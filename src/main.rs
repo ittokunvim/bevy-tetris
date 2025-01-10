@@ -4,6 +4,7 @@ use bevy::{
 };
 
 mod utils;
+mod blocks;
 mod wall;
 
 const GAMETITLE: &str = "テトリス";
@@ -36,6 +37,7 @@ fn main() {
             setup_camera,
             setup_bgm,
         ))
+        .add_plugins(blocks::BlocksPlugin)
         .add_plugins(wall::WallPlugin)
         .run();
 }
