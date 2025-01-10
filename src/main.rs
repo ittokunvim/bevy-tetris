@@ -3,6 +3,7 @@ use bevy::{
     log::LogPlugin,
 };
 
+mod utils;
 mod wall;
 
 const GAMETITLE: &str = "テトリス";
