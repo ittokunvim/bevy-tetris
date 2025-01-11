@@ -2,6 +2,10 @@ use bevy::prelude::*;
 
 use crate::GRID_SIZE;
 use crate::utils::blockdata::*;
+use crate::player::{
+    BlockDirection,
+    BlockMoveEvent,
+};
 
 const SIZE: Vec2 = Vec2::splat(GRID_SIZE - 2.0);
 const INITIAL_POSITION: Vec2 = Vec2::new(
@@ -95,12 +99,29 @@ fn setup(
     }
 }
 
+fn movement(
+    mut events: EventReader<BlockMoveEvent>,
+    mut query: Query<&mut Transform, With<Block>>,
+) {
+    for event in events.read() {
+        let direction = event.0;
+        // trace!("direction: {:?}", direction);
+        for mut transform in &mut query {
+            match direction {
+                BlockDirection::Left  => transform.translation.x -= GRID_SIZE,
+                BlockDirection::Right => transform.translation.x += GRID_SIZE,
+            }
+        }
+    }
+}
+
 pub struct BlocksPlugin;
 
 impl Plugin for BlocksPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(Startup, setup)
+            .add_systems(Update, movement)
         ;
     }
 }
