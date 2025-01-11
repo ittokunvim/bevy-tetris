@@ -9,15 +9,18 @@ const BOTTOM_WALL: f32 = -10.0 * GRID_SIZE;
 const TOP_WALL: f32 = 10.0 * GRID_SIZE;
 const WALL_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
 
-#[derive(Component)]
-#[require(Sprite, Transform)]
-struct Wall;
-
-enum WallLocation {
+#[derive(Copy, Clone)]
+pub enum WallLocation {
     Left,
     Right,
     Bottom,
     Top,
+}
+
+#[derive(Component)]
+#[require(Sprite, Transform)]
+pub struct Wall {
+    pub location: WallLocation,
 }
 
 impl WallLocation {
@@ -50,7 +53,7 @@ impl WallLocation {
 impl Wall {
     fn new(location: WallLocation) -> (Wall, Sprite, Transform) {
         (
-            Wall,
+            Wall { location, },
             Sprite::from_color(WALL_COLOR, Vec2::ONE),
             Transform {
                 translation: location.position().extend(0.0),
