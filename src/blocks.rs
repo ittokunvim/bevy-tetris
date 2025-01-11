@@ -12,9 +12,13 @@ const INITIAL_POSITION: Vec2 = Vec2::new(
     -1.0 * GRID_SIZE - GRID_SIZE / 2.0,
     10.0 * GRID_SIZE - GRID_SIZE / 2.0,
 );
- 
+const FPS: f32 = 1.0;
+
+#[derive(Component, Deref, DerefMut)]
+struct FallingTimer(Timer);
+
 #[derive(Component)]
-#[require(Sprite, Transform)]
+#[require(Sprite, Transform, FallingTimer)]
 struct Block;
 
 #[allow(dead_code)]
@@ -26,6 +30,12 @@ enum BlockType {
     TypeS,
     TypeT,
     TypeZ,
+}
+
+impl Default for FallingTimer {
+    fn default() -> Self {
+        Self(Timer::from_seconds(FPS, TimerMode::Repeating))
+    }
 }
 
 impl BlockType {
@@ -72,7 +82,7 @@ impl BlockType {
 }
 
 impl Block {
-    fn new(i: usize, block: BlockType) -> (Self, Sprite, Transform) {
+    fn new(i: usize, block: BlockType) -> (Self, Sprite, Transform, FallingTimer) {
         (
             Self,
             Sprite::from_color(block.color(), Vec2::ONE),
@@ -81,6 +91,7 @@ impl Block {
                 scale: SIZE.extend(1.0),
                 ..Default::default()
             },
+            FallingTimer::default(),
         )
     }
 }
@@ -115,6 +126,19 @@ fn movement(
     }
 }
 
+fn falling(
+    mut query: Query<(&mut FallingTimer, &mut Transform), With<Block>>,
+    time: Res<Time>,
+) {
+    for (mut timer, mut transform) in &mut query {
+        timer.tick(time.delta());
+        if !timer.just_finished() { continue }
+        timer.reset();
+        // debug!("movement");
+        transform.translation.y -= GRID_SIZE;
+    }
+}
+
 pub struct BlocksPlugin;
 
 impl Plugin for BlocksPlugin {
@@ -122,6 +146,7 @@ impl Plugin for BlocksPlugin {
         app
             .add_systems(Startup, setup)
             .add_systems(Update, movement)
+            .add_systems(Update, falling)
         ;
     }
 }
