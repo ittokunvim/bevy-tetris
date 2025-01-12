@@ -18,11 +18,17 @@ const INITIAL_POSITION: Vec2 = Vec2::new(
 );
 const FPS: f32 = 1.0;
 
+#[derive(Event, Default)]
+struct ReachBottomEvent;
+
 #[derive(Component, Deref, DerefMut)]
 struct FallingTimer(Timer);
 
+#[derive(Component, Default)]
+struct PlayerBlock;
+
 #[derive(Component)]
-#[require(Sprite, Transform, FallingTimer)]
+#[require(Sprite, Transform, FallingTimer, PlayerBlock)]
 struct Block;
 
 #[allow(dead_code)]
@@ -109,22 +115,14 @@ impl Block {
 }
 
 fn setup(
-    mut commands: Commands,
+    commands: Commands,
 ) {
-    for i in 1..BLOCK_COUNT + 1 {
-        commands.spawn(Block::new(i, BlockType::TypeI));
-        // commands.spawn(Block::new(i, BlockType::TypeJ));
-        // commands.spawn(Block::new(i, BlockType::TypeL));
-        // commands.spawn(Block::new(i, BlockType::TypeO));
-        // commands.spawn(Block::new(i, BlockType::TypeS));
-        // commands.spawn(Block::new(i, BlockType::TypeT));
-        // commands.spawn(Block::new(i, BlockType::TypeZ));
-    }
+    fn_spawn_block(commands);
 }
 
 fn movement(
     mut events: EventReader<BlockMoveEvent>,
-    mut query: Query<&mut Transform, With<Block>>,
+    mut query: Query<&mut Transform, With<PlayerBlock>>,
 ) {
     for event in events.read() {
         let direction = event.0;
@@ -139,7 +137,7 @@ fn movement(
 }
 
 fn falling(
-    mut query: Query<(&mut FallingTimer, &mut Transform), With<Block>>,
+    mut query: Query<(&mut FallingTimer, &mut Transform), With<PlayerBlock>>,
     time: Res<Time>,
 ) {
     for (mut timer, mut transform) in &mut query {
@@ -152,8 +150,9 @@ fn falling(
 }
 
 fn check_for_wall(
-    mut block_query: Query<&mut Transform, (With<Block>, Without<Wall>)>,
-    wall_query: Query<(&Wall, &Transform), (With<Wall>, Without<Block>)>,
+    mut events: EventWriter<ReachBottomEvent>,
+    mut block_query: Query<&mut Transform, (With<PlayerBlock>, Without<Wall>)>,
+    wall_query: Query<(&Wall, &Transform), (With<Wall>, Without<PlayerBlock>)>,
 ) {
     let mut collide_left   = false;
     let mut collide_right  = false;
@@ -185,6 +184,35 @@ fn check_for_wall(
         if collide_bottom { block_transform.translation.y += GRID_SIZE; }
         if collide_top    { block_transform.translation.y -= GRID_SIZE; }
     }
+    // block has reach bottom
+    if collide_bottom { events.send_default(); }
+}
+
+fn reach_bottom(
+    mut events: EventReader<ReachBottomEvent>,
+    mut commands: Commands,
+    query: Query<Entity, With<PlayerBlock>>,
+) {
+    if events.is_empty() { return }
+    events.clear();
+    // debug!("reach_bottom: remove PlayerBlock components");
+    for entity in &query { commands.entity(entity).remove::<PlayerBlock>(); }
+    // debug!("reach_bottom: spawn PlayerBlock");
+    fn_spawn_block(commands);
+}
+
+fn fn_spawn_block(
+    mut commands: Commands,
+) {
+    for i in 1..BLOCK_COUNT + 1 {
+        commands.spawn(Block::new(i, BlockType::TypeI));
+        // commands.spawn(Block::new(i, BlockType::TypeJ));
+        // commands.spawn(Block::new(i, BlockType::TypeL));
+        // commands.spawn(Block::new(i, BlockType::TypeO));
+        // commands.spawn(Block::new(i, BlockType::TypeS));
+        // commands.spawn(Block::new(i, BlockType::TypeT));
+        // commands.spawn(Block::new(i, BlockType::TypeZ));
+    }
 }
 
 pub struct BlocksPlugin;
@@ -192,11 +220,13 @@ pub struct BlocksPlugin;
 impl Plugin for BlocksPlugin {
     fn build(&self, app: &mut App) {
         app
+            .add_event::<ReachBottomEvent>()
             .add_systems(Startup, setup)
             .add_systems(Update, (
                 movement,
                 falling,
                 check_for_wall,
+                reach_bottom,
             ).chain())
         ;
     }
