@@ -54,7 +54,13 @@ impl BlockType {
             BlockType::TypeZ => Z_COLOR,
         }
     }
-
+    // このメソッドではブロックを生成する時のポジション(x,y)を返します。
+    // ブロックデータは配列x4のusizex16からなり、usizex16から縦4マス横4マスの
+    // ブロックの範囲とします。
+    // そこからメソッドに渡されたIDを元にブロックデータの値を参照し、
+    // 一致した箇所をxy軸に変換して返します。
+    // 例
+    // BlockType::TypeI.position(2) -> INITIAL_POSITION + Vec2::new(GRID_SIZE * 1, -GRID_SIZE * 1)
     fn position(&self, i: usize) -> Vec2 {
         let closure = |id: usize, block: [[usize; 16]; 4]| {
             let mut position = INITIAL_POSITION;
@@ -65,11 +71,13 @@ impl BlockType {
                     return position
                 }
                 position.x += GRID_SIZE;
+                // movement y
                 if i % 4 == 3 {
                     position.x = INITIAL_POSITION.x;
                     position.y -= GRID_SIZE;
                 }
             }
+            // id should be in the block[0]
             panic!("id: {} is not found", id);
         };
 
