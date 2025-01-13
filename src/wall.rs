@@ -123,7 +123,7 @@ impl Plugin for WallPlugin {
         app
             .add_event::<ReachBottomEvent>()
             .add_systems(Startup, setup)
-            // .add_systems(Update, check_for_wall) // move block.rs
+            // .add_systems(Update, check_for_wall) // move block/movement.rs
         ;
     }
 }
