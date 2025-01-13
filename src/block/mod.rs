@@ -5,22 +5,11 @@ use crate::wall::ReachBottomEvent;
 mod movement;
 mod spawn;
 
-const FPS: f32 = 0.2;
-
 #[derive(Event, Default)]
 struct SpawnEvent;
 
-#[derive(Component, Deref, DerefMut)]
-struct FallingTimer(Timer);
-
 #[derive(Component, Default)]
 pub struct PlayerBlock;
-
-impl Default for FallingTimer {
-    fn default() -> Self {
-        Self(Timer::from_seconds(FPS, TimerMode::Repeating))
-    }
-}
 
 fn reach_bottom(
     mut read_events: EventReader<ReachBottomEvent>,

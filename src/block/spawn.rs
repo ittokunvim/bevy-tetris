@@ -4,7 +4,6 @@ use crate::GRID_SIZE;
 use crate::utils::blockdata::*;
 use super::{
     SpawnEvent,
-    FallingTimer,
     PlayerBlock,
 };
 
@@ -15,7 +14,7 @@ const INITIAL_POSITION: Vec2 = Vec2::new(
 );
 
 #[derive(Component)]
-#[require(Sprite, Transform, FallingTimer, PlayerBlock)]
+#[require(Sprite, Transform, PlayerBlock)]
 struct Block;
 
 #[allow(dead_code)]
@@ -81,7 +80,7 @@ impl BlockType {
 }
 
 impl Block {
-    fn new(i: usize, block: BlockType) -> (Self, Sprite, Transform, FallingTimer) {
+    fn new(i: usize, block: BlockType) -> (Self, Sprite, Transform) {
         (
             Self,
             Sprite::from_color(block.color(), Vec2::ONE),
@@ -90,7 +89,6 @@ impl Block {
                 scale: SIZE.extend(1.0),
                 ..Default::default()
             },
-            FallingTimer::default(),
         )
     }
 }
