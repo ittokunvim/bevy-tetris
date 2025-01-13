@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use crate::wall::ReachBottomEvent;
+
 mod movement;
 mod spawn;
 
@@ -7,9 +9,6 @@ const FPS: f32 = 0.2;
 
 #[derive(Event, Default)]
 struct SpawnEvent;
-
-#[derive(Event, Default)]
-pub struct ReachBottomEvent;
 
 #[derive(Component, Deref, DerefMut)]
 struct FallingTimer(Timer);
@@ -43,7 +42,6 @@ impl Plugin for BlockPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<SpawnEvent>()
-            .add_event::<ReachBottomEvent>()
             .add_plugins(movement::MovementPlugin)
             .add_plugins(spawn::SpawnPlugin)
             .add_systems(Update, (
