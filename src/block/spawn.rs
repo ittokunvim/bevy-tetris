@@ -15,7 +15,7 @@ const INITIAL_POSITION: Vec2 = Vec2::new(
 
 #[derive(Component)]
 #[require(Sprite, Transform, PlayerBlock)]
-struct Block;
+pub struct Block;
 
 #[allow(dead_code)]
 enum BlockType {
