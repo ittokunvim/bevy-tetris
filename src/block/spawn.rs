@@ -105,11 +105,12 @@ fn spawn(
 ) {
     if events.is_empty() { return }
     events.clear();
+    // debug!("spawn");
     for i in 1..BLOCK_COUNT + 1 {
-        commands.spawn(Block::new(i, BlockType::TypeI));
+        // commands.spawn(Block::new(i, BlockType::TypeI));
         // commands.spawn(Block::new(i, BlockType::TypeJ));
         // commands.spawn(Block::new(i, BlockType::TypeL));
-        // commands.spawn(Block::new(i, BlockType::TypeO));
+        commands.spawn(Block::new(i, BlockType::TypeO));
         // commands.spawn(Block::new(i, BlockType::TypeS));
         // commands.spawn(Block::new(i, BlockType::TypeT));
         // commands.spawn(Block::new(i, BlockType::TypeZ));

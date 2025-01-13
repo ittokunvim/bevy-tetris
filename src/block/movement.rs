@@ -54,6 +54,7 @@ impl Plugin for MovementPlugin {
         app
             .insert_resource(FallingTimer::default())
             .add_systems(Update, (
+                crate::player::block_movement,
                 falling,
                 movement,
                 crate::wall::check_for_wall,

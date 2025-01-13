@@ -8,14 +8,14 @@ const KEY_BLOCK_RIGHT_2: KeyCode = KeyCode::KeyD;
 #[derive(Event)]
 pub struct BlockMoveEvent(pub BlockDirection);
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub enum BlockDirection {
     Left,
     Right,
     Bottom,
 }
 
-fn block_movement(
+pub fn block_movement(
     mut events: EventWriter<BlockMoveEvent>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
@@ -39,7 +39,7 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<BlockMoveEvent>()
-            .add_systems(Update, block_movement)
+            // .add_systems(Update, block_movement)
         ;
     }
 }

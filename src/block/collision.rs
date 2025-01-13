@@ -11,8 +11,8 @@ use super::{
 };
 use super::spawn::Block;
 
-#[derive(Event, Default)]
-pub struct CollisionEvent;
+#[derive(Event)]
+pub struct CollisionEvent(BlockDirection);
 
 pub fn check_for_collision(
     mut read_events: EventReader<BlockMoveEvent>,
@@ -30,13 +30,8 @@ pub fn check_for_collision(
                 let block_pos = block_transform.translation;
                 // trace!("block_pos: {}", block_pos);
                 if player_pos == block_pos {
-                    match direction {
-                        BlockDirection::Left   => {}
-                        BlockDirection::Right  => {}
-                        BlockDirection::Bottom => {}
-                    }
-                    // trace!("send collision event");
-                    write_events.send_default();
+                    // debug!("send collision event");
+                    write_events.send(CollisionEvent(direction));
                     return;
                 }
             }
@@ -50,14 +45,26 @@ pub fn collision(
     mut commands: Commands,
     mut query: Query<(Entity, &mut Transform), With<PlayerBlock>>,
 ) {
-    if read_events.is_empty() { return }
-    read_events.clear();
-    // trace!("move block");
-    for (entity, mut transform) in &mut query {
-        transform.translation.y += GRID_SIZE;
-        commands.entity(entity).remove::<PlayerBlock>();
+    for event in read_events.read() {
+        let direction = event.0;
+        let mut closure = |direction: BlockDirection, movement: Vec3| {
+            for (entity, mut transform) in &mut query {
+                transform.translation += movement;
+                // trace!("pos: {}", transform.translation);
+                if direction == BlockDirection::Bottom {
+                    commands.entity(entity).remove::<PlayerBlock>();
+                    write_events.send_default();
+                }
+            }
+        };
+        let movement = Vec3::ZERO;
+        // debug!("collision");
+        match direction {
+            BlockDirection::Left   => closure(direction, movement.with_x(GRID_SIZE)),
+            BlockDirection::Right  => closure(direction, movement.with_x(-GRID_SIZE)),
+            BlockDirection::Bottom => closure(direction, movement.with_y(GRID_SIZE)),
+        }
     }
-    write_events.send_default();
 }
 
 pub struct CollisionPlugin;
