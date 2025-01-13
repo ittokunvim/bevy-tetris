@@ -1,11 +1,6 @@
 use bevy::prelude::*;
 
-use crate::GRID_SIZE;
-use crate::player::{
-    BlockDirection,
-    BlockMoveEvent,
-};
-
+mod movement;
 mod spawn;
 
 const FPS: f32 = 0.2;
@@ -25,35 +20,6 @@ pub struct PlayerBlock;
 impl Default for FallingTimer {
     fn default() -> Self {
         Self(Timer::from_seconds(FPS, TimerMode::Repeating))
-    }
-}
-
-fn movement(
-    mut events: EventReader<BlockMoveEvent>,
-    mut query: Query<&mut Transform, With<PlayerBlock>>,
-) {
-    for event in events.read() {
-        let direction = event.0;
-        // trace!("direction: {:?}", direction);
-        for mut transform in &mut query {
-            match direction {
-                BlockDirection::Left  => transform.translation.x -= GRID_SIZE,
-                BlockDirection::Right => transform.translation.x += GRID_SIZE,
-            }
-        }
-    }
-}
-
-fn falling(
-    mut query: Query<(&mut FallingTimer, &mut Transform), With<PlayerBlock>>,
-    time: Res<Time>,
-) {
-    for (mut timer, mut transform) in &mut query {
-        timer.tick(time.delta());
-        if !timer.just_finished() { continue }
-        timer.reset();
-        // debug!("movement");
-        transform.translation.y -= GRID_SIZE;
     }
 }
 
@@ -78,11 +44,9 @@ impl Plugin for BlockPlugin {
         app
             .add_event::<SpawnEvent>()
             .add_event::<ReachBottomEvent>()
+            .add_plugins(movement::MovementPlugin)
             .add_plugins(spawn::SpawnPlugin)
             .add_systems(Update, (
-                movement,
-                falling,
-                crate::wall::check_for_wall,
                 reach_bottom,
             ).chain())
         ;
