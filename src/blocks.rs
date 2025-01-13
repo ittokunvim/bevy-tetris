@@ -6,10 +6,6 @@ use crate::player::{
     BlockDirection,
     BlockMoveEvent,
 };
-use crate::wall::{
-    Wall,
-    WallLocation,
-};
 
 const SIZE: Vec2 = Vec2::splat(GRID_SIZE - 2.0);
 const INITIAL_POSITION: Vec2 = Vec2::new(
@@ -19,13 +15,13 @@ const INITIAL_POSITION: Vec2 = Vec2::new(
 const FPS: f32 = 1.0;
 
 #[derive(Event, Default)]
-struct ReachBottomEvent;
+pub struct ReachBottomEvent;
 
 #[derive(Component, Deref, DerefMut)]
 struct FallingTimer(Timer);
 
 #[derive(Component, Default)]
-struct PlayerBlock;
+pub struct PlayerBlock;
 
 #[derive(Component)]
 #[require(Sprite, Transform, FallingTimer, PlayerBlock)]
@@ -149,45 +145,6 @@ fn falling(
     }
 }
 
-fn check_for_wall(
-    mut events: EventWriter<ReachBottomEvent>,
-    mut block_query: Query<&mut Transform, (With<PlayerBlock>, Without<Wall>)>,
-    wall_query: Query<(&Wall, &Transform), (With<Wall>, Without<PlayerBlock>)>,
-) {
-    let mut collide_left   = false;
-    let mut collide_right  = false;
-    let mut collide_bottom = false;
-    let mut collide_top    = false;
-    // check collide
-    for block_transform in &block_query {
-        let (block_x, block_y) = (
-            block_transform.translation.x,
-            block_transform.translation.y,
-        );
-        for (wall, wall_transform) in &wall_query {
-            let (wall_x, wall_y) = (
-                wall_transform.translation.x,
-                wall_transform.translation.y,
-            );
-            match wall.location {
-                WallLocation::Left =>   if block_x <= wall_x { collide_left = true }
-                WallLocation::Right =>  if block_x >= wall_x { collide_right = true }
-                WallLocation::Bottom => if block_y <= wall_y { collide_bottom = true }
-                WallLocation::Top =>    if block_y >= wall_y { collide_top = true}
-            }
-        }
-    }
-    // move block
-    for mut block_transform in &mut block_query {
-        if collide_left   { block_transform.translation.x += GRID_SIZE; }
-        if collide_right  { block_transform.translation.x -= GRID_SIZE; }
-        if collide_bottom { block_transform.translation.y += GRID_SIZE; }
-        if collide_top    { block_transform.translation.y -= GRID_SIZE; }
-    }
-    // block has reach bottom
-    if collide_bottom { events.send_default(); }
-}
-
 fn reach_bottom(
     mut events: EventReader<ReachBottomEvent>,
     mut commands: Commands,
@@ -225,7 +182,7 @@ impl Plugin for BlocksPlugin {
             .add_systems(Update, (
                 movement,
                 falling,
-                check_for_wall,
+                crate::wall::check_for_wall,
                 reach_bottom,
             ).chain())
         ;
