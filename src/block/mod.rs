@@ -2,12 +2,12 @@ use bevy::prelude::*;
 
 use crate::wall::ReachBottomEvent;
 
-mod collision;
-mod movement;
+pub mod collision;
+pub mod movement;
 mod spawn;
 
 #[derive(Event, Default)]
-struct SpawnEvent;
+pub struct SpawnEvent;
 
 #[derive(Component, Default)]
 pub struct PlayerBlock;

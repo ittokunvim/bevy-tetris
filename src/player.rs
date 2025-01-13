@@ -39,7 +39,14 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<BlockMoveEvent>()
-            // .add_systems(Update, block_movement)
+            .add_systems(Update, (
+                block_movement,
+                crate::block::movement::falling,
+                crate::block::movement::movement,
+                crate::wall::check_for_wall,
+                crate::block::collision::check_for_collision,
+                crate::block::collision::collision,
+            ).chain())
         ;
     }
 }

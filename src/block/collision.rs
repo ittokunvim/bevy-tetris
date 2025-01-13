@@ -73,10 +73,8 @@ impl Plugin for CollisionPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<CollisionEvent>()
-            // .add_systems(Update, ( // move block/movement.rs
-            //     // check_for_collision,
-            //     // collision,
-            // ))
+            // .add_systems(Update, check_for_collision)
+            // .add_systems(Update, collision)
         ;
     }
 }

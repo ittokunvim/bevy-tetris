@@ -10,7 +10,7 @@ use super::PlayerBlock;
 const FPS: f32 = 0.2;
 
 #[derive(Resource, Deref, DerefMut)]
-struct FallingTimer(Timer);
+pub struct FallingTimer(Timer);
 
 impl Default for FallingTimer {
     fn default() -> Self {
@@ -18,7 +18,19 @@ impl Default for FallingTimer {
     }
 }
 
-fn movement(
+pub fn falling(
+    mut timer: ResMut<FallingTimer>,
+    mut events: EventWriter<BlockMoveEvent>,
+    time: Res<Time>,
+) {
+    timer.tick(time.delta());
+    if !timer.just_finished() { return }
+    timer.reset();
+    // debug!("falling block");
+    events.send(BlockMoveEvent(BlockDirection::Bottom));
+}
+
+pub fn movement(
     mut events: EventReader<BlockMoveEvent>,
     mut query: Query<&mut Transform, With<PlayerBlock>>,
 ) {
@@ -35,32 +47,14 @@ fn movement(
     }
 }
 
-fn falling(
-    mut timer: ResMut<FallingTimer>,
-    mut events: EventWriter<BlockMoveEvent>,
-    time: Res<Time>,
-) {
-    timer.tick(time.delta());
-    if !timer.just_finished() { return }
-    timer.reset();
-    // debug!("falling block");
-    events.send(BlockMoveEvent(BlockDirection::Bottom));
-}
-
 pub struct MovementPlugin;
 
 impl Plugin for MovementPlugin {
     fn build(&self, app: &mut App) {
         app
             .insert_resource(FallingTimer::default())
-            .add_systems(Update, (
-                crate::player::block_movement,
-                falling,
-                movement,
-                crate::wall::check_for_wall,
-                crate::block::collision::check_for_collision,
-                crate::block::collision::collision,
-            ).chain())
+            // .add_systems(Update, falling)
+            // .add_systems(Update, movement)
         ;
     }
 }
