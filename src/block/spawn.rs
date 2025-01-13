@@ -2,9 +2,9 @@ use bevy::prelude::*;
 
 use crate::GRID_SIZE;
 use crate::utils::blockdata::*;
-use crate::player::{
-    BlockDirection,
-    BlockMoveEvent,
+use super::{
+    SpawnEvent,
+    PlayerBlock,
 };
 
 const SIZE: Vec2 = Vec2::splat(GRID_SIZE - 2.0);
@@ -12,19 +12,9 @@ const INITIAL_POSITION: Vec2 = Vec2::new(
     -1.0 * GRID_SIZE - GRID_SIZE / 2.0,
     10.0 * GRID_SIZE - GRID_SIZE / 2.0,
 );
-const FPS: f32 = 1.0;
-
-#[derive(Event, Default)]
-pub struct ReachBottomEvent;
-
-#[derive(Component, Deref, DerefMut)]
-struct FallingTimer(Timer);
-
-#[derive(Component, Default)]
-pub struct PlayerBlock;
 
 #[derive(Component)]
-#[require(Sprite, Transform, FallingTimer, PlayerBlock)]
+#[require(Sprite, Transform, PlayerBlock)]
 struct Block;
 
 #[allow(dead_code)]
@@ -36,12 +26,6 @@ enum BlockType {
     TypeS,
     TypeT,
     TypeZ,
-}
-
-impl Default for FallingTimer {
-    fn default() -> Self {
-        Self(Timer::from_seconds(FPS, TimerMode::Repeating))
-    }
 }
 
 impl BlockType {
@@ -96,7 +80,7 @@ impl BlockType {
 }
 
 impl Block {
-    fn new(i: usize, block: BlockType) -> (Self, Sprite, Transform, FallingTimer) {
+    fn new(i: usize, block: BlockType) -> (Self, Sprite, Transform) {
         (
             Self,
             Sprite::from_color(block.color(), Vec2::ONE),
@@ -105,62 +89,22 @@ impl Block {
                 scale: SIZE.extend(1.0),
                 ..Default::default()
             },
-            FallingTimer::default(),
         )
     }
 }
 
 fn setup(
-    commands: Commands,
+    mut events: EventWriter<SpawnEvent>,
 ) {
-    fn_spawn_block(commands);
+    events.send_default();
 }
 
-fn movement(
-    mut events: EventReader<BlockMoveEvent>,
-    mut query: Query<&mut Transform, With<PlayerBlock>>,
-) {
-    for event in events.read() {
-        let direction = event.0;
-        // trace!("direction: {:?}", direction);
-        for mut transform in &mut query {
-            match direction {
-                BlockDirection::Left  => transform.translation.x -= GRID_SIZE,
-                BlockDirection::Right => transform.translation.x += GRID_SIZE,
-            }
-        }
-    }
-}
-
-fn falling(
-    mut query: Query<(&mut FallingTimer, &mut Transform), With<PlayerBlock>>,
-    time: Res<Time>,
-) {
-    for (mut timer, mut transform) in &mut query {
-        timer.tick(time.delta());
-        if !timer.just_finished() { continue }
-        timer.reset();
-        // debug!("movement");
-        transform.translation.y -= GRID_SIZE;
-    }
-}
-
-fn reach_bottom(
-    mut events: EventReader<ReachBottomEvent>,
+fn spawn(
+    mut events: EventReader<SpawnEvent>,
     mut commands: Commands,
-    query: Query<Entity, With<PlayerBlock>>,
 ) {
     if events.is_empty() { return }
     events.clear();
-    // debug!("reach_bottom: remove PlayerBlock components");
-    for entity in &query { commands.entity(entity).remove::<PlayerBlock>(); }
-    // debug!("reach_bottom: spawn PlayerBlock");
-    fn_spawn_block(commands);
-}
-
-fn fn_spawn_block(
-    mut commands: Commands,
-) {
     for i in 1..BLOCK_COUNT + 1 {
         commands.spawn(Block::new(i, BlockType::TypeI));
         // commands.spawn(Block::new(i, BlockType::TypeJ));
@@ -172,19 +116,13 @@ fn fn_spawn_block(
     }
 }
 
-pub struct BlocksPlugin;
+pub struct SpawnPlugin;
 
-impl Plugin for BlocksPlugin {
+impl Plugin for SpawnPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_event::<ReachBottomEvent>()
             .add_systems(Startup, setup)
-            .add_systems(Update, (
-                movement,
-                falling,
-                crate::wall::check_for_wall,
-                reach_bottom,
-            ).chain())
+            .add_systems(Update, spawn)
         ;
     }
 }

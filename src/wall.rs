@@ -1,10 +1,7 @@
 use bevy::prelude::*;
 
 use crate::GRID_SIZE;
-use crate::blocks::{
-    ReachBottomEvent,
-    PlayerBlock,
-};
+use crate::block::PlayerBlock;
 
 const WALL_THICKNESS: f32 = 1.0;
 const LEFT_WALL: f32 = -5.0 * GRID_SIZE;
@@ -12,6 +9,9 @@ const RIGHT_WALL: f32 = 5.0 * GRID_SIZE;
 const BOTTOM_WALL: f32 = -10.0 * GRID_SIZE;
 const TOP_WALL: f32 = 10.0 * GRID_SIZE;
 const WALL_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
+
+#[derive(Event, Default)]
+pub struct ReachBottomEvent;
 
 #[derive(Copy, Clone)]
 pub enum WallLocation {
@@ -121,6 +121,7 @@ pub struct WallPlugin;
 impl Plugin for WallPlugin {
     fn build(&self, app: &mut App) {
         app
+            .add_event::<ReachBottomEvent>()
             .add_systems(Startup, setup)
             // .add_systems(Update, check_for_wall) // move block.rs
         ;
