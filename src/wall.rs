@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 use crate::GRID_SIZE;
 use crate::block::PlayerBlock;
+use crate::block::SpawnEvent;
 
 const WALL_THICKNESS: f32 = 1.0;
 const LEFT_WALL: f32 = -5.0 * GRID_SIZE;
@@ -116,6 +117,20 @@ pub fn check_for_wall(
     if collide_bottom { events.send_default(); }
 }
 
+fn reach_bottom(
+    mut read_events: EventReader<ReachBottomEvent>,
+    mut write_events: EventWriter<SpawnEvent>,
+    mut commands: Commands,
+    query: Query<Entity, With<PlayerBlock>>,
+) {
+    if read_events.is_empty() { return }
+    read_events.clear();
+    // debug!("remove PlayerBlock components");
+    for entity in &query { commands.entity(entity).remove::<PlayerBlock>(); }
+    // debug!("send spawn event");
+    write_events.send_default();
+}
+
 pub struct WallPlugin;
 
 impl Plugin for WallPlugin {
@@ -124,6 +139,7 @@ impl Plugin for WallPlugin {
             .add_event::<ReachBottomEvent>()
             .add_systems(Startup, setup)
             // .add_systems(Update, check_for_wall)
+            .add_systems(Update, reach_bottom)
         ;
     }
 }
