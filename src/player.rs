@@ -25,7 +25,7 @@ fn block_movement(
 
     for key in keyboard_input.get_just_pressed() {
         match key {
-            &KEY_BLOCK_LEFT_1 | &KEY_BLOCK_LEFT_2 => closure(BlockDirection::Left),
+            &KEY_BLOCK_LEFT_1  | &KEY_BLOCK_LEFT_2  => closure(BlockDirection::Left),
             &KEY_BLOCK_RIGHT_1 | &KEY_BLOCK_RIGHT_2 => closure(BlockDirection::Right),
             _ => {},
         }

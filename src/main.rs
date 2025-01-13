@@ -4,7 +4,7 @@ use bevy::{
 };
 
 mod utils;
-mod blocks;
+mod block;
 mod player;
 mod wall;
 
@@ -38,7 +38,7 @@ fn main() {
             setup_camera,
             setup_bgm,
         ))
-        .add_plugins(blocks::BlocksPlugin)
+        .add_plugins(block::BlockPlugin)
         .add_plugins(player::PlayerPlugin)
         .add_plugins(wall::WallPlugin)
         .run();

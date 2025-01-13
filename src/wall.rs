@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::GRID_SIZE;
-use crate::blocks::{
+use crate::block::{
     ReachBottomEvent,
     PlayerBlock,
 };

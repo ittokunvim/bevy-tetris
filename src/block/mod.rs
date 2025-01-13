@@ -12,7 +12,7 @@ const INITIAL_POSITION: Vec2 = Vec2::new(
     -1.0 * GRID_SIZE - GRID_SIZE / 2.0,
     10.0 * GRID_SIZE - GRID_SIZE / 2.0,
 );
-const FPS: f32 = 1.0;
+const FPS: f32 = 0.2;
 
 #[derive(Event, Default)]
 pub struct ReachBottomEvent;
@@ -172,9 +172,9 @@ fn fn_spawn_block(
     }
 }
 
-pub struct BlocksPlugin;
+pub struct BlockPlugin;
 
-impl Plugin for BlocksPlugin {
+impl Plugin for BlockPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<ReachBottomEvent>()
