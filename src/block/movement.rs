@@ -27,8 +27,9 @@ fn movement(
         // trace!("direction: {:?}", direction);
         for mut transform in &mut query {
             match direction {
-                BlockDirection::Left  => transform.translation.x -= GRID_SIZE,
-                BlockDirection::Right => transform.translation.x += GRID_SIZE,
+                BlockDirection::Left   => transform.translation.x -= GRID_SIZE,
+                BlockDirection::Right  => transform.translation.x += GRID_SIZE,
+                BlockDirection::Bottom => transform.translation.y -= GRID_SIZE,
             }
         }
     }
@@ -36,16 +37,14 @@ fn movement(
 
 fn falling(
     mut timer: ResMut<FallingTimer>,
-    mut query: Query<&mut Transform, With<PlayerBlock>>,
+    mut events: EventWriter<BlockMoveEvent>,
     time: Res<Time>,
 ) {
     timer.tick(time.delta());
     if !timer.just_finished() { return }
     timer.reset();
     // debug!("falling block");
-    for mut transform in &mut query {
-        transform.translation.y -= GRID_SIZE;
-    }
+    events.send(BlockMoveEvent(BlockDirection::Bottom));
 }
 
 pub struct MovementPlugin;
@@ -55,8 +54,8 @@ impl Plugin for MovementPlugin {
         app
             .insert_resource(FallingTimer::default())
             .add_systems(Update, (
-                movement,
                 falling,
+                movement,
                 crate::wall::check_for_wall,
             ).chain())
         ;

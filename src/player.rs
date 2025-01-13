@@ -12,6 +12,7 @@ pub struct BlockMoveEvent(pub BlockDirection);
 pub enum BlockDirection {
     Left,
     Right,
+    Bottom,
 }
 
 fn block_movement(
