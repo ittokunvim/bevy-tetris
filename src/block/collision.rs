@@ -1,13 +1,15 @@
 use bevy::prelude::*;
 
+use crate::GRID_SIZE;
 use crate::player::{
     BlockMoveEvent,
     BlockDirection,
 };
-use crate::block::spawn::Block;
 use super::{
+    SpawnEvent,
     PlayerBlock,
 };
+use super::spawn::Block;
 
 #[derive(Event, Default)]
 pub struct CollisionEvent;
@@ -29,9 +31,9 @@ pub fn check_for_collision(
                 // trace!("block_pos: {}", block_pos);
                 if player_pos == block_pos {
                     match direction {
-                        BlockDirection::Left   => { debug!("collision left") }
-                        BlockDirection::Right  => { debug!("collision right") }
-                        BlockDirection::Bottom => { debug!("collision bottom") }
+                        BlockDirection::Left   => {}
+                        BlockDirection::Right  => {}
+                        BlockDirection::Bottom => {}
                     }
                     // trace!("send collision event");
                     write_events.send_default();
@@ -42,6 +44,22 @@ pub fn check_for_collision(
     }
 }
 
+pub fn collision(
+    mut read_events: EventReader<CollisionEvent>,
+    mut write_events: EventWriter<SpawnEvent>,
+    mut commands: Commands,
+    mut query: Query<(Entity, &mut Transform), With<PlayerBlock>>,
+) {
+    if read_events.is_empty() { return }
+    read_events.clear();
+    // trace!("move block");
+    for (entity, mut transform) in &mut query {
+        transform.translation.y += GRID_SIZE;
+        commands.entity(entity).remove::<PlayerBlock>();
+    }
+    write_events.send_default();
+}
+
 pub struct CollisionPlugin;
 
 impl Plugin for CollisionPlugin {
@@ -50,6 +68,7 @@ impl Plugin for CollisionPlugin {
             .add_event::<CollisionEvent>()
             // .add_systems(Update, ( // move block/movement.rs
             //     // check_for_collision,
+            //     // collision,
             // ))
         ;
     }

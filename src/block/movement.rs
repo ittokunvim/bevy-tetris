@@ -58,6 +58,7 @@ impl Plugin for MovementPlugin {
                 movement,
                 crate::wall::check_for_wall,
                 crate::block::collision::check_for_collision,
+                crate::block::collision::collision,
             ).chain())
         ;
     }
