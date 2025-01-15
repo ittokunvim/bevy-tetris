@@ -1,15 +1,21 @@
 use bevy::prelude::*;
 
 use crate::GRID_SIZE;
-use crate::player::{
-    BlockDirection,
-    BlockMoveEvent,
-};
-use crate::wall::WallCollisionEvent;
 use super::PlayerBlock;
-use super::collision::BlockCollisionEvent;
+use super::collision::CollisionEvent as BlockCollisionEvent;
+use crate::wall::CollisionEvent as WallCollisionEvent;
 
 const FPS: f32 = 0.2;
+
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub enum Direction {
+    Left,
+    Right,
+    Bottom,
+}
+
+#[derive(Event)]
+pub struct MoveEvent(pub Direction);
 
 #[derive(Resource, Deref, DerefMut)]
 pub struct FallingTimer(Timer);
@@ -22,18 +28,18 @@ impl Default for FallingTimer {
 
 pub fn falling(
     mut timer: ResMut<FallingTimer>,
-    mut events: EventWriter<BlockMoveEvent>,
+    mut events: EventWriter<MoveEvent>,
     time: Res<Time>,
 ) {
     timer.tick(time.delta());
     if !timer.just_finished() { return }
     timer.reset();
     // debug!("falling block");
-    events.send(BlockMoveEvent(BlockDirection::Bottom));
+    events.send(MoveEvent(Direction::Bottom));
 }
 
 pub fn movement(
-    mut read_events1: EventReader<BlockMoveEvent>,
+    mut read_events1: EventReader<MoveEvent>,
     mut query: Query<&mut Transform, With<PlayerBlock>>,
     read_events2: EventReader<WallCollisionEvent>,
     read_events3: EventReader<BlockCollisionEvent>
@@ -45,9 +51,9 @@ pub fn movement(
         // trace!("direction: {:?}", direction);
         for mut transform in &mut query {
             match direction {
-                BlockDirection::Left   => transform.translation.x -= GRID_SIZE,
-                BlockDirection::Right  => transform.translation.x += GRID_SIZE,
-                BlockDirection::Bottom => transform.translation.y -= GRID_SIZE,
+                Direction::Left   => transform.translation.x -= GRID_SIZE,
+                Direction::Right  => transform.translation.x += GRID_SIZE,
+                Direction::Bottom => transform.translation.y -= GRID_SIZE,
             }
         }
     }
@@ -58,6 +64,7 @@ pub struct MovementPlugin;
 impl Plugin for MovementPlugin {
     fn build(&self, app: &mut App) {
         app
+            .add_event::<MoveEvent>()
             .insert_resource(FallingTimer::default())
             // .add_systems(Update, falling)
             // .add_systems(Update, movement)

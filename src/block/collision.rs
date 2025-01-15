@@ -1,21 +1,26 @@
 use bevy::prelude::*;
 
 use crate::GRID_SIZE;
-use crate::player::{
-    BlockMoveEvent,
-    BlockDirection,
-};
 use super::PlayerBlock;
-use super::spawn::Block;
-use crate::wall::ReachBottomEvent;
+use super::movement::{
+    Direction,
+    MoveEvent,
+};
+use super::spawn::{
+    SpawnEvent,
+    Block,
+};
 
 #[derive(Event, Default)]
-pub struct BlockCollisionEvent;
+pub struct CollisionEvent;
+
+#[derive(Event, Default)]
+pub struct BottomHitEvent;
 
 pub fn check_for_collision(
-    mut read_events: EventReader<BlockMoveEvent>,
-    mut write_events1: EventWriter<BlockCollisionEvent>,
-    mut write_events2: EventWriter<ReachBottomEvent>,
+    mut read_events: EventReader<MoveEvent>,
+    mut write_events1: EventWriter<CollisionEvent>,
+    mut write_events2: EventWriter<BottomHitEvent>,
     player_query: Query<&Transform, With<PlayerBlock>>,
     block_query: Query<&Transform, (With<Block>, Without<PlayerBlock>)>,
 ) {
@@ -25,9 +30,9 @@ pub fn check_for_collision(
         for player_transform in &player_query {
             let mut player_pos = player_transform.translation;
             match direction {
-                BlockDirection::Left   => player_pos.x -= GRID_SIZE,
-                BlockDirection::Right  => player_pos.x += GRID_SIZE,
-                BlockDirection::Bottom => player_pos.y -= GRID_SIZE,
+                Direction::Left   => player_pos.x -= GRID_SIZE,
+                Direction::Right  => player_pos.x += GRID_SIZE,
+                Direction::Bottom => player_pos.y -= GRID_SIZE,
             }
             // trace!("player_pos: {}", player_pos);
             for block_transform in &block_query {
@@ -35,7 +40,7 @@ pub fn check_for_collision(
                 // trace!("block_pos: {}", block_pos);
                 if player_pos == block_pos {
                     write_events1.send_default();
-                    if direction == BlockDirection::Bottom {
+                    if direction == Direction::Bottom {
                         write_events2.send_default();
                     }
                     return;
@@ -45,13 +50,29 @@ pub fn check_for_collision(
     }
 }
 
+fn bottom_hit(
+    mut read_events: EventReader<BottomHitEvent>,
+    mut write_events: EventWriter<SpawnEvent>,
+    mut commands: Commands,
+    query: Query<Entity, With<PlayerBlock>>,
+) {
+    if read_events.is_empty() { return }
+    read_events.clear();
+    // debug!("remove PlayerBlock components");
+    for entity in &query { commands.entity(entity).remove::<PlayerBlock>(); }
+    // debug!("send spawn event");
+    write_events.send_default();
+}
+
 pub struct CollisionPlugin;
 
 impl Plugin for CollisionPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_event::<BlockCollisionEvent>()
+            .add_event::<CollisionEvent>()
+            .add_event::<BottomHitEvent>()
             // .add_systems(Update, check_for_collision)
+            .add_systems(Update, bottom_hit)
         ;
     }
 }

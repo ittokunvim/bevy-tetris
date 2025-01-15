@@ -1,13 +1,11 @@
 use bevy::prelude::*;
 
 use crate::GRID_SIZE;
-use crate::block::{
-    SpawnEvent,
-    PlayerBlock,
-};
-use crate::player::{
-    BlockDirection,
-    BlockMoveEvent,
+use crate::block::PlayerBlock;
+use crate::block::collision::BottomHitEvent as BlockBottomHitEvent;
+use crate::block::movement::{
+    Direction as BlockDirection,
+    MoveEvent as BlockMoveEvent,
 };
 
 const WALL_THICKNESS: f32 = 1.0;
@@ -18,10 +16,7 @@ const TOP_WALL: f32 = 10.0 * GRID_SIZE;
 const WALL_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
 
 #[derive(Event, Default)]
-pub struct WallCollisionEvent;
-
-#[derive(Event, Default)]
-pub struct ReachBottomEvent;
+pub struct CollisionEvent;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub enum WallLocation {
@@ -89,8 +84,8 @@ fn setup(
 
 pub fn check_for_wall(
     mut read_events: EventReader<BlockMoveEvent>,
-    mut write_events1: EventWriter<WallCollisionEvent>,
-    mut write_events2: EventWriter<ReachBottomEvent>,
+    mut write_events1: EventWriter<CollisionEvent>,
+    mut write_events2: EventWriter<BlockBottomHitEvent>,
     player_query: Query<&Transform, (With<PlayerBlock>, Without<Wall>)>,
     wall_query: Query<(&Wall, &Transform), (With<Wall>, Without<PlayerBlock>)>,
 ) {
@@ -133,30 +128,14 @@ pub fn check_for_wall(
     }
 }
 
-fn reach_bottom(
-    mut read_events: EventReader<ReachBottomEvent>,
-    mut write_events: EventWriter<SpawnEvent>,
-    mut commands: Commands,
-    query: Query<Entity, With<PlayerBlock>>,
-) {
-    if read_events.is_empty() { return }
-    read_events.clear();
-    // debug!("remove PlayerBlock components");
-    for entity in &query { commands.entity(entity).remove::<PlayerBlock>(); }
-    // debug!("send spawn event");
-    write_events.send_default();
-}
-
 pub struct WallPlugin;
 
 impl Plugin for WallPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_event::<WallCollisionEvent>()
-            .add_event::<ReachBottomEvent>()
+            .add_event::<CollisionEvent>()
             .add_systems(Startup, setup)
             // .add_systems(Update, check_for_wall)
-            .add_systems(Update, reach_bottom)
         ;
     }
 }
