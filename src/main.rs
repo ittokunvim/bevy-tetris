@@ -10,7 +10,7 @@ mod wall;
 
 const GAMETITLE: &str = "テトリス";
 const GRID_SIZE: f32 = 20.0;
-const WINDOW_SIZE: Vec2 = Vec2::new(32.0, 24.0);
+const WINDOW_SIZE: Vec2 = Vec2::new(640.0, 480.0);
 const BACKGROUND_COLOR: Color = Color::srgb(0.1, 0.1, 0.1);
 const PATH_SOUND_BGM: &str = "bevy-tetris/bgm.ogg";
 
@@ -19,7 +19,7 @@ fn main() {
         .add_plugins(DefaultPlugins
             .set(WindowPlugin {
                 primary_window: Some(Window {
-                    resolution: (WINDOW_SIZE * GRID_SIZE).into(),
+                    resolution: WINDOW_SIZE.into(),
                     title: GAMETITLE.to_string(),
                     ..Default::default()
                 }),
