@@ -45,34 +45,6 @@ pub fn check_for_collision(
     }
 }
 
-pub fn collision(
-    mut read_events: EventReader<CollisionEvent>,
-    mut write_events: EventWriter<SpawnEvent>,
-    mut commands: Commands,
-    mut query: Query<(Entity, &mut Transform), With<PlayerBlock>>,
-) {
-    for event in read_events.read() {
-        let direction = event.0;
-        let mut closure = |direction: BlockDirection, movement: Vec3| {
-            for (entity, mut transform) in &mut query {
-                transform.translation += movement;
-                // trace!("pos: {}", transform.translation);
-                if direction == BlockDirection::Bottom {
-                    commands.entity(entity).remove::<PlayerBlock>();
-                    write_events.send_default();
-                }
-            }
-        };
-        let movement = Vec3::ZERO;
-        // debug!("collision");
-        match direction {
-            BlockDirection::Left   => closure(direction, movement.with_x(GRID_SIZE)),
-            BlockDirection::Right  => closure(direction, movement.with_x(-GRID_SIZE)),
-            BlockDirection::Bottom => closure(direction, movement.with_y(GRID_SIZE)),
-        }
-    }
-}
-
 pub struct CollisionPlugin;
 
 impl Plugin for CollisionPlugin {
@@ -80,7 +52,6 @@ impl Plugin for CollisionPlugin {
         app
             .add_event::<BlockCollisionEvent>()
             // .add_systems(Update, check_for_collision)
-            // .add_systems(Update, collision)
         ;
     }
 }

@@ -45,7 +45,6 @@ impl Plugin for PlayerPlugin {
                 crate::block::collision::check_for_collision,
                 crate::block::movement::movement,
                 crate::wall::check_for_wall,
-                crate::block::collision::collision,
             ).chain())
         ;
     }
