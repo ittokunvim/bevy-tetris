@@ -1,8 +1,14 @@
 use bevy::prelude::*;
 
 use crate::GRID_SIZE;
-use crate::block::PlayerBlock;
-use crate::block::SpawnEvent;
+use crate::block::{
+    SpawnEvent,
+    PlayerBlock,
+};
+use crate::player::{
+    BlockDirection,
+    BlockMoveEvent,
+};
 
 const WALL_THICKNESS: f32 = 1.0;
 const LEFT_WALL: f32 = -5.0 * GRID_SIZE;
@@ -12,9 +18,12 @@ const TOP_WALL: f32 = 10.0 * GRID_SIZE;
 const WALL_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
 
 #[derive(Event, Default)]
+pub struct WallCollisionEvent;
+
+#[derive(Event, Default)]
 pub struct ReachBottomEvent;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub enum WallLocation {
     Left,
     Right,
@@ -79,42 +88,49 @@ fn setup(
 }
 
 pub fn check_for_wall(
-    mut events: EventWriter<ReachBottomEvent>,
-    mut block_query: Query<&mut Transform, (With<PlayerBlock>, Without<Wall>)>,
+    mut read_events: EventReader<BlockMoveEvent>,
+    mut write_events1: EventWriter<WallCollisionEvent>,
+    mut write_events2: EventWriter<ReachBottomEvent>,
+    player_query: Query<&Transform, (With<PlayerBlock>, Without<Wall>)>,
     wall_query: Query<(&Wall, &Transform), (With<Wall>, Without<PlayerBlock>)>,
 ) {
-    let mut collide_left   = false;
-    let mut collide_right  = false;
-    let mut collide_bottom = false;
-    let mut collide_top    = false;
-    // check collide
-    for block_transform in &block_query {
-        let (block_x, block_y) = (
-            block_transform.translation.x,
-            block_transform.translation.y,
-        );
-        for (wall, wall_transform) in &wall_query {
-            let (wall_x, wall_y) = (
-                wall_transform.translation.x,
-                wall_transform.translation.y,
+    for block_move_event in read_events.read() {
+        let direction = block_move_event.0;
+        // send event closure
+        let mut closure = |location: WallLocation| {
+            // trace!("location: {:?}", location);
+            write_events1.send_default();
+            if location == WallLocation::Bottom { write_events2.send_default(); }
+        };
+        // check collision wall
+        for player_transform in &player_query {
+            let (mut player_x, mut player_y) = (
+                player_transform.translation.x,
+                player_transform.translation.y,
             );
-            match wall.location {
-                WallLocation::Left =>   if block_x <= wall_x { collide_left = true }
-                WallLocation::Right =>  if block_x >= wall_x { collide_right = true }
-                WallLocation::Bottom => if block_y <= wall_y { collide_bottom = true }
-                WallLocation::Top =>    if block_y >= wall_y { collide_top = true}
+            match direction {
+                BlockDirection::Left   => player_x -= GRID_SIZE,
+                BlockDirection::Right  => player_x += GRID_SIZE,
+                BlockDirection::Bottom => player_y -= GRID_SIZE,
+            }
+            for (wall, wall_transform) in &wall_query {
+                let (wall_x, wall_y) = (
+                    wall_transform.translation.x,
+                    wall_transform.translation.y,
+                );
+                match wall.location {
+                    WallLocation::Left =>
+                    if player_x <= wall_x { closure(wall.location) }
+                    WallLocation::Right =>
+                    if player_x >= wall_x { closure(wall.location) }
+                    WallLocation::Bottom =>
+                    if player_y <= wall_y { closure(wall.location) }
+                    WallLocation::Top =>
+                    if player_y >= wall_y { closure(wall.location) }
+                }
             }
         }
     }
-    // move block
-    for mut block_transform in &mut block_query {
-        if collide_left   { block_transform.translation.x += GRID_SIZE; }
-        if collide_right  { block_transform.translation.x -= GRID_SIZE; }
-        if collide_bottom { block_transform.translation.y += GRID_SIZE; }
-        if collide_top    { block_transform.translation.y -= GRID_SIZE; }
-    }
-    // block has reach bottom
-    if collide_bottom { events.send_default(); }
 }
 
 fn reach_bottom(
@@ -136,6 +152,7 @@ pub struct WallPlugin;
 impl Plugin for WallPlugin {
     fn build(&self, app: &mut App) {
         app
+            .add_event::<WallCollisionEvent>()
             .add_event::<ReachBottomEvent>()
             .add_systems(Startup, setup)
             // .add_systems(Update, check_for_wall)
