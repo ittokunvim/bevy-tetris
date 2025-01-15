@@ -7,6 +7,7 @@ use crate::player::{
 };
 use crate::wall::WallCollisionEvent;
 use super::PlayerBlock;
+use super::collision::BlockCollisionEvent;
 
 const FPS: f32 = 0.2;
 
@@ -35,8 +36,10 @@ pub fn movement(
     mut read_events1: EventReader<BlockMoveEvent>,
     mut query: Query<&mut Transform, With<PlayerBlock>>,
     read_events2: EventReader<WallCollisionEvent>,
+    read_events3: EventReader<BlockCollisionEvent>
 ) {
-    if !read_events2.is_empty()  { return }
+    if !read_events2.is_empty() { return }
+    if !read_events3.is_empty()  { return }
     for event in read_events1.read() {
         let direction = event.0;
         // trace!("direction: {:?}", direction);
