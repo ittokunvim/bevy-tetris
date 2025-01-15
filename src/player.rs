@@ -1,19 +1,14 @@
 use bevy::prelude::*;
 
+use crate::block::movement::{
+    Direction as BlockDirection,
+    MoveEvent as BlockMoveEvent,
+};
+
 const KEY_BLOCK_LEFT_1: KeyCode = KeyCode::ArrowLeft;
 const KEY_BLOCK_LEFT_2: KeyCode = KeyCode::KeyA;
 const KEY_BLOCK_RIGHT_1: KeyCode = KeyCode::ArrowRight;
 const KEY_BLOCK_RIGHT_2: KeyCode = KeyCode::KeyD;
-
-#[derive(Event)]
-pub struct BlockMoveEvent(pub BlockDirection);
-
-#[derive(Copy, Clone, PartialEq, Debug)]
-pub enum BlockDirection {
-    Left,
-    Right,
-    Bottom,
-}
 
 pub fn block_movement(
     mut events: EventWriter<BlockMoveEvent>,
@@ -38,7 +33,6 @@ pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_event::<BlockMoveEvent>()
             .add_systems(Update, (
                 block_movement,
                 crate::block::movement::falling,

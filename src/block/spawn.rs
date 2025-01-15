@@ -2,16 +2,16 @@ use bevy::prelude::*;
 
 use crate::GRID_SIZE;
 use crate::utils::blockdata::*;
-use super::{
-    SpawnEvent,
-    PlayerBlock,
-};
+use super::PlayerBlock;
 
 const SIZE: Vec2 = Vec2::splat(GRID_SIZE - 2.0);
 const INITIAL_POSITION: Vec2 = Vec2::new(
     -1.0 * GRID_SIZE - GRID_SIZE / 2.0,
     10.0 * GRID_SIZE - GRID_SIZE / 2.0,
 );
+
+#[derive(Event, Default)]
+pub struct SpawnEvent;
 
 #[derive(Component)]
 #[require(Sprite, Transform, PlayerBlock)]
@@ -122,6 +122,7 @@ pub struct SpawnPlugin;
 impl Plugin for SpawnPlugin {
     fn build(&self, app: &mut App) {
         app
+            .add_event::<SpawnEvent>()
             .add_systems(Startup, setup)
             .add_systems(Update, spawn)
         ;
