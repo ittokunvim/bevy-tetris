@@ -42,8 +42,8 @@ impl Plugin for PlayerPlugin {
             .add_systems(Update, (
                 block_movement,
                 crate::block::movement::falling,
-                crate::block::movement::movement,
                 crate::wall::check_for_wall,
+                crate::block::movement::movement,
                 crate::block::collision::check_for_collision,
                 crate::block::collision::collision,
             ).chain())
