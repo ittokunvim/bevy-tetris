@@ -1,11 +1,11 @@
 use bevy::prelude::*;
 
 use crate::GRID_SIZE;
-use crate::block::PlayerBlock;
-use crate::block::collision::BottomHitEvent as BlockBottomHitEvent;
-use crate::block::movement::{
-    Direction as BlockDirection,
+use crate::block::{
     MoveEvent as BlockMoveEvent,
+    Direction as BlockDirection,
+    PlayerBlock,
+    BottomHitEvent as BlockBottomHitEvent,
 };
 
 const WALL_THICKNESS: f32 = 1.0;

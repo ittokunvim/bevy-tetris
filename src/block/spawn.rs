@@ -2,31 +2,13 @@ use bevy::prelude::*;
 
 use crate::GRID_SIZE;
 use crate::utils::blockdata::*;
-use super::PlayerBlock;
-
-const SIZE: Vec2 = Vec2::splat(GRID_SIZE - 2.0);
-const INITIAL_POSITION: Vec2 = Vec2::new(
-    -1.0 * GRID_SIZE - GRID_SIZE / 2.0,
-    10.0 * GRID_SIZE - GRID_SIZE / 2.0,
-);
-
-#[derive(Event, Default)]
-pub struct SpawnEvent;
-
-#[derive(Component)]
-#[require(Sprite, Transform, PlayerBlock)]
-pub struct Block;
-
-#[allow(dead_code)]
-enum BlockType {
-    TypeI,
-    TypeJ,
-    TypeL,
-    TypeO,
-    TypeS,
-    TypeT,
-    TypeZ,
-}
+use super::{
+    BLOCK_SIZE,
+    BLOCK_POSITION,
+    SpawnEvent,
+    Block,
+    BlockType,
+};
 
 impl BlockType {
     fn color(&self) -> Color {
@@ -49,7 +31,7 @@ impl BlockType {
     // BlockType::TypeI.position(2) -> INITIAL_POSITION + Vec2::new(GRID_SIZE * 1, -GRID_SIZE * 1)
     fn position(&self, i: usize) -> Vec2 {
         let closure = |id: usize, block: [[usize; 16]; 4]| {
-            let mut position = INITIAL_POSITION;
+            let mut position = BLOCK_POSITION;
 
             for i in 0..block[0].len() {
                 if id == block[0][i] {
@@ -59,7 +41,7 @@ impl BlockType {
                 position.x += GRID_SIZE;
                 // movement y
                 if i % 4 == 3 {
-                    position.x = INITIAL_POSITION.x;
+                    position.x = BLOCK_POSITION.x;
                     position.y -= GRID_SIZE;
                 }
             }
@@ -86,7 +68,7 @@ impl Block {
             Sprite::from_color(block.color(), Vec2::ONE),
             Transform {
                 translation: block.position(i).extend(1.0),
-                scale: SIZE.extend(1.0),
+                scale: BLOCK_SIZE.extend(1.0),
                 ..Default::default()
             },
         )
@@ -122,7 +104,6 @@ pub struct SpawnPlugin;
 impl Plugin for SpawnPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_event::<SpawnEvent>()
             .add_systems(Startup, setup)
             .add_systems(Update, spawn)
         ;
