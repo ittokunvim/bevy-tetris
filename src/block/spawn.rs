@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::GRID_SIZE;
+use crate::{
+    GRID_SIZE,
+    AppState,
+};
 use crate::utils::blockdata::*;
 use super::PlayerBlock;
 
@@ -150,9 +153,9 @@ impl Plugin for SpawnPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<SpawnEvent>()
-            .add_systems(Startup, setup)
-            .add_systems(Update, spawn)
-            .add_systems(Update, check_position)
+            .add_systems(OnEnter(AppState::Ingame), setup)
+            .add_systems(Update, spawn.run_if(in_state(AppState::Ingame)))
+            .add_systems(Update, check_position.run_if(in_state(AppState::Ingame)))
         ;
     }
 }

@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::GRID_SIZE;
+use crate::{
+    GRID_SIZE,
+    AppState,
+};
 use crate::block::PlayerBlock;
 use crate::block::movement::{
     Direction as BlockDirection,
@@ -166,10 +169,10 @@ impl Plugin for WallPlugin {
             .add_event::<CollisionEvent>()
             .add_event::<BottomHitEvent>()
             .add_event::<TopHitEvent>()
-            .add_systems(Startup, setup)
+            .add_systems(OnEnter(AppState::Ingame), setup)
             // .add_systems(Update, check_for_wall)
-            .add_systems(Update, bottom_hit)
-            .add_systems(Update, top_hit)
+            .add_systems(Update, bottom_hit.run_if(in_state(AppState::Ingame)))
+            .add_systems(Update, top_hit.run_if(in_state(AppState::Ingame)))
         ;
     }
 }
