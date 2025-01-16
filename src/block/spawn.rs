@@ -117,6 +117,33 @@ fn spawn(
     }
 }
 
+fn check_position(
+    mut player_query: Query<&mut Transform, With<PlayerBlock>>,
+    block_query: Query<&Transform, (With<Block>, Without<PlayerBlock>)>,
+) {
+    let mut collision = true;
+    // check PlayerBlock position
+    while collision {
+        collision = false;
+        for player_transform in &player_query {
+            let player_pos = player_transform.translation.truncate();
+            for block_transform in &block_query {
+                let block_pos = block_transform.translation.truncate();
+                if player_pos == block_pos {
+                    collision = true;
+                    break;
+                }
+            }
+        }
+        if collision {
+            // move PlayerBlock position
+            for mut transform in &mut player_query {
+                transform.translation.y += GRID_SIZE;
+            }
+        }
+    }
+}
+
 pub struct SpawnPlugin;
 
 impl Plugin for SpawnPlugin {
@@ -125,6 +152,7 @@ impl Plugin for SpawnPlugin {
             .add_event::<SpawnEvent>()
             .add_systems(Startup, setup)
             .add_systems(Update, spawn)
+            .add_systems(Update, check_position)
         ;
     }
 }

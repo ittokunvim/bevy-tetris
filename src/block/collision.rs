@@ -6,21 +6,16 @@ use super::movement::{
     Direction,
     MoveEvent,
 };
-use super::spawn::{
-    SpawnEvent,
-    Block,
-};
+use super::spawn::Block;
+use crate::wall::BottomHitEvent as BlockBottomHitEvent;
 
 #[derive(Event, Default)]
 pub struct CollisionEvent;
 
-#[derive(Event, Default)]
-pub struct BottomHitEvent;
-
 pub fn check_for_collision(
     mut read_events: EventReader<MoveEvent>,
     mut write_events1: EventWriter<CollisionEvent>,
-    mut write_events2: EventWriter<BottomHitEvent>,
+    mut write_events2: EventWriter<BlockBottomHitEvent>,
     player_query: Query<&Transform, With<PlayerBlock>>,
     block_query: Query<&Transform, (With<Block>, Without<PlayerBlock>)>,
 ) {
@@ -50,29 +45,13 @@ pub fn check_for_collision(
     }
 }
 
-fn bottom_hit(
-    mut read_events: EventReader<BottomHitEvent>,
-    mut write_events: EventWriter<SpawnEvent>,
-    mut commands: Commands,
-    query: Query<Entity, With<PlayerBlock>>,
-) {
-    if read_events.is_empty() { return }
-    read_events.clear();
-    // debug!("remove PlayerBlock components");
-    for entity in &query { commands.entity(entity).remove::<PlayerBlock>(); }
-    // debug!("send spawn event");
-    write_events.send_default();
-}
-
 pub struct CollisionPlugin;
 
 impl Plugin for CollisionPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<CollisionEvent>()
-            .add_event::<BottomHitEvent>()
             // .add_systems(Update, check_for_collision)
-            .add_systems(Update, bottom_hit)
         ;
     }
 }
