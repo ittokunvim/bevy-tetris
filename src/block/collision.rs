@@ -44,27 +44,12 @@ pub fn check_for_collision(
     }
 }
 
-fn bottom_hit(
-    mut read_events: EventReader<BottomHitEvent>,
-    mut write_events: EventWriter<SpawnEvent>,
-    mut commands: Commands,
-    query: Query<Entity, With<PlayerBlock>>,
-) {
-    if read_events.is_empty() { return }
-    read_events.clear();
-    // debug!("remove PlayerBlock components");
-    for entity in &query { commands.entity(entity).remove::<PlayerBlock>(); }
-    // debug!("send spawn event");
-    write_events.send_default();
-}
-
 pub struct CollisionPlugin;
 
 impl Plugin for CollisionPlugin {
     fn build(&self, app: &mut App) {
         app
             // .add_systems(Update, check_for_collision)
-            .add_systems(Update, bottom_hit)
         ;
     }
 }

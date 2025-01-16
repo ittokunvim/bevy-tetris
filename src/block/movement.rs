@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::GRID_SIZE;
+use crate::{
+    AppState,
+    GRID_SIZE,
+};
 use super::{
     BLOCK_SPEED,
     PlayerBlock,
@@ -52,6 +55,13 @@ pub fn movement(
     }
 }
 
+fn reset_timer(
+    mut timer: ResMut<FallingTimer>,
+) {
+    // debug!("reset_timer");
+    timer.reset();
+}
+
 pub struct MovementPlugin;
 
 impl Plugin for MovementPlugin {
@@ -60,6 +70,7 @@ impl Plugin for MovementPlugin {
             .insert_resource(FallingTimer::default())
             // .add_systems(Update, falling)
             // .add_systems(Update, movement)
+            .add_systems(OnExit(AppState::Ingame), reset_timer)
         ;
     }
 }

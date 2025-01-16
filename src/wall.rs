@@ -1,12 +1,16 @@
 use bevy::prelude::*;
 
-use crate::GRID_SIZE;
+use crate::{
+    GRID_SIZE,
+    AppState,
+};
 use crate::block::{
     MoveEvent as BlockMoveEvent,
     Direction as BlockDirection,
     PlayerBlock,
     BottomHitEvent as BlockBottomHitEvent,
 };
+use crate::block::spawn::SpawnEvent;
 
 const WALL_THICKNESS: f32 = 1.0;
 const LEFT_WALL: f32 = -5.0 * GRID_SIZE;
@@ -17,6 +21,12 @@ const WALL_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
 
 #[derive(Event, Default)]
 pub struct CollisionEvent;
+
+#[derive(Event, Default)]
+pub struct BottomHitEvent;
+
+#[derive(Event, Default)]
+pub struct TopHitEvent;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub enum WallLocation {
@@ -85,7 +95,8 @@ fn setup(
 pub fn check_for_wall(
     mut read_events: EventReader<BlockMoveEvent>,
     mut write_events1: EventWriter<CollisionEvent>,
-    mut write_events2: EventWriter<BlockBottomHitEvent>,
+    mut write_events2: EventWriter<BottomHitEvent>,
+    mut write_events3: EventWriter<TopHitEvent>,
     player_query: Query<&Transform, (With<PlayerBlock>, Without<Wall>)>,
     wall_query: Query<(&Wall, &Transform), (With<Wall>, Without<PlayerBlock>)>,
 ) {
@@ -96,6 +107,7 @@ pub fn check_for_wall(
             // trace!("location: {:?}", location);
             write_events1.send_default();
             if location == WallLocation::Bottom { write_events2.send_default(); }
+            if location == WallLocation::Top    { write_events3.send_default(); }
         };
         // check collision wall
         for player_transform in &player_query {
@@ -128,14 +140,53 @@ pub fn check_for_wall(
     }
 }
 
+fn bottom_hit(
+    mut read_events: EventReader<BottomHitEvent>,
+    mut write_events: EventWriter<SpawnEvent>,
+    mut commands: Commands,
+    query: Query<Entity, With<PlayerBlock>>,
+) {
+    if read_events.is_empty() { return }
+    read_events.clear();
+    // debug!("remove PlayerBlock components");
+    for entity in &query { commands.entity(entity).remove::<PlayerBlock>(); }
+    // debug!("send spawn event");
+    write_events.send_default();
+}
+
+fn top_hit(
+    mut read_events: EventReader<TopHitEvent>,
+    mut next_state: ResMut<NextState<AppState>>,
+) {
+    if read_events.is_empty() { return }
+    read_events.clear();
+    // trace!("AppState::Ingame -> Gameover");
+    next_state.set(AppState::Gameover);
+}
+
+fn despawn_all(
+    mut commands: Commands,
+    query: Query<Entity, With<Wall>>,
+) {
+    // debug!("despawn_all");
+    for entity in &query { commands.entity(entity).despawn() }
+}
+
 pub struct WallPlugin;
 
 impl Plugin for WallPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<CollisionEvent>()
-            .add_systems(Startup, setup)
+            .add_event::<BottomHitEvent>()
+            .add_event::<TopHitEvent>()
+            .add_systems(OnEnter(AppState::Ingame), setup)
             // .add_systems(Update, check_for_wall)
+            .add_systems(Update, (
+                bottom_hit,
+                top_hit,
+            ).run_if(in_state(AppState::Ingame)))
+            .add_systems(OnExit(AppState::Ingame), despawn_all)
         ;
     }
 }

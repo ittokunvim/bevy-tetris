@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::GRID_SIZE;
+use crate::{
+    GRID_SIZE,
+    AppState,
+};
 use crate::utils::blockdata::*;
 use super::{
     BLOCK_SIZE,
@@ -99,13 +102,53 @@ fn spawn(
     }
 }
 
+fn check_position(
+    mut player_query: Query<&mut Transform, With<PlayerBlock>>,
+    block_query: Query<&Transform, (With<Block>, Without<PlayerBlock>)>,
+) {
+    let mut collision = true;
+    // check PlayerBlock position
+    while collision {
+        collision = false;
+        for player_transform in &player_query {
+            let player_pos = player_transform.translation.truncate();
+            for block_transform in &block_query {
+                let block_pos = block_transform.translation.truncate();
+                if player_pos == block_pos {
+                    collision = true;
+                    break;
+                }
+            }
+        }
+        if collision {
+            // move PlayerBlock position
+            for mut transform in &mut player_query {
+                transform.translation.y += GRID_SIZE;
+            }
+        }
+    }
+}
+
+fn despawn_all(
+    mut commands: Commands,
+    query: Query<Entity, With<Block>>,
+) {
+    // debug!("despawn_all");
+    for entity in &query { commands.entity(entity).despawn() }
+}
+
 pub struct SpawnPlugin;
 
 impl Plugin for SpawnPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(Startup, setup)
-            .add_systems(Update, spawn)
+            .add_event::<SpawnEvent>()
+            .add_systems(OnEnter(AppState::Ingame), setup)
+            .add_systems(Update, (
+                spawn,
+                check_position,
+            ).run_if(in_state(AppState::Ingame)))
+            .add_systems(OnExit(AppState::Ingame), despawn_all)
         ;
     }
 }

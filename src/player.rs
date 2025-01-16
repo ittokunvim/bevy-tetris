@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+use crate::AppState;
 use crate::block::{
     MoveEvent as BlockMoveEvent,
     Direction as BlockDirection,
@@ -39,7 +40,7 @@ impl Plugin for PlayerPlugin {
                 crate::wall::check_for_wall,
                 crate::block::collision::check_for_collision,
                 crate::block::movement::movement,
-            ).chain())
+            ).chain().run_if(in_state(AppState::Ingame)))
         ;
     }
 }
