@@ -1,21 +1,20 @@
 use bevy::prelude::*;
 
 use crate::GRID_SIZE;
-use super::PlayerBlock;
-use super::movement::{
-    Direction,
+use super::{
     MoveEvent,
+    Direction,
+    CollisionEvent,
+    BottomHitEvent,
+    SpawnEvent,
+    PlayerBlock,
+    Block,
 };
-use super::spawn::Block;
-use crate::wall::BottomHitEvent as BlockBottomHitEvent;
-
-#[derive(Event, Default)]
-pub struct CollisionEvent;
 
 pub fn check_for_collision(
     mut read_events: EventReader<MoveEvent>,
     mut write_events1: EventWriter<CollisionEvent>,
-    mut write_events2: EventWriter<BlockBottomHitEvent>,
+    mut write_events2: EventWriter<BottomHitEvent>,
     player_query: Query<&Transform, With<PlayerBlock>>,
     block_query: Query<&Transform, (With<Block>, Without<PlayerBlock>)>,
 ) {
@@ -50,7 +49,6 @@ pub struct CollisionPlugin;
 impl Plugin for CollisionPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_event::<CollisionEvent>()
             // .add_systems(Update, check_for_collision)
         ;
     }

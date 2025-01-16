@@ -4,28 +4,21 @@ use crate::{
     AppState,
     GRID_SIZE,
 };
-use super::PlayerBlock;
-use super::collision::CollisionEvent as BlockCollisionEvent;
+use super::{
+    BLOCK_SPEED,
+    PlayerBlock,
+    CollisionEvent as BlockCollisionEvent,
+    Direction,
+    MoveEvent,
+};
 use crate::wall::CollisionEvent as WallCollisionEvent;
-
-const FPS: f32 = 0.2;
-
-#[derive(Copy, Clone, PartialEq, Debug)]
-pub enum Direction {
-    Left,
-    Right,
-    Bottom,
-}
-
-#[derive(Event)]
-pub struct MoveEvent(pub Direction);
 
 #[derive(Resource, Deref, DerefMut)]
 pub struct FallingTimer(Timer);
 
 impl Default for FallingTimer {
     fn default() -> Self {
-        Self(Timer::from_seconds(FPS, TimerMode::Repeating))
+        Self(Timer::from_seconds(BLOCK_SPEED, TimerMode::Repeating))
     }
 }
 
@@ -74,7 +67,6 @@ pub struct MovementPlugin;
 impl Plugin for MovementPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_event::<MoveEvent>()
             .insert_resource(FallingTimer::default())
             // .add_systems(Update, falling)
             // .add_systems(Update, movement)

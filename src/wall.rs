@@ -4,10 +4,11 @@ use crate::{
     GRID_SIZE,
     AppState,
 };
-use crate::block::PlayerBlock;
-use crate::block::movement::{
-    Direction as BlockDirection,
+use crate::block::{
     MoveEvent as BlockMoveEvent,
+    Direction as BlockDirection,
+    PlayerBlock,
+    BottomHitEvent as BlockBottomHitEvent,
 };
 use crate::block::spawn::SpawnEvent;
 

@@ -1,9 +1,9 @@
 use bevy::prelude::*;
 
 use crate::AppState;
-use crate::block::movement::{
-    Direction as BlockDirection,
+use crate::block::{
     MoveEvent as BlockMoveEvent,
+    Direction as BlockDirection,
 };
 
 const KEY_BLOCK_LEFT_1: KeyCode = KeyCode::ArrowLeft;
