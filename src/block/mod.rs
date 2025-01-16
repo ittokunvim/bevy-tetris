@@ -4,7 +4,7 @@ use crate::GRID_SIZE;
 
 pub mod collision;
 pub mod movement;
-mod rotation;
+pub mod rotation;
 mod spawn;
 
 const BLOCK_SPEED: f32 = 0.2;
@@ -25,7 +25,7 @@ pub enum Direction {
 }
 
 #[derive(Event, Default)]
-struct RotationEvent;
+pub struct RotationEvent;
 
 #[derive(Event, Default)]
 pub struct CollisionEvent;
@@ -62,7 +62,7 @@ impl Plugin for BlockPlugin {
             .add_event::<SpawnEvent>()
             // .add_plugins(collision::CollisionPlugin)
             .add_plugins(movement::MovementPlugin)
-            .add_plugins(rotation::RotationPlugin)
+            // .add_plugins(rotation::RotationPlugin)
             .add_plugins(spawn::SpawnPlugin)
         ;
     }

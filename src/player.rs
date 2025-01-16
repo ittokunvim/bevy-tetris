@@ -4,14 +4,16 @@ use crate::AppState;
 use crate::block::{
     MoveEvent as BlockMoveEvent,
     Direction as BlockDirection,
+    RotationEvent as BlockRotationEvent,
 };
 
 const KEY_BLOCK_LEFT_1: KeyCode = KeyCode::ArrowLeft;
 const KEY_BLOCK_LEFT_2: KeyCode = KeyCode::KeyA;
 const KEY_BLOCK_RIGHT_1: KeyCode = KeyCode::ArrowRight;
 const KEY_BLOCK_RIGHT_2: KeyCode = KeyCode::KeyD;
+const KEY_BLOCK_ROTATION: KeyCode = KeyCode::Space;
 
-pub fn block_movement(
+fn block_movement(
     mut events: EventWriter<BlockMoveEvent>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
@@ -29,6 +31,16 @@ pub fn block_movement(
     }
 }
 
+fn block_rotation(
+    mut events: EventWriter<BlockRotationEvent>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+) {
+    if keyboard_input.just_pressed(KEY_BLOCK_ROTATION) {
+        // debug!("send BlockRotationEvent");
+        events.send_default();
+    }
+}
+
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
@@ -40,6 +52,10 @@ impl Plugin for PlayerPlugin {
                 crate::wall::check_for_wall,
                 crate::block::collision::check_for_collision,
                 crate::block::movement::movement,
+            ).chain().run_if(in_state(AppState::Ingame)))
+            .add_systems(Update, (
+                block_rotation,
+                crate::block::rotation::rotation,
             ).chain().run_if(in_state(AppState::Ingame)))
         ;
     }
