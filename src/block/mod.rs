@@ -4,7 +4,8 @@ use crate::GRID_SIZE;
 
 pub mod collision;
 pub mod movement;
-pub mod spawn;
+mod rotation;
+mod spawn;
 
 const BLOCK_SPEED: f32 = 0.2;
 const BLOCK_SIZE: Vec2 = Vec2::splat(GRID_SIZE - 2.0);
@@ -22,6 +23,9 @@ pub enum Direction {
     Right,
     Bottom,
 }
+
+#[derive(Event, Default)]
+struct RotationEvent;
 
 #[derive(Event, Default)]
 pub struct CollisionEvent;
@@ -53,10 +57,12 @@ impl Plugin for BlockPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<MoveEvent>()
+            .add_event::<RotationEvent>()
             .add_event::<CollisionEvent>()
             .add_event::<SpawnEvent>()
             // .add_plugins(collision::CollisionPlugin)
             .add_plugins(movement::MovementPlugin)
+            .add_plugins(rotation::RotationPlugin)
             .add_plugins(spawn::SpawnPlugin)
         ;
     }
