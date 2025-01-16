@@ -147,6 +147,14 @@ fn check_position(
     }
 }
 
+fn despawn_all(
+    mut commands: Commands,
+    query: Query<Entity, With<Block>>,
+) {
+    // debug!("despawn_all");
+    for entity in &query { commands.entity(entity).despawn() }
+}
+
 pub struct SpawnPlugin;
 
 impl Plugin for SpawnPlugin {
@@ -154,8 +162,11 @@ impl Plugin for SpawnPlugin {
         app
             .add_event::<SpawnEvent>()
             .add_systems(OnEnter(AppState::Ingame), setup)
-            .add_systems(Update, spawn.run_if(in_state(AppState::Ingame)))
-            .add_systems(Update, check_position.run_if(in_state(AppState::Ingame)))
+            .add_systems(Update, (
+                spawn,
+                check_position,
+            ).run_if(in_state(AppState::Ingame)))
+            .add_systems(OnExit(AppState::Ingame), despawn_all)
         ;
     }
 }

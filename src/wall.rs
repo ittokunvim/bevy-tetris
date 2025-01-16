@@ -155,10 +155,20 @@ fn bottom_hit(
 
 fn top_hit(
     mut read_events: EventReader<TopHitEvent>,
+    mut next_state: ResMut<NextState<AppState>>,
 ) {
     if read_events.is_empty() { return }
     read_events.clear();
-    debug!("top_hit");
+    // trace!("AppState::Ingame -> Gameover");
+    next_state.set(AppState::Gameover);
+}
+
+fn despawn_all(
+    mut commands: Commands,
+    query: Query<Entity, With<Wall>>,
+) {
+    // debug!("despawn_all");
+    for entity in &query { commands.entity(entity).despawn() }
 }
 
 pub struct WallPlugin;
@@ -171,8 +181,11 @@ impl Plugin for WallPlugin {
             .add_event::<TopHitEvent>()
             .add_systems(OnEnter(AppState::Ingame), setup)
             // .add_systems(Update, check_for_wall)
-            .add_systems(Update, bottom_hit.run_if(in_state(AppState::Ingame)))
-            .add_systems(Update, top_hit.run_if(in_state(AppState::Ingame)))
+            .add_systems(Update, (
+                bottom_hit,
+                top_hit,
+            ).run_if(in_state(AppState::Ingame)))
+            .add_systems(OnExit(AppState::Ingame), despawn_all)
         ;
     }
 }
