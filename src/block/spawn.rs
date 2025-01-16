@@ -9,6 +9,7 @@ use super::{
     BLOCK_SIZE,
     BLOCK_POSITION,
     SpawnEvent,
+    PlayerBlock,
     Block,
     BlockType,
 };

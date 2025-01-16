@@ -5,11 +5,10 @@ use super::{
     MoveEvent,
     Direction,
     CollisionEvent,
-    BottomHitEvent,
-    SpawnEvent,
     PlayerBlock,
     Block,
 };
+use crate::wall::BottomHitEvent;
 
 pub fn check_for_collision(
     mut read_events: EventReader<MoveEvent>,
@@ -44,12 +43,12 @@ pub fn check_for_collision(
     }
 }
 
-pub struct CollisionPlugin;
+// pub struct CollisionPlugin;
 
-impl Plugin for CollisionPlugin {
-    fn build(&self, app: &mut App) {
-        app
-            // .add_systems(Update, check_for_collision)
-        ;
-    }
-}
+// impl Plugin for CollisionPlugin {
+//     fn build(&self, app: &mut App) {
+//         app
+//             // .add_systems(Update, check_for_collision)
+//         ;
+//     }
+// }

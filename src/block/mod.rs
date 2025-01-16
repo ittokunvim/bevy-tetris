@@ -27,10 +27,7 @@ pub enum Direction {
 pub struct CollisionEvent;
 
 #[derive(Event, Default)]
-pub struct BottomHitEvent;
-
-#[derive(Event, Default)]
-struct SpawnEvent;
+pub struct SpawnEvent;
 
 #[derive(Component, Default)]
 pub struct PlayerBlock;
@@ -57,9 +54,8 @@ impl Plugin for BlockPlugin {
         app
             .add_event::<MoveEvent>()
             .add_event::<CollisionEvent>()
-            .add_event::<BottomHitEvent>()
             .add_event::<SpawnEvent>()
-            .add_plugins(collision::CollisionPlugin)
+            // .add_plugins(collision::CollisionPlugin)
             .add_plugins(movement::MovementPlugin)
             .add_plugins(spawn::SpawnPlugin)
         ;

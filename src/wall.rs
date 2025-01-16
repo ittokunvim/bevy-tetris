@@ -7,10 +7,9 @@ use crate::{
 use crate::block::{
     MoveEvent as BlockMoveEvent,
     Direction as BlockDirection,
+    SpawnEvent,
     PlayerBlock,
-    BottomHitEvent as BlockBottomHitEvent,
 };
-use crate::block::spawn::SpawnEvent;
 
 const WALL_THICKNESS: f32 = 1.0;
 const LEFT_WALL: f32 = -5.0 * GRID_SIZE;
