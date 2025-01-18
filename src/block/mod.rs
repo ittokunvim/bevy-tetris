@@ -48,11 +48,11 @@ pub struct CurrentBlock {
     init_pos: Vec2,
 }
 
-#[derive(Component, Default)]
-pub struct PlayerBlock;
+#[derive(Component)]
+pub struct PlayerBlock(pub usize);
 
 #[derive(Component)]
-#[require(Sprite, Transform, PlayerBlock)]
+#[require(Sprite, Transform)]
 pub struct Block;
 
 #[allow(dead_code)]

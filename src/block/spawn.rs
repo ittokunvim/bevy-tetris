@@ -71,15 +71,16 @@ impl Block {
         blockdata_id: usize,
         block_id: usize,
         block: BlockType,
-    ) -> (Self, Sprite, Transform) {
+    ) -> (Self, Sprite, Transform, PlayerBlock) {
         (
             Self,
             Sprite::from_color(block.color(), Vec2::ONE),
             Transform {
-                translation: block.position(blockdata_id, block_id).extend(1.0),
+                translation: block.position(BLOCK_POSITION, blockdata_id, block_id).extend(1.0),
                 scale: BLOCK_SIZE.extend(1.0),
                 ..Default::default()
             },
+            PlayerBlock(block_id),
         )
     }
 }
