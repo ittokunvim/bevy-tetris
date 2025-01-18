@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 pub const BLOCK_COUNT: usize = 4;
+pub const MAX_BLOCKDATA: usize = 4;
 pub const I_BLOCK: [[usize; 16]; 4] = [
     [
         0,0,0,0,

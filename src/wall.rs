@@ -8,6 +8,7 @@ use crate::block::{
     MoveEvent as BlockMoveEvent,
     Direction as BlockDirection,
     SpawnEvent,
+    CurrentBlock,
     PlayerBlock,
 };
 
@@ -143,10 +144,13 @@ fn bottom_hit(
     mut read_events: EventReader<BottomHitEvent>,
     mut write_events: EventWriter<SpawnEvent>,
     mut commands: Commands,
+    mut current_block: ResMut<CurrentBlock>,
     query: Query<Entity, With<PlayerBlock>>,
 ) {
     if read_events.is_empty() { return }
     read_events.clear();
+    // debug!("reset current block");
+    *current_block = CurrentBlock::reset();
     // debug!("remove PlayerBlock components");
     for entity in &query { commands.entity(entity).remove::<PlayerBlock>(); }
     // debug!("send spawn event");
