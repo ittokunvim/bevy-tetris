@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::GRID_SIZE;
+use crate::{
+    GRID_SIZE,
+    AppState,
+};
 
 pub mod collision;
 pub mod movement;
@@ -33,6 +36,11 @@ pub struct CollisionEvent;
 #[derive(Event, Default)]
 pub struct SpawnEvent;
 
+#[derive(Resource)]
+pub struct CurrentBlock {
+    id: usize,
+}
+
 #[derive(Component, Default)]
 pub struct PlayerBlock;
 
@@ -51,6 +59,21 @@ enum BlockType {
     TypeZ,
 }
 
+impl CurrentBlock {
+    fn new() -> Self {
+        CurrentBlock { id: 0, }
+    }
+
+    pub fn reset() -> Self { Self::new() }
+}
+
+fn reset_current_block(
+    mut current_block: ResMut<CurrentBlock>,
+) {
+    // debug!("reset current block");
+    *current_block = CurrentBlock::reset();
+}
+
 pub struct BlockPlugin;
 
 impl Plugin for BlockPlugin {
@@ -60,10 +83,12 @@ impl Plugin for BlockPlugin {
             .add_event::<RotationEvent>()
             .add_event::<CollisionEvent>()
             .add_event::<SpawnEvent>()
+            .insert_resource(CurrentBlock::new())
             // .add_plugins(collision::CollisionPlugin)
             .add_plugins(movement::MovementPlugin)
             // .add_plugins(rotation::RotationPlugin)
             .add_plugins(spawn::SpawnPlugin)
+            .add_systems(OnExit(AppState::Ingame), reset_current_block)
         ;
     }
 }
