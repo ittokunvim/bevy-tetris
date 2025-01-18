@@ -45,6 +45,7 @@ pub struct SpawnEvent;
 pub struct CurrentBlock {
     id: usize,
     block: BlockType,
+    init_pos: Vec2,
 }
 
 #[derive(Component, Default)]
@@ -88,6 +89,7 @@ impl CurrentBlock {
         CurrentBlock {
             id: 0,
             block: Self::random_block(),
+            init_pos: BLOCK_POSITION,
         }
     }
 
