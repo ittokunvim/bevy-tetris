@@ -1,4 +1,9 @@
 use bevy::prelude::*;
+use rand::{
+    distributions::Standard,
+    prelude::Distribution,
+    Rng,
+};
 
 use crate::{
     GRID_SIZE,
@@ -61,15 +66,37 @@ enum BlockType {
     TypeZ,
 }
 
+impl Distribution<BlockType> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> BlockType {
+        let index: u8 = rng.gen_range(0..7);
+
+        match index {
+            0 => BlockType::TypeI,
+            1 => BlockType::TypeJ,
+            2 => BlockType::TypeL,
+            3 => BlockType::TypeO,
+            4 => BlockType::TypeS,
+            5 => BlockType::TypeT,
+            6 => BlockType::TypeZ,
+            _ => unreachable!(),
+        }
+    }
+}
+
 impl CurrentBlock {
     fn new() -> Self {
         CurrentBlock {
             id: 0,
-            block: BlockType::TypeO,
+            block: Self::random_block(),
         }
     }
 
     pub fn reset() -> Self { Self::new() }
+
+    fn random_block() -> BlockType {
+        let mut rng = rand::thread_rng();
+        rng.gen()
+    }
 }
 
 fn reset_current_block(
