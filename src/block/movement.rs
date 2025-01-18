@@ -6,10 +6,11 @@ use crate::{
 };
 use super::{
     BLOCK_SPEED,
-    PlayerBlock,
     CollisionEvent as BlockCollisionEvent,
     Direction,
     MoveEvent,
+    CurrentBlock,
+    PlayerBlock,
 };
 use crate::wall::CollisionEvent as WallCollisionEvent;
 
@@ -37,6 +38,7 @@ pub fn falling(
 pub fn movement(
     mut read_events1: EventReader<MoveEvent>,
     mut query: Query<&mut Transform, With<PlayerBlock>>,
+    mut current_block: ResMut<CurrentBlock>,
     read_events2: EventReader<WallCollisionEvent>,
     read_events3: EventReader<BlockCollisionEvent>
 ) {
@@ -52,6 +54,12 @@ pub fn movement(
                 Direction::Bottom => transform.translation.y -= GRID_SIZE,
             }
         }
+        match direction {
+            Direction::Left   => current_block.init_pos.x -= GRID_SIZE,
+            Direction::Right  => current_block.init_pos.x += GRID_SIZE,
+            Direction::Bottom => current_block.init_pos.y -= GRID_SIZE,
+        }
+        // trace!("current_block.init_pos: {}", current_block.init_pos);
     }
 }
 

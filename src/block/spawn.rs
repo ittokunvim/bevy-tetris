@@ -114,6 +114,7 @@ fn spawn(
 
 fn check_position(
     mut player_query: Query<&mut Transform, With<PlayerBlock>>,
+    mut current_block: ResMut<CurrentBlock>,
     block_query: Query<&Transform, (With<Block>, Without<PlayerBlock>)>,
 ) {
     let mut collision = true;
@@ -135,6 +136,7 @@ fn check_position(
             for mut transform in &mut player_query {
                 transform.translation.y += GRID_SIZE;
             }
+            current_block.init_pos.y += GRID_SIZE;
         }
     }
 }
