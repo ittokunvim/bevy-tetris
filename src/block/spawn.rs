@@ -34,9 +34,14 @@ impl BlockType {
     // 一致した箇所をxy軸に変換して返します。
     // 例
     // BlockType::TypeI.position(2) -> INITIAL_POSITION + Vec2::new(GRID_SIZE * 1, -GRID_SIZE * 1)
-    fn position(&self, blockdata_id: usize, block_id: usize) -> Vec2 {
+    pub fn position(
+        &self,
+        init_pos: Vec2,
+        blockdata_id: usize,
+        block_id: usize,
+    ) -> Vec2 {
         let closure = |block: [[usize; 16]; 4]| {
-            let mut position = BLOCK_POSITION;
+            let mut position = init_pos;
 
             for i in 0..block[blockdata_id].len() {
                 if block_id == block[blockdata_id][i] {
@@ -46,7 +51,7 @@ impl BlockType {
                 position.x += GRID_SIZE;
                 // movement y
                 if i % 4 == 3 {
-                    position.x = BLOCK_POSITION.x;
+                    position.x = init_pos.x;
                     position.y -= GRID_SIZE;
                 }
             }
