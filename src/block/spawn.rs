@@ -99,12 +99,13 @@ fn spawn(
     events.clear();
 
     let blockdata_id = current_block.id;
+    let block = current_block.block;
     // debug!("spawn");
     for block_id in 1..BLOCK_COUNT + 1 {
         // commands.spawn(Block::new(i, BlockType::TypeI));
         // commands.spawn(Block::new(i, BlockType::TypeJ));
         // commands.spawn(Block::new(i, BlockType::TypeL));
-        commands.spawn(Block::new(blockdata_id, block_id, BlockType::TypeO));
+        commands.spawn(Block::new(blockdata_id, block_id, block));
         // commands.spawn(Block::new(i, BlockType::TypeS));
         // commands.spawn(Block::new(i, BlockType::TypeT));
         // commands.spawn(Block::new(i, BlockType::TypeZ));

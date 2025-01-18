@@ -39,6 +39,7 @@ pub struct SpawnEvent;
 #[derive(Resource)]
 pub struct CurrentBlock {
     id: usize,
+    block: BlockType,
 }
 
 #[derive(Component, Default)]
@@ -49,6 +50,7 @@ pub struct PlayerBlock;
 pub struct Block;
 
 #[allow(dead_code)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 enum BlockType {
     TypeI,
     TypeJ,
@@ -61,7 +63,10 @@ enum BlockType {
 
 impl CurrentBlock {
     fn new() -> Self {
-        CurrentBlock { id: 0, }
+        CurrentBlock {
+            id: 0,
+            block: BlockType::TypeO,
+        }
     }
 
     pub fn reset() -> Self { Self::new() }
