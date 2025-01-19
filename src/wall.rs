@@ -11,9 +11,6 @@ use crate::block::{
 };
 use crate::utils::prelude::*;
 
-#[derive(Event, Default)]
-pub struct CollisionEvent;
-
 fn setup(
     mut commands: Commands,
 ) {
@@ -84,7 +81,6 @@ pub struct WallPlugin;
 impl Plugin for WallPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_event::<CollisionEvent>()
             .add_systems(OnEnter(AppState::Ingame), setup)
             // .add_systems(Update, check_for_wall)
             .add_systems(OnExit(AppState::Ingame), despawn_all)

@@ -21,10 +21,8 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(Update, (
-                crate::block::movement::falling,
                 crate::wall::check_for_wall,
                 crate::block::collision::check_for_collision,
-                crate::block::movement::movement,
             ).chain().run_if(in_state(AppState::Ingame)))
             .add_systems(Update, (
                 block_rotation,
