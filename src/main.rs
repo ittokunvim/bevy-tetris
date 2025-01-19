@@ -4,6 +4,7 @@ use bevy::{
 };
 
 mod movement;
+mod spawn;
 mod utils;
 mod block;
 mod player;
@@ -48,6 +49,7 @@ fn main() {
         ))
         .add_plugins(block::BlockPlugin)
         .add_plugins(movement::MovementPlugin)
+        .add_plugins(spawn::SpawnPlugin)
         .add_plugins(utils::UtilsPlugin)
         .add_plugins(player::PlayerPlugin)
         .add_plugins(wall::WallPlugin)
