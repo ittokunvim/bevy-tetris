@@ -4,6 +4,7 @@ use crate::AppState;
 
 mod block;
 mod events;
+mod collision;
 
 #[derive(Event)]
 struct MoveEvent(pub Direction);
@@ -44,6 +45,8 @@ impl Plugin for MovementPlugin {
             .add_systems(Update, (
                 events::movement,
                 block::falling,
+                collision::check_for_wall,
+                collision::check_for_block,
                 block::movement,
             ).chain().run_if(in_state(AppState::Ingame)))
             .add_systems(Update, (
