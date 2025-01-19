@@ -8,9 +8,8 @@ use crate::block::{
     MoveEvent as BlockMoveEvent,
     Direction as BlockDirection,
     SpawnEvent,
-    CurrentBlock,
-    PlayerBlock,
 };
+use crate::utils::prelude::*;
 
 const WALL_THICKNESS: f32 = 1.0;
 const LEFT_WALL: f32 = -5.0 * GRID_SIZE;

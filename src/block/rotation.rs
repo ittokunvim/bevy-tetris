@@ -1,11 +1,8 @@
 use bevy::prelude::*;
 
 use crate::utils::blockdata::*;
-use super::{
-    RotationEvent,
-    CurrentBlock,
-    PlayerBlock,
-};
+use super::RotationEvent;
+use crate::utils::prelude::*;
 
 pub fn rotation(
     mut events: EventReader<RotationEvent>,

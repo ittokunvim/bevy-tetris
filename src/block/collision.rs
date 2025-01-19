@@ -5,10 +5,9 @@ use super::{
     MoveEvent,
     Direction,
     CollisionEvent,
-    PlayerBlock,
-    Block,
 };
 use crate::wall::BottomHitEvent;
+use crate::utils::prelude::*;
 
 pub fn check_for_collision(
     mut read_events: EventReader<MoveEvent>,

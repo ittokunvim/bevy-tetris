@@ -5,14 +5,12 @@ use crate::{
     GRID_SIZE,
 };
 use super::{
-    BLOCK_SPEED,
     CollisionEvent as BlockCollisionEvent,
     Direction,
     MoveEvent,
-    CurrentBlock,
-    PlayerBlock,
 };
 use crate::wall::CollisionEvent as WallCollisionEvent;
+use crate::utils::prelude::*;
 
 #[derive(Resource, Deref, DerefMut)]
 pub struct FallingTimer(Timer);
