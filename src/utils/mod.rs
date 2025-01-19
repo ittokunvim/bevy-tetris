@@ -3,6 +3,7 @@ use bevy::prelude::*;
 pub mod block;
 pub mod blockdata;
 pub mod prelude;
+pub mod wall;
 
 pub struct UtilsPlugin;
 

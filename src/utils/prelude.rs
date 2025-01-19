@@ -4,3 +4,8 @@ pub use crate::utils::block::{
     PlayerBlock,
     Block,
 };
+
+pub use crate::utils::wall::{
+    Wall,
+    WallLocation,
+};
