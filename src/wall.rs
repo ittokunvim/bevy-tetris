@@ -14,12 +14,6 @@ use crate::utils::prelude::*;
 #[derive(Event, Default)]
 pub struct CollisionEvent;
 
-#[derive(Event, Default)]
-pub struct BottomHitEvent;
-
-#[derive(Event, Default)]
-pub struct TopHitEvent;
-
 fn setup(
     mut commands: Commands,
 ) {
@@ -77,33 +71,6 @@ pub fn check_for_wall(
     }
 }
 
-fn bottom_hit(
-    mut read_events: EventReader<BottomHitEvent>,
-    mut write_events: EventWriter<SpawnEvent>,
-    mut commands: Commands,
-    mut current_block: ResMut<CurrentBlock>,
-    query: Query<Entity, With<PlayerBlock>>,
-) {
-    if read_events.is_empty() { return }
-    read_events.clear();
-    // debug!("reset current block");
-    *current_block = CurrentBlock::reset();
-    // debug!("remove PlayerBlock components");
-    for entity in &query { commands.entity(entity).remove::<PlayerBlock>(); }
-    // debug!("send spawn event");
-    write_events.send_default();
-}
-
-fn top_hit(
-    mut read_events: EventReader<TopHitEvent>,
-    mut next_state: ResMut<NextState<AppState>>,
-) {
-    if read_events.is_empty() { return }
-    read_events.clear();
-    // trace!("AppState::Ingame -> Gameover");
-    next_state.set(AppState::Gameover);
-}
-
 fn despawn_all(
     mut commands: Commands,
     query: Query<Entity, With<Wall>>,
@@ -118,14 +85,8 @@ impl Plugin for WallPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<CollisionEvent>()
-            .add_event::<BottomHitEvent>()
-            .add_event::<TopHitEvent>()
             .add_systems(OnEnter(AppState::Ingame), setup)
             // .add_systems(Update, check_for_wall)
-            .add_systems(Update, (
-                bottom_hit,
-                top_hit,
-            ).run_if(in_state(AppState::Ingame)))
             .add_systems(OnExit(AppState::Ingame), despawn_all)
         ;
     }
