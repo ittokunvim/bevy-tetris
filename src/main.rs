@@ -3,6 +3,7 @@ use bevy::{
     log::LogPlugin,
 };
 
+mod movement;
 mod utils;
 mod block;
 mod player;
@@ -46,6 +47,7 @@ fn main() {
             setup_bgm,
         ))
         .add_plugins(block::BlockPlugin)
+        .add_plugins(movement::MovementPlugin)
         .add_plugins(utils::UtilsPlugin)
         .add_plugins(player::PlayerPlugin)
         .add_plugins(wall::WallPlugin)
