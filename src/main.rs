@@ -46,6 +46,7 @@ fn main() {
             setup_bgm,
         ))
         .add_plugins(block::BlockPlugin)
+        .add_plugins(utils::UtilsPlugin)
         .add_plugins(player::PlayerPlugin)
         .add_plugins(wall::WallPlugin)
         .run();
