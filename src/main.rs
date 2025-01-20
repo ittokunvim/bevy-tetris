@@ -7,9 +7,6 @@ mod movement;
 mod rotation;
 mod spawn;
 mod utils;
-mod block;
-mod player;
-mod wall;
 
 const GAMETITLE: &str = "テトリス";
 const GRID_SIZE: f32 = 20.0;
@@ -48,13 +45,10 @@ fn main() {
             setup_camera,
             setup_bgm,
         ))
-        .add_plugins(block::BlockPlugin)
         .add_plugins(movement::MovementPlugin)
         .add_plugins(rotation::RotationPlugin)
         .add_plugins(spawn::SpawnPlugin)
         .add_plugins(utils::UtilsPlugin)
-        .add_plugins(player::PlayerPlugin)
-        .add_plugins(wall::WallPlugin)
         .run();
 }
 
