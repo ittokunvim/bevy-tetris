@@ -1,14 +1,11 @@
 use bevy::prelude::*;
 
 use crate::utils::blockdata::*;
-use super::{
-    RotationEvent,
-    CurrentBlock,
-    PlayerBlock,
-};
+use super::BlockRotationEvent;
+use crate::utils::prelude::*;
 
 pub fn rotation(
-    mut events: EventReader<RotationEvent>,
+    mut events: EventReader<BlockRotationEvent>,
     mut current_block: ResMut<CurrentBlock>,
     mut query: Query<(&PlayerBlock, &mut Transform), With<PlayerBlock>>,
 ) {
@@ -30,11 +27,4 @@ pub fn rotation(
     }
 }
 
-// pub struct RotationPlugin;
 
-// impl Plugin for RotationPlugin {
-//     fn build(&self, app: &mut App) {
-//         app
-//         ;
-//     }
-// }

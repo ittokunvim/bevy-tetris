@@ -1,19 +1,82 @@
 use bevy::prelude::*;
+use rand::{
+    distributions::Standard,
+    prelude::Distribution,
+    Rng,
+};
 
 use crate::{
     GRID_SIZE,
     AppState,
 };
 use crate::utils::blockdata::*;
-use super::{
-    BLOCK_SIZE,
-    BLOCK_POSITION,
-    SpawnEvent,
-    CurrentBlock,
-    PlayerBlock,
-    Block,
-    BlockType,
-};
+
+pub const BLOCK_SPEED: f32 = 0.2;
+const BLOCK_SIZE: Vec2 = Vec2::splat(GRID_SIZE - 2.0);
+const BLOCK_POSITION: Vec2 = Vec2::new(
+    -1.0 * GRID_SIZE - GRID_SIZE / 2.0,
+    10.0 * GRID_SIZE - GRID_SIZE / 2.0,
+);
+
+#[derive(Resource)]
+pub struct CurrentBlock {
+    pub id: usize,
+    pub block: BlockType,
+    pub init_pos: Vec2,
+}
+
+#[derive(Component)]
+pub struct PlayerBlock(pub usize);
+
+#[derive(Component)]
+#[require(Sprite, Transform)]
+pub struct Block;
+
+#[allow(dead_code)]
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub enum BlockType {
+    TypeI,
+    TypeJ,
+    TypeL,
+    TypeO,
+    TypeS,
+    TypeT,
+    TypeZ,
+}
+
+impl CurrentBlock {
+    fn new() -> Self {
+        CurrentBlock {
+            id: 0,
+            block: Self::random_block(),
+            init_pos: BLOCK_POSITION,
+        }
+    }
+
+    pub fn reset() -> Self { Self::new() }
+
+    fn random_block() -> BlockType {
+        let mut rng = rand::thread_rng();
+        rng.gen()
+    }
+}
+
+impl Distribution<BlockType> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> BlockType {
+        let index: u8 = rng.gen_range(0..7);
+
+        match index {
+            0 => BlockType::TypeI,
+            1 => BlockType::TypeJ,
+            2 => BlockType::TypeL,
+            3 => BlockType::TypeO,
+            4 => BlockType::TypeS,
+            5 => BlockType::TypeT,
+            6 => BlockType::TypeZ,
+            _ => unreachable!(),
+        }
+    }
+}
 
 impl BlockType {
     fn color(&self) -> Color {
@@ -72,7 +135,7 @@ impl BlockType {
 }
 
 impl Block {
-    fn new(
+    pub fn new(
         blockdata_id: usize,
         block_id: usize,
         block: BlockType,
@@ -90,83 +153,20 @@ impl Block {
     }
 }
 
-fn setup(
-    mut events: EventWriter<SpawnEvent>,
-) {
-    events.send_default();
-}
-
-fn spawn(
-    mut events: EventReader<SpawnEvent>,
-    mut commands: Commands,
-    current_block: Res<CurrentBlock>,
-) {
-    if events.is_empty() { return }
-    events.clear();
-
-    let blockdata_id = current_block.id;
-    let block = current_block.block;
-    // debug!("spawn");
-    for block_id in 1..BLOCK_COUNT + 1 {
-        // commands.spawn(Block::new(i, BlockType::TypeI));
-        // commands.spawn(Block::new(i, BlockType::TypeJ));
-        // commands.spawn(Block::new(i, BlockType::TypeL));
-        commands.spawn(Block::new(blockdata_id, block_id, block));
-        // commands.spawn(Block::new(i, BlockType::TypeS));
-        // commands.spawn(Block::new(i, BlockType::TypeT));
-        // commands.spawn(Block::new(i, BlockType::TypeZ));
-    }
-}
-
-fn check_position(
-    mut player_query: Query<&mut Transform, With<PlayerBlock>>,
+fn reset_current_block(
     mut current_block: ResMut<CurrentBlock>,
-    block_query: Query<&Transform, (With<Block>, Without<PlayerBlock>)>,
 ) {
-    let mut collision = true;
-    // check PlayerBlock position
-    while collision {
-        collision = false;
-        for player_transform in &player_query {
-            let player_pos = player_transform.translation.truncate();
-            for block_transform in &block_query {
-                let block_pos = block_transform.translation.truncate();
-                if player_pos == block_pos {
-                    collision = true;
-                    break;
-                }
-            }
-        }
-        if collision {
-            // move PlayerBlock position
-            for mut transform in &mut player_query {
-                transform.translation.y += GRID_SIZE;
-            }
-            current_block.init_pos.y += GRID_SIZE;
-        }
-    }
+    // debug!("reset current block");
+    *current_block = CurrentBlock::reset();
 }
 
-fn despawn_all(
-    mut commands: Commands,
-    query: Query<Entity, With<Block>>,
-) {
-    // debug!("despawn_all");
-    for entity in &query { commands.entity(entity).despawn() }
-}
+pub struct BlockPlugin;
 
-pub struct SpawnPlugin;
-
-impl Plugin for SpawnPlugin {
+impl Plugin for BlockPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_event::<SpawnEvent>()
-            .add_systems(OnEnter(AppState::Ingame), setup)
-            .add_systems(Update, (
-                spawn,
-                check_position,
-            ).run_if(in_state(AppState::Ingame)))
-            .add_systems(OnExit(AppState::Ingame), despawn_all)
+            .insert_resource(CurrentBlock::new())
+            .add_systems(OnExit(AppState::Ingame), reset_current_block)
         ;
     }
 }

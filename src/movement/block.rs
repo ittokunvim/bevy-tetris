@@ -1,21 +1,14 @@
 use bevy::prelude::*;
 
-use crate::{
-    AppState,
-    GRID_SIZE,
-};
+use crate::GRID_SIZE;
 use super::{
-    BLOCK_SPEED,
-    CollisionEvent as BlockCollisionEvent,
-    Direction,
     MoveEvent,
-    CurrentBlock,
-    PlayerBlock,
+    Direction,
+    BlockCollisionEvent,
+    WallCollisionEvent,
+    FallingTimer,
 };
-use crate::wall::CollisionEvent as WallCollisionEvent;
-
-#[derive(Resource, Deref, DerefMut)]
-pub struct FallingTimer(Timer);
+use crate::utils::prelude::*;
 
 impl Default for FallingTimer {
     fn default() -> Self {
@@ -63,22 +56,9 @@ pub fn movement(
     }
 }
 
-fn reset_timer(
+pub fn reset_timer(
     mut timer: ResMut<FallingTimer>,
 ) {
     // debug!("reset_timer");
     timer.reset();
-}
-
-pub struct MovementPlugin;
-
-impl Plugin for MovementPlugin {
-    fn build(&self, app: &mut App) {
-        app
-            .insert_resource(FallingTimer::default())
-            // .add_systems(Update, falling)
-            // .add_systems(Update, movement)
-            .add_systems(OnExit(AppState::Ingame), reset_timer)
-        ;
-    }
 }
