@@ -9,7 +9,7 @@ use super::{
 };
 use crate::utils::prelude::*;
 
-use crate::block::SpawnEvent;
+use crate::spawn::BlockSpawnEvent;
 
 const KEY_BLOCK_LEFT_1: KeyCode = KeyCode::ArrowLeft;
 const KEY_BLOCK_LEFT_2: KeyCode = KeyCode::KeyA;
@@ -36,7 +36,7 @@ pub fn movement(
 
 pub fn bottom_hit(
     mut read_events: EventReader<BottomHitEvent>,
-    mut write_events: EventWriter<SpawnEvent>,
+    mut write_events: EventWriter<BlockSpawnEvent>,
     mut commands: Commands,
     mut current_block: ResMut<CurrentBlock>,
     query: Query<Entity, With<PlayerBlock>>,

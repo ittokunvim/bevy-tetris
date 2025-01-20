@@ -11,9 +11,6 @@ pub struct RotationEvent;
 #[derive(Event, Default)]
 pub struct CollisionEvent;
 
-#[derive(Event, Default)]
-pub struct SpawnEvent;
-
 pub struct BlockPlugin;
 
 impl Plugin for BlockPlugin {
@@ -21,7 +18,6 @@ impl Plugin for BlockPlugin {
         app
             .add_event::<RotationEvent>()
             .add_event::<CollisionEvent>()
-            .add_event::<SpawnEvent>()
             // .add_plugins(collision::CollisionPlugin)
             .add_plugins(movement::MovementPlugin)
             // .add_plugins(rotation::RotationPlugin)
