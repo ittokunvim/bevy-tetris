@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 mod block;
+mod wall;
 
 #[derive(Event, Default)]
 pub struct BlockSpawnEvent;
@@ -12,6 +13,7 @@ impl Plugin for SpawnPlugin {
         app
             .add_event::<BlockSpawnEvent>()
             .add_plugins(block::BlockPlugin)
+            .add_plugins(wall::WallPlugin)
         ;
     }
 }
