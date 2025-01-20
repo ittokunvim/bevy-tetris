@@ -4,6 +4,7 @@ use bevy::{
 };
 
 mod movement;
+mod rotation;
 mod spawn;
 mod utils;
 mod block;
@@ -49,6 +50,7 @@ fn main() {
         ))
         .add_plugins(block::BlockPlugin)
         .add_plugins(movement::MovementPlugin)
+        .add_plugins(rotation::RotationPlugin)
         .add_plugins(spawn::SpawnPlugin)
         .add_plugins(utils::UtilsPlugin)
         .add_plugins(player::PlayerPlugin)
