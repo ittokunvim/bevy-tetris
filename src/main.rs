@@ -17,6 +17,7 @@ const BLOCK_POSITION: Vec3 = Vec3::new(
     FIELD_POSITION.y + GRID_SIZE / 2.0 + FIELD_SIZE.y / 2.0 - GRID_SIZE * 1.0,
     10.0,
 );
+const BLOCK_SPEED: f32 = 0.5;
 const I_BLOCK: [usize; 8]  = [
     0,0,0,0,
     1,1,1,1,
@@ -53,11 +54,31 @@ const S_COLOR: Color = Color::srgb(1.0, 0.0, 1.0);
 const T_COLOR: Color = Color::srgb(1.0, 1.0, 0.0);
 const Z_COLOR: Color = Color::srgb(1.0, 1.0, 1.0);
 
+#[derive(Event)]
+struct MoveEvent(Direction);
+
+#[derive(Copy, Clone)]
+enum Direction {
+    Left,
+    Right,
+    Top,
+    Bottom,
+}
+
+#[derive(Resource, Deref, DerefMut)]
+struct FallingTimer(Timer);
+
 #[derive(Component)]
 struct Field;
 
 #[derive(Component)]
 struct Block;
+
+impl FallingTimer {
+    fn new() -> Self {
+        Self(Timer::from_seconds(BLOCK_SPEED, TimerMode::Repeating))
+    }
+}
 
 fn main() {
     App::new()
@@ -73,7 +94,13 @@ fn main() {
         )
         .insert_resource(ClearColor(BACKGROUND_COLOR))
         .insert_resource(Time::<Fixed>::from_seconds(1.0 / 60.0))
+        .add_event::<MoveEvent>()
+        .insert_resource(FallingTimer::new())
         .add_systems(Startup, setup)
+        .add_systems(Update, (
+            send_falling_event,
+            block_movement,
+        ))
         .run();
 }
 
@@ -113,5 +140,32 @@ fn setup(
             Transform::from_xyz(x, y, z),
             Block,
         ));
+    }
+}
+
+fn send_falling_event(
+    mut timer: ResMut<FallingTimer>,
+    mut events: EventWriter<MoveEvent>,
+    time: Res<Time>,
+) {
+    timer.tick(time.delta());
+    if !timer.just_finished() { return; }
+    events.send(MoveEvent(Direction::Bottom));
+}
+
+fn block_movement(
+    mut events: EventReader<MoveEvent>,
+    mut query: Query<&mut Transform, With<Block>>,
+) {
+    for event in events.read() {
+        let direction = event.0;
+        for mut transform in &mut query {
+            match direction {
+                Direction::Left   => transform.translation.x -= GRID_SIZE,
+                Direction::Right  => transform.translation.x += GRID_SIZE,
+                Direction::Bottom => transform.translation.y -= GRID_SIZE,
+                Direction::Top    => transform.translation.y += GRID_SIZE,
+            }
+        }
     }
 }
