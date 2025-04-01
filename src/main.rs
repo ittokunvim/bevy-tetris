@@ -6,12 +6,58 @@ const BACKGROUND_COLOR: Color = Color::srgb(0.1, 0.1, 0.1);
 const PATH_SOUND_BGM: &str = "bevy-tetris/bgm.ogg";
 
 const GRID_SIZE: f32 = 20.0;
+
 const FIELD_SIZE: Vec2 = Vec2::new(10.0 * GRID_SIZE, 20.0 * GRID_SIZE);
 const FIELD_COLOR: Color = Color::srgb(0.6, 0.6, 0.6);
 const FIELD_POSITION: Vec3 = Vec3::new(0.0, 0.0, -10.0);
 
+const BLOCK_SIZE: f32 = GRID_SIZE - 1.0;
+const BLOCK_POSITION: Vec3 = Vec3::new(
+    FIELD_POSITION.x + GRID_SIZE / 2.0 - GRID_SIZE * 2.0,
+    FIELD_POSITION.y + GRID_SIZE / 2.0 + FIELD_SIZE.y / 2.0 - GRID_SIZE * 1.0,
+    10.0,
+);
+const I_BLOCK: [usize; 8]  = [
+    0,0,0,0,
+    1,1,1,1,
+];
+const J_BLOCK: [usize; 8]  = [
+    1,0,0,0,
+    1,1,1,0,
+];
+const L_BLOCK: [usize; 8]  = [
+    0,0,1,0,
+    1,1,1,0,
+];
+const O_BLOCK: [usize; 8]  = [
+    0,1,1,0,
+    0,1,1,0,
+];
+const S_BLOCK: [usize; 8]  = [
+    0,1,1,0,
+    1,1,0,0,
+];
+const T_BLOCK: [usize; 8]  = [
+    0,1,0,0,
+    1,1,1,0,
+];
+const Z_BLOCK: [usize; 8]  = [
+    0,1,1,0,
+    1,1,0,0,
+];
+const I_COLOR: Color = Color::srgb(0.0, 0.0, 1.0);
+const J_COLOR: Color = Color::srgb(0.0, 1.0, 0.0);
+const L_COLOR: Color = Color::srgb(0.0, 1.0, 1.0);
+const O_COLOR: Color = Color::srgb(1.0, 0.0, 0.0);
+const S_COLOR: Color = Color::srgb(1.0, 0.0, 1.0);
+const T_COLOR: Color = Color::srgb(1.0, 1.0, 0.0);
+const Z_COLOR: Color = Color::srgb(1.0, 1.0, 1.0);
+
 #[derive(Component)]
 struct Field;
+
+#[derive(Component)]
+struct Block;
 
 fn main() {
     App::new()
@@ -51,4 +97,21 @@ fn setup(
         Transform::from_xyz(FIELD_POSITION.x, FIELD_POSITION.y, FIELD_POSITION.z),
         Field,
     ));
+    // block
+    let shape = meshes.add(Rectangle::new(BLOCK_SIZE, BLOCK_SIZE));
+    for block in I_BLOCK.iter().enumerate() {
+        let (index, value) = block;
+        let (x, y, z) = (
+            BLOCK_POSITION.x + GRID_SIZE * ((index % 4) as f32),
+            BLOCK_POSITION.y - GRID_SIZE * ((index / 4) as f32),
+            BLOCK_POSITION.z,
+        );
+        if *value == 0 { continue; }
+        commands.spawn((
+            Mesh2d(shape.clone()),
+            MeshMaterial2d(materials.add(I_COLOR)),
+            Transform::from_xyz(x, y, z),
+            Block,
+        ));
+    }
 }
