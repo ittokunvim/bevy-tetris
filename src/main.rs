@@ -7,6 +7,15 @@ const PATH_SOUND_BGM: &str = "bevy-tetris/bgm.ogg";
 
 const GRID_SIZE: f32 = 20.0;
 
+const KEY_BLOCK_LEFT_1: KeyCode = KeyCode::ArrowLeft;
+const KEY_BLOCK_LEFT_2: KeyCode = KeyCode::KeyA;
+const KEY_BLOCK_RIGHT_1: KeyCode = KeyCode::ArrowRight;
+const KEY_BLOCK_RIGHT_2: KeyCode = KeyCode::KeyD;
+const KEY_BLOCK_BOTTOM_1: KeyCode = KeyCode::ArrowDown;
+const KEY_BLOCK_BOTTOM_2: KeyCode = KeyCode::KeyS;
+const KEY_BLOCK_TOP_1: KeyCode = KeyCode::ArrowUp;
+const KEY_BLOCK_TOP_2: KeyCode = KeyCode::KeyW;
+
 const FIELD_SIZE: Vec2 = Vec2::new(10.0 * GRID_SIZE, 20.0 * GRID_SIZE);
 const FIELD_COLOR: Color = Color::srgb(0.6, 0.6, 0.6);
 const FIELD_POSITION: Vec3 = Vec3::new(0.0, 0.0, -10.0);
@@ -18,6 +27,7 @@ const BLOCK_POSITION: Vec3 = Vec3::new(
     10.0,
 );
 const BLOCK_SPEED: f32 = 0.5;
+const BLOCK_SPEED_FAST: f32 = 0.2;
 const I_BLOCK: [usize; 8]  = [
     0,0,0,0,
     1,1,1,1,
@@ -61,8 +71,8 @@ struct MoveEvent(Direction);
 enum Direction {
     Left,
     Right,
-    Top,
     Bottom,
+    Top,
 }
 
 #[derive(Resource, Deref, DerefMut)]
@@ -77,6 +87,10 @@ struct Block;
 impl FallingTimer {
     fn new() -> Self {
         Self(Timer::from_seconds(BLOCK_SPEED, TimerMode::Repeating))
+    }
+
+    fn update_timer(seconds: f32) -> Timer {
+        Timer::from_seconds(seconds, TimerMode::Repeating)
     }
 }
 
@@ -98,6 +112,7 @@ fn main() {
         .insert_resource(FallingTimer::new())
         .add_systems(Startup, setup)
         .add_systems(Update, (
+            send_input_event,
             send_falling_event,
             block_movement,
         ))
@@ -140,6 +155,38 @@ fn setup(
             Transform::from_xyz(x, y, z),
             Block,
         ));
+    }
+}
+
+fn send_input_event(
+    mut events: EventWriter<MoveEvent>,
+    mut timer: ResMut<FallingTimer>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+) {
+    let mut closure = |direction: Direction| {
+        match direction {
+            Direction::Left   |
+            Direction::Right  |
+            Direction::Top    => { events.send(MoveEvent(direction)); },
+            Direction::Bottom => { timer.0 = FallingTimer::update_timer(BLOCK_SPEED_FAST); }
+        }
+    };
+    for key in keyboard_input.get_just_pressed() {
+        match key {
+            &KEY_BLOCK_LEFT_1   | &KEY_BLOCK_LEFT_2   => closure(Direction::Left),
+            &KEY_BLOCK_RIGHT_1  | &KEY_BLOCK_RIGHT_2  => closure(Direction::Right),
+            &KEY_BLOCK_BOTTOM_1 | &KEY_BLOCK_BOTTOM_2 => closure(Direction::Bottom),
+            &KEY_BLOCK_TOP_1    | &KEY_BLOCK_TOP_2    => closure(Direction::Top),
+            _ => {},
+        }
+    }
+    for key in keyboard_input.get_just_released() {
+        match key {
+            &KEY_BLOCK_BOTTOM_1 | &KEY_BLOCK_BOTTOM_2 => {
+                timer.0 = FallingTimer::update_timer(BLOCK_SPEED);
+            },
+            _ => {},
+        }
     }
 }
 
