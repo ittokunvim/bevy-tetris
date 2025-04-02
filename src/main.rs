@@ -16,18 +16,20 @@ const FIELD_SIZE: Vec2 = Vec2::new(10.0 * GRID_SIZE, 20.0 * GRID_SIZE);
 const FIELD_POSITION: Vec3 = Vec3::new(0.0, 0.0, -10.0);
 
 #[derive(Event)]
-pub struct MoveEvent(pub Direction);
+struct MoveEvent(Direction);
 
-#[derive(Copy, Clone, PartialEq)]
-pub enum Direction {
+#[derive(Event)]
+struct RotationEvent(Direction);
+
+#[derive(Copy, Clone, PartialEq, Debug)]
+enum Direction {
     Left,
     Right,
     Bottom,
-    Top,
 }
 
 #[derive(Resource, Deref, DerefMut)]
-pub struct FallingTimer(Timer);
+struct FallingTimer(Timer);
 
 impl FallingTimer {
     fn new() -> Self {
@@ -54,6 +56,7 @@ fn main() {
         .insert_resource(ClearColor(BACKGROUND_COLOR))
         .insert_resource(Time::<Fixed>::from_seconds(1.0 / 60.0))
         .add_event::<MoveEvent>()
+        .add_event::<RotationEvent>()
         .insert_resource(FallingTimer::new())
         .add_plugins(field::FieldPlugin)
         .add_plugins(key::KeyPlugin)
