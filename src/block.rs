@@ -99,6 +99,18 @@ fn block_movement(
     for event in events.read() {
         let direction = event.0;
 
+        for transform in &mut query {
+            let (x, y) = (transform.translation.x, transform.translation.y);
+            match direction {
+                Direction::Left =>
+                if x - GRID_SIZE < FIELD_POSITION.x - FIELD_SIZE.x / 2.0 { return; }
+                Direction::Right =>
+                if x + GRID_SIZE > FIELD_POSITION.x + FIELD_SIZE.x / 2.0 { return; }
+                Direction::Bottom =>
+                if y - GRID_SIZE < FIELD_POSITION.y - FIELD_SIZE.y / 2.0 { return; }
+            }
+        }
+
         match direction {
             Direction::Left   => current_block.pos.x -= GRID_SIZE,
             Direction::Right  => current_block.pos.x += GRID_SIZE,
@@ -126,6 +138,25 @@ fn block_rotation(
             let id = current_block.id;
             current_block.id = if id + 1 < MAX_BLOCKDATA { id + 1 } else { 0 };
         }
+        for (block, mut _transform) in &mut query {
+            loop {
+                let position = current_block.position(block.0);
+                if position.x < FIELD_POSITION.x - FIELD_SIZE.x / 2.0 {
+                    current_block.pos.x += GRID_SIZE;
+                    continue;
+                }
+                else if position.x > FIELD_POSITION.x + FIELD_SIZE.x / 2.0 {
+                    current_block.pos.x -= GRID_SIZE;
+                    continue;
+                }
+                else if position.y < FIELD_POSITION.y - FIELD_SIZE.y / 2.0 {
+                    current_block.pos.y += GRID_SIZE;
+                    continue;
+                }
+                break;
+            }
+        }
+
         for (block, mut transform) in &mut query {
             transform.translation = current_block.position(block.0);
         }
