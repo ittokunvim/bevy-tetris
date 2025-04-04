@@ -6,6 +6,7 @@ use crate::{
     FIELD_POSITION,
     MoveEvent,
     RotationEvent,
+    SpawnEvent,
     Direction,
     FallingTimer,
 };
@@ -58,11 +59,23 @@ impl CurrentBlock {
     }
 }
 
-fn setup(
+fn setup(mut events: EventWriter<SpawnEvent>) { events.send_default(); }
+
+fn block_spawn(
+    mut events: EventReader<SpawnEvent>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
+    mut current_block: ResMut<CurrentBlock>,
+    query: Query<Entity, With<Block>>,
 ) {
+    if events.is_empty() { return; }
+    events.clear();
+
+    for entity in &query {
+        commands.entity(entity).remove::<Block>();
+    }
+    *current_block = CurrentBlock::new();
     let shape = meshes.add(Rectangle::new(BLOCK_SIZE, BLOCK_SIZE));
     for block in I_BLOCK[0].iter().enumerate() {
         let (index, value) = block;
@@ -92,11 +105,12 @@ fn block_falling(
 }
 
 fn block_movement(
-    mut events: EventReader<MoveEvent>,
+    mut move_events: EventReader<MoveEvent>,
+    mut spawn_events: EventWriter<SpawnEvent>,
     mut query: Query<&mut Transform, With<Block>>,
     mut current_block: ResMut<CurrentBlock>,
 ) {
-    for event in events.read() {
+    for event in move_events.read() {
         let direction = event.0;
 
         for transform in &mut query {
@@ -107,7 +121,10 @@ fn block_movement(
                 Direction::Right =>
                 if x + GRID_SIZE > FIELD_POSITION.x + FIELD_SIZE.x / 2.0 { return; }
                 Direction::Bottom =>
-                if y - GRID_SIZE < FIELD_POSITION.y - FIELD_SIZE.y / 2.0 { return; }
+                if y - GRID_SIZE < FIELD_POSITION.y - FIELD_SIZE.y / 2.0 {
+                    spawn_events.send_default();
+                    return;
+                }
             }
         }
 
@@ -128,12 +145,14 @@ fn block_movement(
 
 fn block_rotation(
     mut events: EventReader<RotationEvent>,
+    mut timer: ResMut<FallingTimer>,
     mut query: Query<(&Block, &mut Transform), With<Block>>,
     mut current_block: ResMut<CurrentBlock>,
 ) {
     for event in events.read() {
         let direction = event.0;
         
+        timer.reset();
         if direction == Direction::Right {
             let id = current_block.id;
             current_block.id = if id + 1 < MAX_BLOCKDATA { id + 1 } else { 0 };
@@ -171,10 +190,11 @@ impl Plugin for BlockPlugin {
             .insert_resource(CurrentBlock::new())
             .add_systems(Startup, setup)
             .add_systems(Update, (
+                block_spawn,
                 block_falling,
-                block_movement,
                 block_rotation,
-            ))
+                block_movement,
+            ).chain())
         ;
     }
 }
