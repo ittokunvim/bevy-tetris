@@ -30,7 +30,10 @@ struct CurrentBlock {
 }
 
 #[derive(Component)]
-struct Block(usize);
+struct PlayerBlock(usize);
+
+#[derive(Component)]
+struct Block;
 
 impl CurrentBlock {
     fn new() -> Self {
@@ -67,13 +70,14 @@ fn block_spawn(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut current_block: ResMut<CurrentBlock>,
-    query: Query<Entity, With<Block>>,
+    query: Query<Entity, With<PlayerBlock>>,
 ) {
     if events.is_empty() { return; }
     events.clear();
 
     for entity in &query {
-        commands.entity(entity).remove::<Block>();
+        commands.entity(entity).remove::<PlayerBlock>();
+        commands.entity(entity).insert(Block);
     }
     *current_block = CurrentBlock::new();
     let shape = meshes.add(Rectangle::new(BLOCK_SIZE, BLOCK_SIZE));
@@ -89,7 +93,7 @@ fn block_spawn(
             Mesh2d(shape.clone()),
             MeshMaterial2d(materials.add(I_COLOR)),
             Transform::from_xyz(x, y, z),
-            Block(*value),
+            PlayerBlock(*value),
         ));
     }
 }
@@ -107,33 +111,36 @@ fn block_falling(
 fn block_movement(
     mut move_events: EventReader<MoveEvent>,
     mut spawn_events: EventWriter<SpawnEvent>,
-    mut query: Query<&mut Transform, With<Block>>,
+    mut player_query: Query<&mut Transform, (With<PlayerBlock>, Without<Block>)>,
     mut current_block: ResMut<CurrentBlock>,
 ) {
     for event in move_events.read() {
         let direction = event.0;
 
-        for transform in &mut query {
-            let (x, y) = (transform.translation.x, transform.translation.y);
+        for player_transform in &mut player_query {
+            let player_x = player_transform.translation.x;
+            let player_y = player_transform.translation.y;
+            // check for field collision
             match direction {
                 Direction::Left =>
-                if x - GRID_SIZE < FIELD_POSITION.x - FIELD_SIZE.x / 2.0 { return; }
+                if player_x - GRID_SIZE < FIELD_POSITION.x - FIELD_SIZE.x / 2.0 { return; }
                 Direction::Right =>
-                if x + GRID_SIZE > FIELD_POSITION.x + FIELD_SIZE.x / 2.0 { return; }
+                if player_x + GRID_SIZE > FIELD_POSITION.x + FIELD_SIZE.x / 2.0 { return; }
                 Direction::Bottom =>
-                if y - GRID_SIZE < FIELD_POSITION.y - FIELD_SIZE.y / 2.0 {
+                if player_y - GRID_SIZE < FIELD_POSITION.y - FIELD_SIZE.y / 2.0 {
                     spawn_events.send_default();
                     return;
                 }
             }
         }
-
+        // updated current block position
         match direction {
             Direction::Left   => current_block.pos.x -= GRID_SIZE,
             Direction::Right  => current_block.pos.x += GRID_SIZE,
             Direction::Bottom => current_block.pos.y -= GRID_SIZE,
         }
-        for mut transform in &mut query {
+        // moved block
+        for mut transform in &mut player_query {
             match direction {
                 Direction::Left   => transform.translation.x -= GRID_SIZE,
                 Direction::Right  => transform.translation.x += GRID_SIZE,
@@ -146,20 +153,20 @@ fn block_movement(
 fn block_rotation(
     mut events: EventReader<RotationEvent>,
     mut timer: ResMut<FallingTimer>,
-    mut query: Query<(&Block, &mut Transform), With<Block>>,
+    mut query: Query<(&PlayerBlock, &mut Transform), With<PlayerBlock>>,
     mut current_block: ResMut<CurrentBlock>,
 ) {
     for event in events.read() {
         let direction = event.0;
         // falling timer reset
         timer.reset();
-        for (block, mut _transform) in &mut query {
         // updated current block id
         current_block.id = match direction {
             Direction::Right => (current_block.id + 1) % MAX_BLOCKDATA,
             Direction::Left  => (current_block.id + MAX_BLOCKDATA - 1) % MAX_BLOCKDATA,
             _ => current_block.id,
         };
+        for (block, mut transform) in &mut query {
             loop {
                 let position = current_block.position(block.0);
                 if position.x < FIELD_POSITION.x - FIELD_SIZE.x / 2.0 {
@@ -176,9 +183,6 @@ fn block_rotation(
                 }
                 break;
             }
-        }
-
-        for (block, mut transform) in &mut query {
             transform.translation = current_block.position(block.0);
         }
     }
