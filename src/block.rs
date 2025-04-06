@@ -170,11 +170,15 @@ fn block_movement(
 fn block_rotation(
     mut events: EventReader<RotationEvent>,
     mut timer: ResMut<FallingTimer>,
-    mut query: Query<(&PlayerBlock, &mut Transform), With<PlayerBlock>>,
+    mut player_query: Query<(&PlayerBlock, &mut Transform), (With<PlayerBlock>, Without<Block>)>,
     mut current_block: ResMut<CurrentBlock>,
+    block_query: Query<&Transform, With<Block>>,
 ) {
     for event in events.read() {
         let direction = event.0;
+        let mut count = 0;
+        let mut collision_x = 0.0;
+        let mut collision_y = 0.0;
         // falling timer reset
         timer.reset();
         // updated current block id
@@ -183,24 +187,57 @@ fn block_rotation(
             Direction::Left  => (current_block.id + MAX_BLOCKDATA - 1) % MAX_BLOCKDATA,
             _ => current_block.id,
         };
-        for (block, mut transform) in &mut query {
-            loop {
-                let position = current_block.position(block.0);
+        // check collision
+        for (player, mut _player_transform) in &mut player_query {
+            while count < 3 {
+                // 回転時のブロックの位置を取得
+                let position = current_block.position(player.0);
+                // フィールド左側の衝突判定
                 if position.x < FIELD_POSITION.x - FIELD_SIZE.x / 2.0 {
                     current_block.pos.x += GRID_SIZE;
-                    continue;
+                    collision_x += GRID_SIZE;
+                    count += 1;
                 }
+                // フィールド右側の衝突判定
                 else if position.x > FIELD_POSITION.x + FIELD_SIZE.x / 2.0 {
                     current_block.pos.x -= GRID_SIZE;
-                    continue;
+                    collision_x -= GRID_SIZE;
+                    count += 1;
                 }
+                // フィールド下側の衝突判定
                 else if position.y < FIELD_POSITION.y - FIELD_SIZE.y / 2.0 {
                     current_block.pos.y += GRID_SIZE;
-                    continue;
+                    collision_y += GRID_SIZE;
+                    count += 1;
                 }
-                break;
+                // ブロック同士の衝突判定
+                else if block_query.iter().any(|block_transform|
+                    position == block_transform.translation
+                ) {
+                    current_block.pos.y += GRID_SIZE;
+                    collision_y += GRID_SIZE;
+                    count += 1;
+                }
+                // 衝突がなければループを抜ける
+                else { break; }
             }
-            transform.translation = current_block.position(block.0);
+        }
+        // もし衝突判定が3回以上あった場合、回転を行わない
+        if count >= 3 {
+            // reset current block id
+            current_block.id = match direction {
+                Direction::Right => (current_block.id + MAX_BLOCKDATA - 1) % MAX_BLOCKDATA,
+                Direction::Left  => (current_block.id + 1) % MAX_BLOCKDATA,
+                _ => current_block.id,
+            };
+            // reset current block position
+            current_block.pos.x -= collision_x;
+            current_block.pos.y -= collision_y;
+            return;
+        }
+        // move player block
+        for (player, mut player_transform) in &mut player_query {
+            player_transform.translation = current_block.position(player.0);
         }
     }
 }
