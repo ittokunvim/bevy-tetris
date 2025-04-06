@@ -113,6 +113,7 @@ fn block_movement(
     mut spawn_events: EventWriter<SpawnEvent>,
     mut player_query: Query<&mut Transform, (With<PlayerBlock>, Without<Block>)>,
     mut current_block: ResMut<CurrentBlock>,
+    block_query: Query<&Transform, With<Block>>,
 ) {
     for event in move_events.read() {
         let direction = event.0;
@@ -130,6 +131,22 @@ fn block_movement(
                 if player_y - GRID_SIZE < FIELD_POSITION.y - FIELD_SIZE.y / 2.0 {
                     spawn_events.send_default();
                     return;
+                }
+            }
+            for block_transform in &block_query {
+                let block_x = block_transform.translation.x;
+                let block_y = block_transform.translation.y;
+                // check for block collision
+                match direction {
+                    Direction::Left =>
+                    if player_x - GRID_SIZE == block_x && player_y == block_y { return; }
+                    Direction::Right =>
+                    if player_x + GRID_SIZE == block_x && player_y == block_y { return; }
+                    Direction::Bottom =>
+                    if player_x == block_x && player_y - GRID_SIZE == block_y {
+                        spawn_events.send_default();
+                        return;
+                    }
                 }
             }
         }
