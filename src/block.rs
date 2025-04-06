@@ -151,13 +151,15 @@ fn block_rotation(
 ) {
     for event in events.read() {
         let direction = event.0;
-        
+        // falling timer reset
         timer.reset();
-        if direction == Direction::Right {
-            let id = current_block.id;
-            current_block.id = if id + 1 < MAX_BLOCKDATA { id + 1 } else { 0 };
-        }
         for (block, mut _transform) in &mut query {
+        // updated current block id
+        current_block.id = match direction {
+            Direction::Right => (current_block.id + 1) % MAX_BLOCKDATA,
+            Direction::Left  => (current_block.id + MAX_BLOCKDATA - 1) % MAX_BLOCKDATA,
+            _ => current_block.id,
+        };
             loop {
                 let position = current_block.position(block.0);
                 if position.x < FIELD_POSITION.x - FIELD_SIZE.x / 2.0 {

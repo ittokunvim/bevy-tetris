@@ -14,8 +14,8 @@ const KEY_BLOCK_RIGHT_1: KeyCode = KeyCode::ArrowRight;
 const KEY_BLOCK_RIGHT_2: KeyCode = KeyCode::KeyD;
 const KEY_BLOCK_BOTTOM_1: KeyCode = KeyCode::ArrowDown;
 const KEY_BLOCK_BOTTOM_2: KeyCode = KeyCode::KeyS;
-const KEY_BLOCK_ROTATION_1: KeyCode = KeyCode::ArrowUp;
-const KEY_BLOCK_ROTATION_2: KeyCode = KeyCode::KeyW;
+const KEY_BLOCK_ROTATION_LEFT: KeyCode = KeyCode::KeyZ;
+const KEY_BLOCK_ROTATION_RIGHT: KeyCode = KeyCode::ArrowUp;
 
 fn move_event(
     mut events: EventWriter<MoveEvent>,
@@ -47,10 +47,15 @@ fn rotation_event(
     mut events: EventWriter<RotationEvent>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
+    let mut closure = |direction: Direction| {
+        events.send(RotationEvent(direction));
+    };
     for key in keyboard_input.get_just_pressed() {
-        if key == &KEY_BLOCK_ROTATION_1 || key == &KEY_BLOCK_ROTATION_2 {
-            events.send(RotationEvent(Direction::Right));
-        }
+        match key {
+            &KEY_BLOCK_ROTATION_LEFT  => closure(Direction::Left),
+            &KEY_BLOCK_ROTATION_RIGHT => closure(Direction::Right),
+            _ => {},
+        };
     }
 }
 
