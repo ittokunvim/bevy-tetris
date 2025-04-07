@@ -30,7 +30,10 @@ struct CurrentBlock {
 }
 
 #[derive(Component)]
-struct Block(usize);
+struct PlayerBlock(usize);
+
+#[derive(Component)]
+struct Block;
 
 impl CurrentBlock {
     fn new() -> Self {
@@ -67,13 +70,14 @@ fn block_spawn(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut current_block: ResMut<CurrentBlock>,
-    query: Query<Entity, With<Block>>,
+    query: Query<Entity, With<PlayerBlock>>,
 ) {
     if events.is_empty() { return; }
     events.clear();
 
     for entity in &query {
-        commands.entity(entity).remove::<Block>();
+        commands.entity(entity).remove::<PlayerBlock>();
+        commands.entity(entity).insert(Block);
     }
     *current_block = CurrentBlock::new();
     let shape = meshes.add(Rectangle::new(BLOCK_SIZE, BLOCK_SIZE));
@@ -89,7 +93,7 @@ fn block_spawn(
             Mesh2d(shape.clone()),
             MeshMaterial2d(materials.add(I_COLOR)),
             Transform::from_xyz(x, y, z),
-            Block(*value),
+            PlayerBlock(*value),
         ));
     }
 }
@@ -107,33 +111,53 @@ fn block_falling(
 fn block_movement(
     mut move_events: EventReader<MoveEvent>,
     mut spawn_events: EventWriter<SpawnEvent>,
-    mut query: Query<&mut Transform, With<Block>>,
+    mut player_query: Query<&mut Transform, (With<PlayerBlock>, Without<Block>)>,
     mut current_block: ResMut<CurrentBlock>,
+    block_query: Query<&Transform, With<Block>>,
 ) {
     for event in move_events.read() {
         let direction = event.0;
 
-        for transform in &mut query {
-            let (x, y) = (transform.translation.x, transform.translation.y);
+        for player_transform in &mut player_query {
+            let player_x = player_transform.translation.x;
+            let player_y = player_transform.translation.y;
+            // check for field collision
             match direction {
                 Direction::Left =>
-                if x - GRID_SIZE < FIELD_POSITION.x - FIELD_SIZE.x / 2.0 { return; }
+                if player_x - GRID_SIZE < FIELD_POSITION.x - FIELD_SIZE.x / 2.0 { return; }
                 Direction::Right =>
-                if x + GRID_SIZE > FIELD_POSITION.x + FIELD_SIZE.x / 2.0 { return; }
+                if player_x + GRID_SIZE > FIELD_POSITION.x + FIELD_SIZE.x / 2.0 { return; }
                 Direction::Bottom =>
-                if y - GRID_SIZE < FIELD_POSITION.y - FIELD_SIZE.y / 2.0 {
+                if player_y - GRID_SIZE < FIELD_POSITION.y - FIELD_SIZE.y / 2.0 {
                     spawn_events.send_default();
                     return;
                 }
             }
+            for block_transform in &block_query {
+                let block_x = block_transform.translation.x;
+                let block_y = block_transform.translation.y;
+                // check for block collision
+                match direction {
+                    Direction::Left =>
+                    if player_x - GRID_SIZE == block_x && player_y == block_y { return; }
+                    Direction::Right =>
+                    if player_x + GRID_SIZE == block_x && player_y == block_y { return; }
+                    Direction::Bottom =>
+                    if player_x == block_x && player_y - GRID_SIZE == block_y {
+                        spawn_events.send_default();
+                        return;
+                    }
+                }
+            }
         }
-
+        // updated current block position
         match direction {
             Direction::Left   => current_block.pos.x -= GRID_SIZE,
             Direction::Right  => current_block.pos.x += GRID_SIZE,
             Direction::Bottom => current_block.pos.y -= GRID_SIZE,
         }
-        for mut transform in &mut query {
+        // moved block
+        for mut transform in &mut player_query {
             match direction {
                 Direction::Left   => transform.translation.x -= GRID_SIZE,
                 Direction::Right  => transform.translation.x += GRID_SIZE,
@@ -146,40 +170,74 @@ fn block_movement(
 fn block_rotation(
     mut events: EventReader<RotationEvent>,
     mut timer: ResMut<FallingTimer>,
-    mut query: Query<(&Block, &mut Transform), With<Block>>,
+    mut player_query: Query<(&PlayerBlock, &mut Transform), (With<PlayerBlock>, Without<Block>)>,
     mut current_block: ResMut<CurrentBlock>,
+    block_query: Query<&Transform, With<Block>>,
 ) {
     for event in events.read() {
         let direction = event.0;
+        let mut count = 0;
+        let mut collision_x = 0.0;
+        let mut collision_y = 0.0;
         // falling timer reset
         timer.reset();
-        for (block, mut _transform) in &mut query {
         // updated current block id
         current_block.id = match direction {
             Direction::Right => (current_block.id + 1) % MAX_BLOCKDATA,
             Direction::Left  => (current_block.id + MAX_BLOCKDATA - 1) % MAX_BLOCKDATA,
             _ => current_block.id,
         };
-            loop {
-                let position = current_block.position(block.0);
+        // check collision
+        for (player, mut _player_transform) in &mut player_query {
+            while count < 3 {
+                // 回転時のブロックの位置を取得
+                let position = current_block.position(player.0);
+                // フィールド左側の衝突判定
                 if position.x < FIELD_POSITION.x - FIELD_SIZE.x / 2.0 {
                     current_block.pos.x += GRID_SIZE;
-                    continue;
+                    collision_x += GRID_SIZE;
+                    count += 1;
                 }
+                // フィールド右側の衝突判定
                 else if position.x > FIELD_POSITION.x + FIELD_SIZE.x / 2.0 {
                     current_block.pos.x -= GRID_SIZE;
-                    continue;
+                    collision_x -= GRID_SIZE;
+                    count += 1;
                 }
+                // フィールド下側の衝突判定
                 else if position.y < FIELD_POSITION.y - FIELD_SIZE.y / 2.0 {
                     current_block.pos.y += GRID_SIZE;
-                    continue;
+                    collision_y += GRID_SIZE;
+                    count += 1;
                 }
-                break;
+                // ブロック同士の衝突判定
+                else if block_query.iter().any(|block_transform|
+                    position == block_transform.translation
+                ) {
+                    current_block.pos.y += GRID_SIZE;
+                    collision_y += GRID_SIZE;
+                    count += 1;
+                }
+                // 衝突がなければループを抜ける
+                else { break; }
             }
         }
-
-        for (block, mut transform) in &mut query {
-            transform.translation = current_block.position(block.0);
+        // もし衝突判定が3回以上あった場合、回転を行わない
+        if count >= 3 {
+            // reset current block id
+            current_block.id = match direction {
+                Direction::Right => (current_block.id + MAX_BLOCKDATA - 1) % MAX_BLOCKDATA,
+                Direction::Left  => (current_block.id + 1) % MAX_BLOCKDATA,
+                _ => current_block.id,
+            };
+            // reset current block position
+            current_block.pos.x -= collision_x;
+            current_block.pos.y -= collision_y;
+            return;
+        }
+        // move player block
+        for (player, mut player_transform) in &mut player_query {
+            player_transform.translation = current_block.position(player.0);
         }
     }
 }
