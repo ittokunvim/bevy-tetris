@@ -66,6 +66,29 @@ impl CurrentBlock {
     }
 }
 
+impl BlockMap {
+    fn insert(&self, pos: Vec2) -> [[usize; 10]; 20] {
+        let mut block_map = self.0;
+        let field_pos_lefttop = Vec2::new(
+            FIELD_POSITION.x - FIELD_SIZE.x / 2.0 + GRID_SIZE / 2.0, 
+            FIELD_POSITION.y + FIELD_SIZE.y / 2.0 - GRID_SIZE / 2.0,
+        );
+        for y in 0..20 {
+            for x in 0..10 {
+                let current_pos = Vec2::new(
+                    field_pos_lefttop.x + GRID_SIZE * x as f32, 
+                    field_pos_lefttop.y - GRID_SIZE * y as f32,
+                );
+                if current_pos == pos {
+                    block_map[y][x] = 1;
+                    return block_map
+                }
+            }
+        }
+        block_map
+    }
+}
+
 fn setup(mut events: EventWriter<SpawnEvent>) { events.send_default(); }
 
 fn block_spawn(
@@ -74,16 +97,21 @@ fn block_spawn(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut current_block: ResMut<CurrentBlock>,
-    query: Query<Entity, With<PlayerBlock>>,
+    player_query: Query<(Entity, &Transform), With<PlayerBlock>>,
 ) {
     if events.is_empty() { return; }
     events.clear();
-
-    for entity in &query {
+    // change PlayerBlock -> Block
+    for (entity, transform) in &player_query {
         commands.entity(entity).remove::<PlayerBlock>();
         commands.entity(entity).insert(Block);
+        // update BlockMap
+        let pos = transform.translation.truncate();
+        block_map.0 = block_map.insert(pos);
     }
+    // reset CurrentBlock
     *current_block = CurrentBlock::new();
+    // spawn PlayerBlock
     let shape = meshes.add(Rectangle::new(BLOCK_SIZE, BLOCK_SIZE));
     for block in I_BLOCK[0].iter().enumerate() {
         let (index, value) = block;
