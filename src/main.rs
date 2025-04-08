@@ -24,6 +24,9 @@ struct RotationEvent(Direction);
 #[derive(Event, Default)]
 struct SpawnEvent;
 
+#[derive(Event, Default)]
+struct FixEvent;
+
 #[derive(Copy, Clone, PartialEq, Debug)]
 enum Direction {
     Left,
@@ -61,6 +64,7 @@ fn main() {
         .add_event::<MoveEvent>()
         .add_event::<RotationEvent>()
         .add_event::<SpawnEvent>()
+        .add_event::<FixEvent>()
         .insert_resource(FallingTimer::new())
         .add_plugins(field::FieldPlugin)
         .add_plugins(key::KeyPlugin)
