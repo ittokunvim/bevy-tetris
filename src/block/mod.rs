@@ -4,18 +4,17 @@ use crate::{
     GRID_SIZE,
     FIELD_SIZE,
     FIELD_POSITION,
-    MoveEvent,
-    RotationEvent,
     SpawnEvent,
-    FixEvent,
-    Direction,
-    FallingTimer,
 };
 use crate::blockdata::{
     BLOCK_MAP,
     I_BLOCK,
-    I_COLOR,
 };
+
+mod clear;
+mod movement;
+mod rotation;
+mod spawn;
 
 const MAX_BLOCK_COUNT: usize = 4;
 const MAX_COLLISION_COUNT: usize = 3;
@@ -151,304 +150,6 @@ impl BlockMap {
 
 fn setup(mut events: EventWriter<SpawnEvent>) { events.send_default(); }
 
-/// ブロック生成イベントを処理する関数
-/// `SpawnEvent`を受け取り、新しいブロックを生成してフィールドに配置します
-///
-fn block_spawn(
-    mut events: EventReader<SpawnEvent>,
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-    mut rotation_block: ResMut<RotationBlock>,
-) {
-    // イベントをチェック
-    if events.is_empty() {
-        return;
-    }
-
-    // イベントをクリア
-    events.clear();
-
-    // RotationBlockをリセット
-    *rotation_block = RotationBlock::new();
-
-    // PlayerBlockを生成
-    let shape = meshes.add(Rectangle::new(BLOCK_SIZE, BLOCK_SIZE));
-
-    for (index, value) in I_BLOCK[0].iter().enumerate() {
-        // ブロックの位置を計算
-        let (x, y, z) = (
-            BLOCK_POSITION.x + GRID_SIZE * ((index % 4) as f32),
-            BLOCK_POSITION.y - GRID_SIZE * ((index / 4) as f32),
-            BLOCK_POSITION.z,
-        );
-
-        // ブロックの値が0であればスキップ
-        if *value == 0 {
-            continue;
-        }
-
-        // PlayerBlockを生成
-        commands.spawn((
-            Mesh2d(shape.clone()),
-            MeshMaterial2d(materials.add(I_COLOR)),
-            Transform::from_xyz(x, y, z),
-            PlayerBlock(*value),
-        ));
-    }
-}
-
-/// ブロックの落下を管理する関数
-/// `FallingTimer`を使用して一定間隔でブロックを下に移動させる
-///
-fn block_falling(
-    mut timer: ResMut<FallingTimer>,
-    mut events: EventWriter<MoveEvent>,
-    time: Res<Time>,
-) {
-    // タイマーを進める
-    timer.tick(time.delta());
-
-    // タイマーが終わったかチェック
-    if !timer.just_finished() {
-        return;
-    }
-
-    // ブロックを下に移動させるイベントを送信
-    events.send(MoveEvent(Direction::Bottom));
-}
-
-/// ブロックの移動を管理する関数
-/// `MoveEvent`を受け取り、ブロックの位置を更新し、
-/// 必要に応じてブロックを固定する
-///
-fn block_movement(
-    mut move_events: EventReader<MoveEvent>,
-    mut fix_events: EventWriter<FixEvent>,
-    mut player_query: Query<&mut Transform, (With<PlayerBlock>, Without<Block>)>,
-    mut rotation_block: ResMut<RotationBlock>,
-    block_query: Query<&Transform, With<Block>>,
-) {
-    for event in move_events.read() {
-        let direction = event.0;
-
-        // フィールドの衝突をチェック
-        for player_transform in &mut player_query {
-            let player_x = player_transform.translation.x;
-            let player_y = player_transform.translation.y;
-
-            match direction {
-                Direction::Left => {
-                    if player_x - GRID_SIZE < FIELD_POSITION.x - FIELD_SIZE.x / 2.0 {
-                        return;
-                    }
-                }
-                Direction::Right => {
-                    if player_x + GRID_SIZE > FIELD_POSITION.x + FIELD_SIZE.x / 2.0 {
-                        return;
-                    }
-                }
-                Direction::Bottom => {
-                    if player_y - GRID_SIZE < FIELD_POSITION.y - FIELD_SIZE.y / 2.0 {
-                        // ブロックがそこに達した場合、ブロックを固定
-                        fix_events.send_default();
-                        return;
-                    }
-                }
-            }
-
-            // ブロックの衝突をチェック
-            for block_transform in &block_query {
-                let block_x = block_transform.translation.x;
-                let block_y = block_transform.translation.y;
-
-                match direction {
-                    Direction::Left => {
-                        if player_x - GRID_SIZE == block_x && player_y == block_y {
-                            return;
-                        }
-                    }
-                    Direction::Right => {
-                        if player_x + GRID_SIZE == block_x && player_y == block_y {
-                            return;
-                        }
-                    }
-                    Direction::Bottom => {
-                        if player_x == block_x && player_y - GRID_SIZE == block_y {
-                            // ブロックが底に達した場合、ブロックを固定
-                            fix_events.send_default();
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-
-        // 現在のブロック位置を更新
-        match direction {
-            Direction::Left   => rotation_block.pos.x -= GRID_SIZE,
-            Direction::Right  => rotation_block.pos.x += GRID_SIZE,
-            Direction::Bottom => rotation_block.pos.y -= GRID_SIZE,
-        }
-        // ブロックを移動
-        for mut transform in &mut player_query {
-            match direction {
-                Direction::Left   => transform.translation.x -= GRID_SIZE,
-                Direction::Right  => transform.translation.x += GRID_SIZE,
-                Direction::Bottom => transform.translation.y -= GRID_SIZE,
-            }
-        }
-    }
-}
-
-/// ブロックの回転を管理する関数
-/// `RotationEvent`を受け取り、ブロックの位置を更新し、
-/// 必要に応じてブロックの衝突を処理します
-///
-fn block_rotation(
-    mut events: EventReader<RotationEvent>,
-    mut timer: ResMut<FallingTimer>,
-    mut player_query: Query<(&PlayerBlock, &mut Transform), (With<PlayerBlock>, Without<Block>)>,
-    mut rotation_block: ResMut<RotationBlock>,
-    block_query: Query<&Transform, With<Block>>,
-) {
-    for event in events.read() {
-        let direction = event.0;
-        let mut count = 0;
-        let mut collision_x = 0.0;
-        let mut collision_y = 0.0;
-
-        // タイマーをリセット
-        timer.reset();
-
-        // 現在のブロックIDを更新
-        rotation_block.id = match direction {
-            Direction::Right => (rotation_block.id + 1) % MAX_BLOCK_COUNT,
-            Direction::Left  => (rotation_block.id + MAX_BLOCK_COUNT - 1) % MAX_BLOCK_COUNT,
-            _ => rotation_block.id,
-        };
-
-        // 衝突をチェック
-        for (player, mut _player_transform) in &mut player_query {
-            while count < MAX_COLLISION_COUNT {
-                // 回転時のブロックの位置を取得
-                let position = rotation_block.position(player.0);
-
-                // フィールド左側の衝突判定
-                if position.x < FIELD_POSITION.x - FIELD_SIZE.x / 2.0 {
-                    rotation_block.pos.x += GRID_SIZE;
-                    collision_x += GRID_SIZE;
-                    count += 1;
-                }
-                // フィールド右側の衝突判定
-                else if position.x > FIELD_POSITION.x + FIELD_SIZE.x / 2.0 {
-                    rotation_block.pos.x -= GRID_SIZE;
-                    collision_x -= GRID_SIZE;
-                    count += 1;
-                }
-                // フィールド下側の衝突判定
-                else if position.y < FIELD_POSITION.y - FIELD_SIZE.y / 2.0 {
-                    rotation_block.pos.y += GRID_SIZE;
-                    collision_y += GRID_SIZE;
-                    count += 1;
-                }
-                // ブロック同士の衝突判定
-                else if block_query.iter().any(|block_transform|
-                    position == block_transform.translation
-                ) {
-                    rotation_block.pos.y += GRID_SIZE;
-                    collision_y += GRID_SIZE;
-                    count += 1;
-                }
-                // 衝突がなければループを抜ける
-                else { break; }
-            }
-        }
-
-        // もし衝突判定が規定回数以上あった場合、回転を行わない
-        if count >= MAX_COLLISION_COUNT {
-            // 現在のブロックIDをリセット
-            rotation_block.id = match direction {
-                Direction::Right => (rotation_block.id + MAX_BLOCK_COUNT - 1) % MAX_BLOCK_COUNT,
-                Direction::Left  => (rotation_block.id + 1) % MAX_BLOCK_COUNT,
-                _ => rotation_block.id,
-            };
-            // 現在のブロック位置をリセット
-            rotation_block.pos.x -= collision_x;
-            rotation_block.pos.y -= collision_y;
-            return;
-        }
-        // ブロックを回転させる
-        for (player, mut player_transform) in &mut player_query {
-            player_transform.translation = rotation_block.position(player.0);
-        }
-    }
-}
-
-/// ブロックの削除を管理する関数
-/// `FixEvent`を受け取り、プレイヤーブロックを固定ブロックに変換し、
-/// ブロックマップを更新して、ラインが揃った場合にブロックを削除します。
-///
-fn block_clear(
-    mut fix_events: EventReader<FixEvent>,
-    mut commands: Commands,
-    mut player_query: Query<(Entity, &mut Transform), (With<PlayerBlock>, Without<Block>)>,
-    mut block_query: Query<(Entity, &mut Transform), (With<Block>, Without<PlayerBlock>)>,
-    mut block_map: ResMut<BlockMap>,
-    mut spawn_events: EventWriter<SpawnEvent>,
-) {
-    // イベントをチェック
-    if fix_events.is_empty() {
-        return;
-    }
-
-    // イベントをクリア
-    fix_events.clear();
-
-    // PlayerBlockをBlockに変換
-    for (player_entity, player_transform) in &player_query {
-        commands.entity(player_entity).remove::<PlayerBlock>();
-        commands.entity(player_entity).insert(Block);
-
-        // BlockMapを更新
-        let pos = player_transform.translation.truncate();
-        block_map.0 = block_map.insert(pos);
-    }
-
-    let map = block_map.0;
-
-    // ブロックを削除
-    for (index, row) in map.iter().enumerate() {
-        if *row == [1; 10] {
-            let y = FIELD_LEFT_TOP.y - GRID_SIZE * index as f32;
-            block_map.0 = block_map.clearline(index);
-
-            // プレイヤーブロックをチェック
-            for (player_entity, mut player_transform) in &mut player_query {
-                if player_transform.translation.y == y {
-                    commands.entity(player_entity).despawn();
-                }
-                if player_transform.translation.y > y {
-                    player_transform.translation.y -= GRID_SIZE;
-                }
-            }
-
-            // 固定ブロックをチェック
-            for (block_entity, mut block_transform) in &mut block_query {
-                if block_transform.translation.y == y {
-                    commands.entity(block_entity).despawn();
-                }
-                if block_transform.translation.y > y {
-                    block_transform.translation.y -= GRID_SIZE;
-                }
-            }
-        }
-    }
-
-    // ブロックを生成するイベントを送信
-    spawn_events.send_default();
-}
-
 pub struct BlockPlugin;
 
 impl Plugin for BlockPlugin {
@@ -458,11 +159,11 @@ impl Plugin for BlockPlugin {
             .insert_resource(BlockMap(BLOCK_MAP))
             .add_systems(Startup, setup)
             .add_systems(Update, (
-                block_spawn,
-                block_falling,
-                block_rotation,
-                block_movement,
-                block_clear,
+                spawn::block_spawn,
+                movement::block_falling,
+                rotation::block_rotation,
+                movement::block_movement,
+                clear::block_clear,
             ).chain())
         ;
     }
