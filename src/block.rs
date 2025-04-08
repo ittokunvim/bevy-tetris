@@ -7,6 +7,7 @@ use crate::{
     MoveEvent,
     RotationEvent,
     SpawnEvent,
+    FixEvent,
     Direction,
     FallingTimer,
 };
@@ -110,44 +111,9 @@ fn block_spawn(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut current_block: ResMut<CurrentBlock>,
-    mut block_map: ResMut<BlockMap>,
-    mut player_query: Query<(Entity, &mut Transform), (With<PlayerBlock>, Without<Block>)>,
-    mut block_query: Query<(Entity, &mut Transform), (With<Block>, Without<PlayerBlock>)>,
 ) {
     if events.is_empty() { return; }
     events.clear();
-    // change PlayerBlock -> Block
-    for (player_entity, player_transform) in &player_query {
-        commands.entity(player_entity).remove::<PlayerBlock>();
-        commands.entity(player_entity).insert(Block);
-        // update BlockMap
-        let pos = player_transform.translation.truncate();
-        block_map.0 = block_map.insert(pos);
-    }
-    let map = block_map.0;
-    let field_pos_lefttop = FIELD_POSITION.y + FIELD_SIZE.y / 2.0 - GRID_SIZE / 2.0;
-    for (index, row) in map.iter().enumerate() {
-        if *row == [1; 10] {
-            let y = field_pos_lefttop - GRID_SIZE * index as f32;
-            block_map.0 = block_map.clearline(index);
-            for (player_entity, mut player_transform) in &mut player_query {
-                if player_transform.translation.y == y {
-                    commands.entity(player_entity).despawn();
-                }
-                if player_transform.translation.y > y {
-                    player_transform.translation.y -= GRID_SIZE;
-                }
-            }
-            for (block_entity, mut block_transform) in &mut block_query {
-                if block_transform.translation.y == y {
-                    commands.entity(block_entity).despawn();
-                }
-                if block_transform.translation.y > y {
-                    block_transform.translation.y -= GRID_SIZE;
-                }
-            }
-        }
-    }
     // reset CurrentBlock
     *current_block = CurrentBlock::new();
     // spawn PlayerBlock
@@ -181,7 +147,7 @@ fn block_falling(
 
 fn block_movement(
     mut move_events: EventReader<MoveEvent>,
-    mut spawn_events: EventWriter<SpawnEvent>,
+    mut fix_events: EventWriter<FixEvent>,
     mut player_query: Query<&mut Transform, (With<PlayerBlock>, Without<Block>)>,
     mut current_block: ResMut<CurrentBlock>,
     block_query: Query<&Transform, With<Block>>,
@@ -200,7 +166,7 @@ fn block_movement(
                 if player_x + GRID_SIZE > FIELD_POSITION.x + FIELD_SIZE.x / 2.0 { return; }
                 Direction::Bottom =>
                 if player_y - GRID_SIZE < FIELD_POSITION.y - FIELD_SIZE.y / 2.0 {
-                    spawn_events.send_default();
+                    fix_events.send_default();
                     return;
                 }
             }
@@ -215,7 +181,7 @@ fn block_movement(
                     if player_x + GRID_SIZE == block_x && player_y == block_y { return; }
                     Direction::Bottom =>
                     if player_x == block_x && player_y - GRID_SIZE == block_y {
-                        spawn_events.send_default();
+                        fix_events.send_default();
                         return;
                     }
                 }
@@ -313,6 +279,51 @@ fn block_rotation(
     }
 }
 
+fn block_clear(
+    mut fix_events: EventReader<FixEvent>,
+    mut commands: Commands,
+    mut player_query: Query<(Entity, &mut Transform), (With<PlayerBlock>, Without<Block>)>,
+    mut block_query: Query<(Entity, &mut Transform), (With<Block>, Without<PlayerBlock>)>,
+    mut block_map: ResMut<BlockMap>,
+    mut spawn_events: EventWriter<SpawnEvent>,
+) {
+    if fix_events.is_empty() { return; }
+    fix_events.clear();
+    // change PlayerBlock -> Block
+    for (player_entity, player_transform) in &player_query {
+        commands.entity(player_entity).remove::<PlayerBlock>();
+        commands.entity(player_entity).insert(Block);
+        // update BlockMap
+        let pos = player_transform.translation.truncate();
+        block_map.0 = block_map.insert(pos);
+    }
+    let map = block_map.0;
+    let field_pos_lefttop = FIELD_POSITION.y + FIELD_SIZE.y / 2.0 - GRID_SIZE / 2.0;
+    for (index, row) in map.iter().enumerate() {
+        if *row == [1; 10] {
+            let y = field_pos_lefttop - GRID_SIZE * index as f32;
+            block_map.0 = block_map.clearline(index);
+            for (player_entity, mut player_transform) in &mut player_query {
+                if player_transform.translation.y == y {
+                    commands.entity(player_entity).despawn();
+                }
+                if player_transform.translation.y > y {
+                    player_transform.translation.y -= GRID_SIZE;
+                }
+            }
+            for (block_entity, mut block_transform) in &mut block_query {
+                if block_transform.translation.y == y {
+                    commands.entity(block_entity).despawn();
+                }
+                if block_transform.translation.y > y {
+                    block_transform.translation.y -= GRID_SIZE;
+                }
+            }
+        }
+    }
+    spawn_events.send_default();
+}
+
 pub struct BlockPlugin;
 
 impl Plugin for BlockPlugin {
@@ -326,6 +337,7 @@ impl Plugin for BlockPlugin {
                 block_falling,
                 block_rotation,
                 block_movement,
+                block_clear,
             ).chain())
         ;
     }
