@@ -87,6 +87,19 @@ impl BlockMap {
         }
         block_map
     }
+
+    fn clearline(&self, index: usize) -> [[usize; 10]; 20] {
+        let mut block_map = self.0;
+        // clear index line
+        block_map[index] = [0; 10];
+        // shift down one by one
+        for i in (1..=index).rev() {
+            block_map[i] = block_map[i - 1];
+        }
+        // clear top line
+        block_map[0] = [0; 10];
+        block_map
+    }
 }
 
 fn setup(mut events: EventWriter<SpawnEvent>) { events.send_default(); }
@@ -97,17 +110,43 @@ fn block_spawn(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut current_block: ResMut<CurrentBlock>,
-    player_query: Query<(Entity, &Transform), With<PlayerBlock>>,
+    mut block_map: ResMut<BlockMap>,
+    mut player_query: Query<(Entity, &mut Transform), (With<PlayerBlock>, Without<Block>)>,
+    mut block_query: Query<(Entity, &mut Transform), (With<Block>, Without<PlayerBlock>)>,
 ) {
     if events.is_empty() { return; }
     events.clear();
     // change PlayerBlock -> Block
-    for (entity, transform) in &player_query {
-        commands.entity(entity).remove::<PlayerBlock>();
-        commands.entity(entity).insert(Block);
+    for (player_entity, player_transform) in &player_query {
+        commands.entity(player_entity).remove::<PlayerBlock>();
+        commands.entity(player_entity).insert(Block);
         // update BlockMap
-        let pos = transform.translation.truncate();
+        let pos = player_transform.translation.truncate();
         block_map.0 = block_map.insert(pos);
+    }
+    let map = block_map.0;
+    let field_pos_lefttop = FIELD_POSITION.y + FIELD_SIZE.y / 2.0 - GRID_SIZE / 2.0;
+    for (index, row) in map.iter().enumerate() {
+        if *row == [1; 10] {
+            let y = field_pos_lefttop - GRID_SIZE * index as f32;
+            block_map.0 = block_map.clearline(index);
+            for (player_entity, mut player_transform) in &mut player_query {
+                if player_transform.translation.y == y {
+                    commands.entity(player_entity).despawn();
+                }
+                if player_transform.translation.y > y {
+                    player_transform.translation.y -= GRID_SIZE;
+                }
+            }
+            for (block_entity, mut block_transform) in &mut block_query {
+                if block_transform.translation.y == y {
+                    commands.entity(block_entity).despawn();
+                }
+                if block_transform.translation.y > y {
+                    block_transform.translation.y -= GRID_SIZE;
+                }
+            }
+        }
     }
     // reset CurrentBlock
     *current_block = CurrentBlock::new();
