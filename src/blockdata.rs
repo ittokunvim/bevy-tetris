@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 
-pub const MAX_BLOCKDATA: usize = 4;
 pub const BLOCK_MAP: [[usize; 10]; 20] = [
     [0,0,0,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,0,0,0,0],
