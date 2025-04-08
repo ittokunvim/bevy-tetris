@@ -12,6 +12,7 @@ use crate::{
 };
 use crate::blockdata::{
     MAX_BLOCKDATA,
+    BLOCK_MAP,
     I_BLOCK,
     I_COLOR,
 };
@@ -28,6 +29,9 @@ struct CurrentBlock {
     id: usize,
     pos: Vec3,
 }
+
+#[derive(Resource)]
+struct BlockMap([[usize; 10]; 20]);
 
 #[derive(Component)]
 struct PlayerBlock(usize);
@@ -248,6 +252,7 @@ impl Plugin for BlockPlugin {
     fn build(&self, app: &mut App) {
         app
             .insert_resource(CurrentBlock::new())
+            .insert_resource(BlockMap(BLOCK_MAP))
             .add_systems(Startup, setup)
             .add_systems(Update, (
                 block_spawn,
