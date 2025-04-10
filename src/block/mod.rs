@@ -5,6 +5,7 @@ use crate::{
     FIELD_SIZE,
     FIELD_POSITION,
     SpawnEvent,
+    FixEvent,
 };
 use crate::blockdata::{
     BLOCK_MAP,
@@ -150,6 +151,35 @@ impl BlockMap {
 
 fn setup(mut events: EventWriter<SpawnEvent>) { events.send_default(); }
 
+/// ゲームオーバーを管理する関数
+/// `FixEvent`を受け取り、固定されたブロックから
+/// ゲームオーバーになるかどうかチェックします
+///
+fn gameover(
+    mut events: EventReader<FixEvent>,
+    query: Query<&Transform, With<PlayerBlock>>,
+) {
+    // イベントをチェック
+    if events.is_empty() {
+        return;
+    }
+
+    // イベントをクリア
+    events.clear();
+
+    // ゲームオーバーかどうか判定する
+    for transform in &query {
+        let pos = transform.translation;
+        if pos.y >= FIELD_LEFT_TOP.y {
+            if pos.x == FIELD_LEFT_TOP.x + GRID_SIZE * 5.0
+            || pos.x == FIELD_LEFT_TOP.x + GRID_SIZE * 6.0 {
+                println!("gameover");
+                return;
+            }
+        }
+    }
+}
+
 pub struct BlockPlugin;
 
 impl Plugin for BlockPlugin {
@@ -163,6 +193,7 @@ impl Plugin for BlockPlugin {
                 movement::block_falling,
                 rotation::block_rotation,
                 movement::block_movement,
+                gameover,
                 clear::block_clear,
             ).chain())
         ;
