@@ -47,7 +47,7 @@ pub fn block_clear(
     // ブロックを削除
     for (index, row) in map.iter().enumerate() {
         if *row == [1; 10] {
-            let y = FIELD_LEFT_TOP.y - GRID_SIZE * index as f32;
+            let y = FIELD_LEFT_TOP.y + GRID_SIZE * 4.0 - GRID_SIZE * index as f32;
             block_map.0 = block_map.clearline(index);
 
             // プレイヤーブロックをチェック

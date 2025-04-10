@@ -41,10 +41,10 @@ struct RotationBlock {
 
 /// ブロック削除時に用いるリソース
 ///
-/// 値は[[usize; 10]; 20]で定義されており
+/// 値は[[usize; 10]; 24]で定義されており
 /// フィールド内の各ブロック座標が0 or 1で格納されている
 #[derive(Resource)]
-struct BlockMap([[usize; 10]; 20]);
+struct BlockMap([[usize; 10]; 24]);
 
 /// 移動、回転するブロックを識別するコンポーネント
 ///
@@ -104,18 +104,18 @@ impl BlockMap {
     /// * pos - ブロックの座標
     ///
     /// # Returns
-    /// * [[usize; 10]; 20] - 更新されたブロックマップ
+    /// * [[usize; 10]; 24] - 更新されたブロックマップ
     ///
     /// # Panics
     /// * 指定された座標が見つからない場合
-    fn insert(&self, pos: Vec2) -> [[usize; 10]; 20] {
+    fn insert(&self, pos: Vec2) -> [[usize; 10]; 24] {
         let mut block_map = self.0;
         // ブロック座標にブロックマップを追加
         for y in 0..block_map.len() {
             for x in 0..block_map[0].len() {
                 let current_pos = Vec2::new(
                     FIELD_LEFT_TOP.x + GRID_SIZE * x as f32, 
-                    FIELD_LEFT_TOP.y - GRID_SIZE * y as f32,
+                    FIELD_LEFT_TOP.y + GRID_SIZE * 4.0 - GRID_SIZE * y as f32,
                 );
                 if current_pos == pos {
                     block_map[y][x] = 1;
@@ -133,8 +133,8 @@ impl BlockMap {
     /// * index - 削除するブロックの列のID
     ///
     /// # Returns
-    /// * [[usize; 10]; 20] - 更新されたブロックマップ
-    fn clearline(&self, index: usize) -> [[usize; 10]; 20] {
+    /// * [[usize; 10]; 24] - 更新されたブロックマップ
+    fn clearline(&self, index: usize) -> [[usize; 10]; 24] {
         let mut block_map = self.0;
         // clear index line
         block_map[index] = [0; 10];
