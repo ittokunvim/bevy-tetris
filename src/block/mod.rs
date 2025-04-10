@@ -6,6 +6,7 @@ use crate::{
     FIELD_POSITION,
     SpawnEvent,
     FixEvent,
+    AppState,
 };
 use crate::blockdata::{
     BLOCK_MAP,
@@ -157,6 +158,7 @@ fn setup(mut events: EventWriter<SpawnEvent>) { events.send_default(); }
 ///
 fn gameover(
     mut events: EventReader<FixEvent>,
+    mut next_state: ResMut<NextState<AppState>>,
     query: Query<&Transform, With<PlayerBlock>>,
 ) {
     // イベントをチェック
@@ -173,7 +175,7 @@ fn gameover(
         if pos.y >= FIELD_LEFT_TOP.y {
             if pos.x == FIELD_LEFT_TOP.x + GRID_SIZE * 5.0
             || pos.x == FIELD_LEFT_TOP.x + GRID_SIZE * 6.0 {
-                println!("gameover");
+                next_state.set(AppState::Gameover);
                 return;
             }
         }
@@ -187,7 +189,7 @@ impl Plugin for BlockPlugin {
         app
             .insert_resource(RotationBlock::new())
             .insert_resource(BlockMap(BLOCK_MAP))
-            .add_systems(Startup, setup)
+            .add_systems(OnEnter(AppState::InGame), setup)
             .add_systems(Update, (
                 spawn::block_spawn,
                 movement::block_falling,
@@ -195,7 +197,7 @@ impl Plugin for BlockPlugin {
                 movement::block_movement,
                 gameover,
                 clear::block_clear,
-            ).chain())
+            ).chain().run_if(in_state(AppState::InGame)))
         ;
     }
 }

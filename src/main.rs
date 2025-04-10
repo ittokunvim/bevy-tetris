@@ -37,6 +37,13 @@ enum Direction {
 #[derive(Resource, Deref, DerefMut)]
 struct FallingTimer(Timer);
 
+#[derive(States, Default, Debug, Clone, PartialEq, Eq, Hash)]
+enum AppState {
+    #[default]
+    InGame,
+    Gameover,
+}
+
 impl FallingTimer {
     fn new() -> Self {
         Self(Timer::from_seconds(BLOCK_SPEED, TimerMode::Repeating))
@@ -59,6 +66,7 @@ fn main() {
                 ..Default::default()
             })
         )
+        .init_state::<AppState>()
         .insert_resource(ClearColor(BACKGROUND_COLOR))
         .insert_resource(Time::<Fixed>::from_seconds(1.0 / 60.0))
         .add_event::<MoveEvent>()
