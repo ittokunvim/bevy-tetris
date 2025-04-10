@@ -6,6 +6,7 @@ use crate::{
     RotationEvent,
     Direction,
     FallingTimer,
+    AppState,
 };
 
 const KEY_BLOCK_LEFT_1: KeyCode = KeyCode::ArrowLeft;
@@ -67,7 +68,7 @@ impl Plugin for KeyPlugin {
             .add_systems(Update, (
                 move_event,
                 rotation_event,
-            ))
+            ).run_if(in_state(AppState::InGame)))
         ;
     }
 }
