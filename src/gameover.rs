@@ -29,6 +29,11 @@ const BORDER_RADIUS: Val = Val::Px(10.0);
 struct Gameover;
 
 impl Gameover {
+    /// ゲームオーバー画面のルートノードを生成します
+    ///
+    /// Returns:
+    /// * `Self`: Gameoverのインスタンス。
+    /// * `Node`: 幅と高さが100%のルートノード。
     fn from_root() -> (Self, Node) {
         (
             Self,
@@ -40,6 +45,14 @@ impl Gameover {
         )
     }
 
+    /// ゲームオーバー画面の背景を生成します。
+    ///
+    /// Returns:
+    /// * `Self`: Gameoverのインスタンス。
+    /// * `Node`: 背景のサイズ、場所、並び方などが定義されたノード。 
+    /// * `BackgroundColor`: 背景色
+    /// * `BorderColor`: ボーダーの色
+    /// * `BorderRadius`: ボーダーのラディウス
     fn from_board() -> (Self, Node, BackgroundColor, BorderColor, BorderRadius) {
         (
             Self,
@@ -62,6 +75,16 @@ impl Gameover {
         )
     }
 
+    /// ゲームオーバーメッセージを表示するテキストを生成します。
+    ///
+    /// Params:
+    /// * `font`: テキストに使用するフォント
+    ///
+    /// Returns:
+    /// * `Self`: Gameoverのインスタンス。
+    /// * `Text`: ゲームオーバーメッセージのテキスト。
+    /// * `TextFont`: フォントスタイル。
+    /// * `TextColor`: テキストの色
     fn from_text(font: Handle<Font>) -> (Self, Text, TextFont, TextColor) {
         (
             Self,
@@ -75,6 +98,14 @@ impl Gameover {
         )
     }
 
+    /// ゲームオーバー画面に表示する「リトライ」ボタンを生成します。
+    ///
+    /// Returns:
+    /// * `Self`: Gameoverのインスタンス。
+    /// * `Node`: リトライボタンを表すノード。
+    /// * `BorderColor`: ボーダーの色
+    /// * `BorderRadius`: ボーダーのラディウス
+    /// * `Button`: ボタンコンポーネント
     fn from_retry() -> (Self, Node, BorderColor, BorderRadius, Button) {
         (
             Self,
@@ -92,6 +123,15 @@ impl Gameover {
         )
     }
 
+    /// ゲームオーバー画面に表示するリトライアイコンを生成します。
+    ///
+    /// Params:
+    /// * `image`: リトライアイコン
+    ///
+    /// Returns:
+    /// * `Self`: Gameoverのインスタンス。
+    /// * `ImageNode`: 画像のノード
+    /// * `Node`: リトライアイコンのサイズ、レイアウトを表すノード。
     fn from_retry_icon(image: Handle<Image>) -> (Self, ImageNode, Node) {
         (
             Self,
@@ -105,6 +145,12 @@ impl Gameover {
     }
 }
 
+/// 構造:
+/// * root
+///   * board
+///     * gameover text
+///     * retry
+///       * icon
 fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -112,27 +158,21 @@ fn setup(
     let font = asset_server.load(PATH_FONT);
     let image = asset_server.load(PATH_IMAGE_RETRY);
 
-    // ノードツリー
-    // root
-    // └── board
-    //     ├── gameover text
-    //     └── retry
-    //         └── icon
     commands
-        // ルートを生成
+        // ルートノードを生成
         .spawn(Gameover::from_root())
         .with_children(|parent| {
-            // ボードを生成
+            // ボードノードを生成
             parent.spawn(Gameover::from_board())
                 .with_children(|parent| {
-                    // ゲームオーバーテキストを生成
+                    // ゲームオーバーテキストノードを生成
                     parent.spawn(Gameover::from_text(font));
                 })
                 .with_children(|parent| {
-                    // リトライを生成
+                    // リトライボタンノードを生成
                     parent.spawn(Gameover::from_retry())
                         .with_children(|parent| {
-                            // リトライアイコンを生成
+                            // リトライアイコンノードを生成
                             parent.spawn(Gameover::from_retry_icon(image));
                         });
                 });
@@ -146,14 +186,18 @@ fn update(
     >,
     mut next_state: ResMut<NextState<AppState>>,
 ) {
+    // 全てのインタラクション状態を持つボタンに対して処理を行う
     for (interaction, mut color) in &mut interaction_query {
         match *interaction {
+            // ボタンが押された時の処理
             Interaction::Pressed => {
                 next_state.set(AppState::InGame);
             }
+            // ボタンがホバーされた時の処理
             Interaction::Hovered => {
                 *color = RETRY_BACKGROUND_COLOR_HOVER.into();
             }
+            // ボタンに何もされていない時の処理
             Interaction::None => {
                 *color = BOARD_COLOR.into();
             }
