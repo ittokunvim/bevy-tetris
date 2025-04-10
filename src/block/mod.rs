@@ -182,6 +182,23 @@ fn gameover(
     }
 }
 
+fn despawn(
+    mut commands: Commands,
+    query: Query<Entity, With<Block>>,
+) {
+    for entity in &query {
+        commands.entity(entity).despawn();
+    }
+}
+
+fn reset(
+    mut rotation_block: ResMut<RotationBlock>,
+    mut block_map: ResMut<BlockMap>,
+) {
+    *rotation_block = RotationBlock::new();
+    *block_map = BlockMap(BLOCK_MAP);
+}
+
 pub struct BlockPlugin;
 
 impl Plugin for BlockPlugin {
@@ -198,6 +215,8 @@ impl Plugin for BlockPlugin {
                 gameover,
                 clear::block_clear,
             ).chain().run_if(in_state(AppState::InGame)))
+            .add_systems(OnExit(AppState::Gameover), despawn)
+            .add_systems(OnExit(AppState::Gameover), reset)
         ;
     }
 }

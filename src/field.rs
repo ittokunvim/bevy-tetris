@@ -26,12 +26,22 @@ fn setup(
     ));
 }
 
+fn despawn(
+    mut commands: Commands,
+    query: Query<Entity, With<Field>>,
+) {
+    for entity in &query {
+        commands.entity(entity).despawn();
+    }
+}
+
 pub struct FieldPlugin;
 
 impl Plugin for FieldPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(OnEnter(AppState::InGame), setup)
+            .add_systems(OnExit(AppState::Gameover), despawn)
         ;
     }
 }

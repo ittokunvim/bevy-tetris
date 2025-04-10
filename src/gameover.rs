@@ -161,6 +161,15 @@ fn update(
     }
 }
 
+fn despawn(
+    mut commands: Commands,
+    query: Query<Entity, With<Gameover>>,
+) {
+    for entity in &query {
+        commands.entity(entity).despawn();
+    }
+}
+
 pub struct GameoverPlugin;
 
 impl Plugin for GameoverPlugin {
@@ -168,6 +177,7 @@ impl Plugin for GameoverPlugin {
         app
             .add_systems(OnEnter(AppState::Gameover), setup)
             .add_systems(Update, update.run_if(in_state(AppState::Gameover)))
+            .add_systems(OnExit(AppState::Gameover), despawn)
         ;
     }
 }
