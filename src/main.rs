@@ -5,6 +5,8 @@ mod blockdata;
 mod field;
 mod key;
 
+mod gameover;
+
 const GAMETITLE: &str = "テトリス";
 const WINDOW_SIZE: Vec2 = Vec2::new(640.0, 480.0);
 const BACKGROUND_COLOR: Color = Color::srgb(0.1, 0.1, 0.1);
@@ -77,6 +79,7 @@ fn main() {
         .add_plugins(field::FieldPlugin)
         .add_plugins(key::KeyPlugin)
         .add_plugins(block::BlockPlugin)
+        .add_plugins(gameover::GameoverPlugin)
         .add_systems(Startup, setup)
         .run();
 }
