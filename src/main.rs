@@ -5,6 +5,8 @@ mod blockdata;
 mod field;
 mod key;
 
+mod gameover;
+
 const GAMETITLE: &str = "テトリス";
 const WINDOW_SIZE: Vec2 = Vec2::new(640.0, 480.0);
 const BACKGROUND_COLOR: Color = Color::srgb(0.1, 0.1, 0.1);
@@ -37,6 +39,13 @@ enum Direction {
 #[derive(Resource, Deref, DerefMut)]
 struct FallingTimer(Timer);
 
+#[derive(States, Default, Debug, Clone, PartialEq, Eq, Hash)]
+enum AppState {
+    #[default]
+    InGame,
+    Gameover,
+}
+
 impl FallingTimer {
     fn new() -> Self {
         Self(Timer::from_seconds(BLOCK_SPEED, TimerMode::Repeating))
@@ -59,6 +68,7 @@ fn main() {
                 ..Default::default()
             })
         )
+        .init_state::<AppState>()
         .insert_resource(ClearColor(BACKGROUND_COLOR))
         .insert_resource(Time::<Fixed>::from_seconds(1.0 / 60.0))
         .add_event::<MoveEvent>()
@@ -69,6 +79,7 @@ fn main() {
         .add_plugins(field::FieldPlugin)
         .add_plugins(key::KeyPlugin)
         .add_plugins(block::BlockPlugin)
+        .add_plugins(gameover::GameoverPlugin)
         .add_systems(Startup, setup)
         .run();
 }

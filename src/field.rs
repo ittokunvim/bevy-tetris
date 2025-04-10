@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use crate::{
     FIELD_SIZE,
     FIELD_POSITION,
+    AppState,
 };
 
 const FIELD_COLOR: Color = Color::srgb(0.6, 0.6, 0.6);
@@ -30,7 +31,7 @@ pub struct FieldPlugin;
 impl Plugin for FieldPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(Startup, setup)
+            .add_systems(OnEnter(AppState::InGame), setup)
         ;
     }
 }
