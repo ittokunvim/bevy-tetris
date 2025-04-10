@@ -140,7 +140,25 @@ fn setup(
 }
 
 fn update(
+    mut interaction_query: Query<
+    (&Interaction, &mut BackgroundColor),
+    (Changed<Interaction>, With<Button>),
+    >,
+    mut next_state: ResMut<NextState<AppState>>,
 ) {
+    for (interaction, mut color) in &mut interaction_query {
+        match *interaction {
+            Interaction::Pressed => {
+                next_state.set(AppState::InGame);
+            }
+            Interaction::Hovered => {
+                *color = RETRY_BACKGROUND_COLOR_HOVER.into();
+            }
+            Interaction::None => {
+                *color = BOARD_COLOR.into();
+            }
+        }
+    }
 }
 
 pub struct GameoverPlugin;
