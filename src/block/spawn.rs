@@ -11,10 +11,6 @@ use crate::block::{
     PlayerBlock,
     Block,
 };
-use crate::blockdata::{
-    I_BLOCK,
-    I_COLOR,
-};
 
 /// ブロック生成イベントを処理する関数
 /// `SpawnEvent`を受け取り、新しいブロックを生成してフィールドに配置します
@@ -40,9 +36,10 @@ pub fn block_spawn(
 
     // PlayerBlockを生成
     let shape = meshes.add(Rectangle::new(BLOCK_SIZE, BLOCK_SIZE));
+    let blocktype = &rotation_block.blocktype;
     let mut init_position = BLOCK_POSITION;
 
-    for (index, value) in I_BLOCK[0].iter().enumerate() {
+    for (index, value) in blocktype.blockdata()[0].iter().enumerate() {
         // ブロックの値が0であればスキップ
         if *value == 0 {
             continue;
@@ -66,7 +63,7 @@ pub fn block_spawn(
         // PlayerBlockを生成
         commands.spawn((
             Mesh2d(shape.clone()),
-            MeshMaterial2d(materials.add(I_COLOR)),
+            MeshMaterial2d(materials.add(blocktype.color())),
             Transform::from_xyz(position.x, position.y, position.z),
             PlayerBlock(*value),
         ));
