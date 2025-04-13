@@ -11,7 +11,7 @@ use crate::{
 use crate::block::{
     MAX_BLOCK_COUNT,
     MAX_COLLISION_COUNT,
-    RotationBlock,
+    CurrentBlock,
     PlayerBlock,
     Block,
 };
@@ -24,7 +24,7 @@ pub fn block_rotation(
     mut events: EventReader<RotationEvent>,
     mut timer: ResMut<FallingTimer>,
     mut player_query: Query<(&PlayerBlock, &mut Transform), (With<PlayerBlock>, Without<Block>)>,
-    mut rotation_block: ResMut<RotationBlock>,
+    mut current_block: ResMut<CurrentBlock>,
     block_query: Query<&Transform, With<Block>>,
 ) {
     for event in events.read() {
@@ -37,33 +37,33 @@ pub fn block_rotation(
         timer.reset();
 
         // 現在のブロックIDを更新
-        rotation_block.id = match direction {
-            Direction::Right => (rotation_block.id + 1) % MAX_BLOCK_COUNT,
-            Direction::Left  => (rotation_block.id + MAX_BLOCK_COUNT - 1) % MAX_BLOCK_COUNT,
-            _ => rotation_block.id,
+        current_block.blockid = match direction {
+            Direction::Right => (current_block.blockid + 1) % MAX_BLOCK_COUNT,
+            Direction::Left  => (current_block.blockid + MAX_BLOCK_COUNT - 1) % MAX_BLOCK_COUNT,
+            _ => current_block.blockid,
         };
 
         // 衝突をチェック
         for (player, mut _player_transform) in &mut player_query {
             while count < MAX_COLLISION_COUNT {
                 // 回転時のブロックの位置を取得
-                let position = rotation_block.position(player.0);
+                let position = current_block.position(player.0);
 
                 // フィールド左側の衝突判定
                 if position.x < FIELD_POSITION.x - FIELD_SIZE.x / 2.0 {
-                    rotation_block.pos.x += GRID_SIZE;
+                    current_block.pos.x += GRID_SIZE;
                     collision_x += GRID_SIZE;
                     count += 1;
                 }
                 // フィールド右側の衝突判定
                 else if position.x > FIELD_POSITION.x + FIELD_SIZE.x / 2.0 {
-                    rotation_block.pos.x -= GRID_SIZE;
+                    current_block.pos.x -= GRID_SIZE;
                     collision_x -= GRID_SIZE;
                     count += 1;
                 }
                 // フィールド下側の衝突判定
                 else if position.y < FIELD_POSITION.y - FIELD_SIZE.y / 2.0 {
-                    rotation_block.pos.y += GRID_SIZE;
+                    current_block.pos.y += GRID_SIZE;
                     collision_y += GRID_SIZE;
                     count += 1;
                 }
@@ -71,7 +71,7 @@ pub fn block_rotation(
                 else if block_query.iter().any(|block_transform|
                     position == block_transform.translation
                 ) {
-                    rotation_block.pos.y += GRID_SIZE;
+                    current_block.pos.y += GRID_SIZE;
                     collision_y += GRID_SIZE;
                     count += 1;
                 }
@@ -83,19 +83,19 @@ pub fn block_rotation(
         // もし衝突判定が規定回数以上あった場合、回転を行わない
         if count >= MAX_COLLISION_COUNT {
             // 現在のブロックIDをリセット
-            rotation_block.id = match direction {
-                Direction::Right => (rotation_block.id + MAX_BLOCK_COUNT - 1) % MAX_BLOCK_COUNT,
-                Direction::Left  => (rotation_block.id + 1) % MAX_BLOCK_COUNT,
-                _ => rotation_block.id,
+            current_block.blockid = match direction {
+                Direction::Right => (current_block.blockid + MAX_BLOCK_COUNT - 1) % MAX_BLOCK_COUNT,
+                Direction::Left  => (current_block.blockid + 1) % MAX_BLOCK_COUNT,
+                _ => current_block.blockid,
             };
             // 現在のブロック位置をリセット
-            rotation_block.pos.x -= collision_x;
-            rotation_block.pos.y -= collision_y;
+            current_block.pos.x -= collision_x;
+            current_block.pos.y -= collision_y;
             return;
         }
         // ブロックを回転させる
         for (player, mut player_transform) in &mut player_query {
-            player_transform.translation = rotation_block.position(player.0);
+            player_transform.translation = current_block.position(player.0);
         }
     }
 }

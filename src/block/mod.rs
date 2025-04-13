@@ -1,4 +1,9 @@
 use bevy::prelude::*;
+use rand::{
+    distributions::Standard,
+    prelude::Distribution,
+    Rng,
+};
 
 use crate::{
     GRID_SIZE,
@@ -8,10 +13,7 @@ use crate::{
     FixEvent,
     AppState,
 };
-use crate::blockdata::{
-    BLOCK_MAP,
-    I_BLOCK,
-};
+use crate::blockdata::*;
 
 mod clear;
 mod movement;
@@ -36,8 +38,9 @@ const FIELD_LEFT_TOP: Vec2 = Vec2::new(
 /// idには[usize; 16]で定義されているindexが格納される
 /// posには回転時に軸となるXYZ軸が定義される
 #[derive(Resource)]
-struct RotationBlock {
-    id: usize,
+struct CurrentBlock {
+    blocktype: BlockType,
+    blockid: usize,
     pos: Vec3,
 }
 
@@ -47,6 +50,17 @@ struct RotationBlock {
 /// フィールド内の各ブロック座標が0 or 1で格納されている
 #[derive(Resource)]
 struct BlockMap([[usize; 10]; 24]);
+
+#[derive(Copy, Clone)]
+enum BlockType {
+    TypeI,
+    TypeJ,
+    TypeL,
+    TypeO,
+    TypeS,
+    TypeT,
+    TypeZ,
+}
 
 /// 移動、回転するブロックを識別するコンポーネント
 ///
@@ -60,11 +74,12 @@ struct PlayerBlock(usize);
 #[derive(Component)]
 struct Block;
 
-impl RotationBlock {
+impl CurrentBlock {
     // リソースを初期化
     fn new() -> Self {
-        RotationBlock {
-            id: 0,
+        CurrentBlock {
+            blocktype: BlockType::random(),
+            blockid: 0,
             pos: BLOCK_POSITION,
         }
     }
@@ -79,10 +94,12 @@ impl RotationBlock {
     /// # Panics
     /// * idが見つからない場合
     fn position(&self, id: usize) -> Vec3 {
+        let blockdata = self.blocktype.blockdata();
+
         // ブロックIDが有効範囲内かチェック
-        assert!(self.id < I_BLOCK.len());
+        assert!(self.blockid < blockdata.len());
         // 回転後のブロックの位置を見つける
-        for (index, value) in I_BLOCK[self.id].iter().enumerate() {
+        for (index, value) in blockdata[self.blockid].iter().enumerate() {
             if id == *value {
                 // ブロックの新しい位置を計算して返す
                 let (x, y, z) = (
@@ -150,6 +167,59 @@ impl BlockMap {
     }
 }
 
+impl Distribution<BlockType> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> BlockType {
+        // 配列を使用してインデックスでブロックを選ぶ
+        const BLOCK_TYPES: [BlockType; 7] = [
+            BlockType::TypeI,
+            BlockType::TypeJ,
+            BlockType::TypeL,
+            BlockType::TypeO,
+            BlockType::TypeS,
+            BlockType::TypeT,
+            BlockType::TypeZ,
+        ];
+
+        let index: usize = rng.gen_range(0..BLOCK_TYPES.len());
+        BLOCK_TYPES[index]
+    }
+}
+
+impl BlockType {
+    // `BlockType`をランダムに生成するヘルパーメソッド
+    fn random() -> Self {
+        let mut rng = rand::thread_rng();
+        rng.gen()
+    }
+
+    // ブロックの形状データを取得するメソッド
+    // 各ブロックタイプに対応する4回転分の形状を持つ
+    fn blockdata(&self) -> [[usize; 16]; 4] {
+        match self {
+            BlockType::TypeI => I_BLOCK,
+            BlockType::TypeJ => J_BLOCK,
+            BlockType::TypeL => L_BLOCK,
+            BlockType::TypeO => O_BLOCK,
+            BlockType::TypeS => S_BLOCK,
+            BlockType::TypeT => T_BLOCK,
+            BlockType::TypeZ => Z_BLOCK,
+        }
+    }
+
+    // ブロックに対応する色を取得するメソッド
+    fn color(&self) -> Color {
+        match self {
+            BlockType::TypeI => I_COLOR,
+            BlockType::TypeJ => J_COLOR,
+            BlockType::TypeL => L_COLOR,
+            BlockType::TypeO => O_COLOR,
+            BlockType::TypeS => S_COLOR,
+            BlockType::TypeT => T_COLOR,
+            BlockType::TypeZ => Z_COLOR,
+        }
+    }
+}
+
 fn setup(mut events: EventWriter<SpawnEvent>) { events.send_default(); }
 
 /// ゲームオーバーを管理する関数
@@ -192,10 +262,10 @@ fn despawn(
 }
 
 fn reset(
-    mut rotation_block: ResMut<RotationBlock>,
+    mut rotation_block: ResMut<CurrentBlock>,
     mut block_map: ResMut<BlockMap>,
 ) {
-    *rotation_block = RotationBlock::new();
+    *rotation_block = CurrentBlock::new();
     *block_map = BlockMap(BLOCK_MAP);
 }
 
@@ -204,7 +274,7 @@ pub struct BlockPlugin;
 impl Plugin for BlockPlugin {
     fn build(&self, app: &mut App) {
         app
-            .insert_resource(RotationBlock::new())
+            .insert_resource(CurrentBlock::new())
             .insert_resource(BlockMap(BLOCK_MAP))
             .add_systems(OnEnter(AppState::InGame), setup)
             .add_systems(Update, (

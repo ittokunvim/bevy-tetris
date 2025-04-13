@@ -7,13 +7,9 @@ use crate::{
 use crate::block::{
     BLOCK_POSITION,
     BLOCK_SIZE,
-    RotationBlock,
+    CurrentBlock,
     PlayerBlock,
     Block,
-};
-use crate::blockdata::{
-    I_BLOCK,
-    I_COLOR,
 };
 
 /// ブロック生成イベントを処理する関数
@@ -24,7 +20,7 @@ pub fn block_spawn(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    mut rotation_block: ResMut<RotationBlock>,
+    mut current_block: ResMut<CurrentBlock>,
     query: Query<&Transform, With<Block>>,
 ) {
     // イベントをチェック
@@ -36,13 +32,14 @@ pub fn block_spawn(
     events.clear();
 
     // RotationBlockをリセット
-    *rotation_block = RotationBlock::new();
+    *current_block = CurrentBlock::new();
 
     // PlayerBlockを生成
     let shape = meshes.add(Rectangle::new(BLOCK_SIZE, BLOCK_SIZE));
+    let blocktype = &current_block.blocktype;
     let mut init_position = BLOCK_POSITION;
 
-    for (index, value) in I_BLOCK[0].iter().enumerate() {
+    for (index, value) in blocktype.blockdata()[0].iter().enumerate() {
         // ブロックの値が0であればスキップ
         if *value == 0 {
             continue;
@@ -66,7 +63,7 @@ pub fn block_spawn(
         // PlayerBlockを生成
         commands.spawn((
             Mesh2d(shape.clone()),
-            MeshMaterial2d(materials.add(I_COLOR)),
+            MeshMaterial2d(materials.add(blocktype.color())),
             Transform::from_xyz(position.x, position.y, position.z),
             PlayerBlock(*value),
         ));
