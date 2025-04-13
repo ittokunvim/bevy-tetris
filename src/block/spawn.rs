@@ -7,7 +7,7 @@ use crate::{
 use crate::block::{
     BLOCK_POSITION,
     BLOCK_SIZE,
-    RotationBlock,
+    CurrentBlock,
     PlayerBlock,
     Block,
 };
@@ -20,7 +20,7 @@ pub fn block_spawn(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    mut rotation_block: ResMut<RotationBlock>,
+    mut current_block: ResMut<CurrentBlock>,
     query: Query<&Transform, With<Block>>,
 ) {
     // イベントをチェック
@@ -32,11 +32,11 @@ pub fn block_spawn(
     events.clear();
 
     // RotationBlockをリセット
-    *rotation_block = RotationBlock::new();
+    *current_block = CurrentBlock::new();
 
     // PlayerBlockを生成
     let shape = meshes.add(Rectangle::new(BLOCK_SIZE, BLOCK_SIZE));
-    let blocktype = &rotation_block.blocktype;
+    let blocktype = &current_block.blocktype;
     let mut init_position = BLOCK_POSITION;
 
     for (index, value) in blocktype.blockdata()[0].iter().enumerate() {

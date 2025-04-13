@@ -10,7 +10,7 @@ use crate::{
     FallingTimer,
 };
 use crate::block::{
-    RotationBlock,
+    CurrentBlock,
     PlayerBlock,
     Block,
 };
@@ -43,7 +43,7 @@ pub fn block_movement(
     mut move_events: EventReader<MoveEvent>,
     mut fix_events: EventWriter<FixEvent>,
     mut player_query: Query<&mut Transform, (With<PlayerBlock>, Without<Block>)>,
-    mut rotation_block: ResMut<RotationBlock>,
+    mut current_block: ResMut<CurrentBlock>,
     block_query: Query<&Transform, With<Block>>,
 ) {
     for event in move_events.read() {
@@ -103,9 +103,9 @@ pub fn block_movement(
 
         // 現在のブロック位置を更新
         match direction {
-            Direction::Left   => rotation_block.pos.x -= GRID_SIZE,
-            Direction::Right  => rotation_block.pos.x += GRID_SIZE,
-            Direction::Bottom => rotation_block.pos.y -= GRID_SIZE,
+            Direction::Left   => current_block.pos.x -= GRID_SIZE,
+            Direction::Right  => current_block.pos.x += GRID_SIZE,
+            Direction::Bottom => current_block.pos.y -= GRID_SIZE,
         }
         // ブロックを移動
         for mut transform in &mut player_query {

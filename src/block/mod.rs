@@ -38,9 +38,9 @@ const FIELD_LEFT_TOP: Vec2 = Vec2::new(
 /// idには[usize; 16]で定義されているindexが格納される
 /// posには回転時に軸となるXYZ軸が定義される
 #[derive(Resource)]
-struct RotationBlock {
+struct CurrentBlock {
     blocktype: BlockType,
-    id: usize,
+    blockid: usize,
     pos: Vec3,
 }
 
@@ -74,12 +74,12 @@ struct PlayerBlock(usize);
 #[derive(Component)]
 struct Block;
 
-impl RotationBlock {
+impl CurrentBlock {
     // リソースを初期化
     fn new() -> Self {
-        RotationBlock {
+        CurrentBlock {
             blocktype: BlockType::random(),
-            id: 0,
+            blockid: 0,
             pos: BLOCK_POSITION,
         }
     }
@@ -97,9 +97,9 @@ impl RotationBlock {
         let blockdata = self.blocktype.blockdata();
 
         // ブロックIDが有効範囲内かチェック
-        assert!(self.id < blockdata.len());
+        assert!(self.blockid < blockdata.len());
         // 回転後のブロックの位置を見つける
-        for (index, value) in blockdata[self.id].iter().enumerate() {
+        for (index, value) in blockdata[self.blockid].iter().enumerate() {
             if id == *value {
                 // ブロックの新しい位置を計算して返す
                 let (x, y, z) = (
@@ -262,10 +262,10 @@ fn despawn(
 }
 
 fn reset(
-    mut rotation_block: ResMut<RotationBlock>,
+    mut rotation_block: ResMut<CurrentBlock>,
     mut block_map: ResMut<BlockMap>,
 ) {
-    *rotation_block = RotationBlock::new();
+    *rotation_block = CurrentBlock::new();
     *block_map = BlockMap(BLOCK_MAP);
 }
 
@@ -274,7 +274,7 @@ pub struct BlockPlugin;
 impl Plugin for BlockPlugin {
     fn build(&self, app: &mut App) {
         app
-            .insert_resource(RotationBlock::new())
+            .insert_resource(CurrentBlock::new())
             .insert_resource(BlockMap(BLOCK_MAP))
             .add_systems(OnEnter(AppState::InGame), setup)
             .add_systems(Update, (
