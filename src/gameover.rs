@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use crate::{
     WINDOW_SIZE,
     PATH_FONT,
+    PATH_IMAGE_HOUSE,
     PATH_IMAGE_RETRY,
     AppState,
 };
@@ -18,6 +19,9 @@ const GAMEOVER_TEXT: &str = "ゲームオーバー";
 const GAMEOVER_FONT_SIZE: f32 = 24.0;
 const GAMEOVER_COLOR: Color = Color::srgb(0.1, 0.1, 0.1);
 
+const LIST_WIDTH: Val = BOARD_WIDTH;
+const LIST_HEIGHT: Val = Val::Px(48.0);
+
 const RETRY_SIZE: Vec2 = Vec2::new(24.0, 24.0);
 const RETRY_BACKGROUND_COLOR_HOVER: Color = Color::srgb(0.8, 0.8, 0.8);
 
@@ -27,6 +31,12 @@ const BORDER_RADIUS: Val = Val::Px(10.0);
 
 #[derive(Component)]
 struct Gameover;
+
+#[derive(Component)]
+struct Home;
+
+#[derive(Component)]
+struct Retry;
 
 impl Gameover {
     /// ゲームオーバー画面のルートノードを生成します
@@ -98,6 +108,25 @@ impl Gameover {
         )
     }
 
+    /// ゲームオーバー画面に表示するボタンの配置を決めるノード
+    ///
+    /// Returns:
+    /// * `Self`: Gameoverのインスタンス。
+    /// * `Node`: ボタンの配置を決めるノード
+    fn from_button_list() -> (Self, Node) {
+        (
+            Self,
+            Node {
+                width: LIST_WIDTH,
+                height: LIST_HEIGHT,
+                flex_direction: FlexDirection::Row,
+                justify_content: JustifyContent::SpaceAround,
+                align_items: AlignItems::Center,
+                ..Default::default()
+            }
+        )
+    }
+
     /// ゲームオーバー画面に表示する「リトライ」ボタンを生成します。
     ///
     /// Returns:
@@ -106,7 +135,7 @@ impl Gameover {
     /// * `BorderColor`: ボーダーの色
     /// * `BorderRadius`: ボーダーのラディウス
     /// * `Button`: ボタンコンポーネント
-    fn from_retry() -> (Self, Node, BorderColor, BorderRadius, Button) {
+    fn from_button() -> (Self, Node, BorderColor, BorderRadius, Button) {
         (
             Self,
             Node {
@@ -132,7 +161,7 @@ impl Gameover {
     /// * `Self`: Gameoverのインスタンス。
     /// * `ImageNode`: 画像のノード
     /// * `Node`: リトライアイコンのサイズ、レイアウトを表すノード。
-    fn from_retry_icon(image: Handle<Image>) -> (Self, ImageNode, Node) {
+    fn from_icon(image: Handle<Image>) -> (Self, ImageNode, Node) {
         (
             Self,
             ImageNode::new(image.clone()),
@@ -149,31 +178,51 @@ impl Gameover {
 /// * root
 ///   * board
 ///     * gameover text
-///     * retry
-///       * icon
+///     * button list
+///       * house button
+///         * icon
+///       * retry button
+///         * icon
 fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
 ) {
     let font = asset_server.load(PATH_FONT);
-    let image = asset_server.load(PATH_IMAGE_RETRY);
+    let house_image = asset_server.load(PATH_IMAGE_HOUSE);
+    let retry_image = asset_server.load(PATH_IMAGE_RETRY);
 
     commands
         // ルートノードを生成
         .spawn(Gameover::from_root())
         .with_children(|parent| {
-            // ボードノードを生成
-            parent.spawn(Gameover::from_board())
+            parent
+                // ボードノードを生成
+                .spawn(Gameover::from_board())
                 .with_children(|parent| {
                     // ゲームオーバーテキストノードを生成
                     parent.spawn(Gameover::from_text(font));
                 })
                 .with_children(|parent| {
-                    // リトライボタンノードを生成
-                    parent.spawn(Gameover::from_retry())
+                    parent
+                        // ボタンリストを生成
+                        .spawn(Gameover::from_button_list())
                         .with_children(|parent| {
-                            // リトライアイコンノードを生成
-                            parent.spawn(Gameover::from_retry_icon(image));
+                            parent
+                                // ホームボタンノードを生成
+                                .spawn((Gameover::from_button(), Home))
+                                .with_children(|parent| {
+                                    // ホームアイコンノードを生成
+                                    parent.spawn(Gameover::from_icon(house_image.clone()));
+                                });
+                        })
+                        .with_children(|parent| {
+                            parent
+                                // リトライボタンノードを生成
+                                .spawn((Gameover::from_button(), Retry))
+                                .with_children(|parent| {
+                                    // リトライアイコンノードを生成
+                                    parent.spawn(Gameover::from_icon(retry_image.clone()));
+                                });
                         });
                 });
         });
