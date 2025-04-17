@@ -21,6 +21,7 @@ const PLAY_SIZE: Vec2 = Vec2::new(64.0, 24.0);
 const PLAY_TEXT: &str = "はじめる";
 const PLAY_FONT_SIZE: f32 = 20.0;
 const PLAY_COLOR: Color = Color::srgb(0.1, 0.1, 0.1);
+const PLAY_BACKGROUND_COLOR_HOVER: Color = Color::srgb(0.1, 1.0, 0.1);
 
 const BORDER_SIZE: Val = Val::Px(4.0);
 const BORDER_COLOR: Color = Color::srgb(0.5, 0.5, 1.0);
@@ -184,7 +185,29 @@ fn setup(
 }
 
 fn update(
+    mut interaction_query: Query<
+    (&Interaction, &mut BackgroundColor),
+    (Changed<Interaction>, With<Button>),
+    >,
+    mut next_state: ResMut<NextState<AppState>>,
 ) {
+    // 全てのインタラクション状態を持つボタンに対して処理を行う
+    for (interaction, mut color) in &mut interaction_query {
+        match *interaction {
+            // ボタンが押された時の処理
+            Interaction::Pressed => {
+                next_state.set(AppState::InGame);
+            }
+            // ボタンがホバーされた時の処理
+            Interaction::Hovered => {
+                *color = PLAY_BACKGROUND_COLOR_HOVER.into();
+            }
+            // ボタンに何もされていない時の処理
+            Interaction::None => {
+                *color = BOARD_COLOR.into();
+            }
+        }
+    }
 }
 
 fn despawn(
