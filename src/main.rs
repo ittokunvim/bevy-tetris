@@ -5,6 +5,7 @@ mod blockdata;
 mod field;
 mod key;
 
+mod mainmenu;
 mod gameover;
 
 const GAMETITLE: &str = "テトリス";
@@ -44,6 +45,7 @@ struct FallingTimer(Timer);
 #[derive(States, Default, Debug, Clone, PartialEq, Eq, Hash)]
 enum AppState {
     #[default]
+    Mainmenu,
     InGame,
     Gameover,
 }
@@ -81,6 +83,7 @@ fn main() {
         .add_plugins(field::FieldPlugin)
         .add_plugins(key::KeyPlugin)
         .add_plugins(block::BlockPlugin)
+        .add_plugins(mainmenu::MainmenuPlugin)
         .add_plugins(gameover::GameoverPlugin)
         .add_systems(Startup, setup)
         .run();
