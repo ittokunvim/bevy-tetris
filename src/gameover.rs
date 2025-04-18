@@ -22,8 +22,9 @@ const GAMEOVER_COLOR: Color = Color::srgb(0.1, 0.1, 0.1);
 const LIST_WIDTH: Val = BOARD_WIDTH;
 const LIST_HEIGHT: Val = Val::Px(48.0);
 
-const RETRY_SIZE: Vec2 = Vec2::new(24.0, 24.0);
-const RETRY_BACKGROUND_COLOR_HOVER: Color = Color::srgb(0.8, 0.8, 0.8);
+const ICON_SIZE: Vec2 = Vec2::new(24.0, 24.0);
+const HOUSE_BACKGROUND_COLOR_HOVER: Color = Color::srgb(0.4, 0.8, 0.4);
+const RETRY_BACKGROUND_COLOR_HOVER: Color = Color::srgb(0.4, 0.4, 0.8);
 
 const BORDER_SIZE: Val = Val::Px(4.0);
 const BORDER_COLOR: Color = Color::srgb(0.5, 0.5, 1.0);
@@ -139,8 +140,8 @@ impl Gameover {
         (
             Self,
             Node {
-                width: Val::Px(RETRY_SIZE.x * 2.0),
-                height: Val::Px(RETRY_SIZE.y * 2.0),
+                width: Val::Px(ICON_SIZE.x * 2.0),
+                height: Val::Px(ICON_SIZE.y * 2.0),
                 border: UiRect::all(BORDER_SIZE),
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Center,
@@ -166,8 +167,8 @@ impl Gameover {
             Self,
             ImageNode::new(image.clone()),
             Node {
-                width: Val::Px(RETRY_SIZE.x),
-                height: Val::Px(RETRY_SIZE.y),
+                width: Val::Px(ICON_SIZE.x),
+                height: Val::Px(ICON_SIZE.y),
                 ..Default::default()
             },
         )
@@ -228,14 +229,40 @@ fn setup(
         });
 }
 
-fn update(
+fn house_button_system(
     mut interaction_query: Query<
     (&Interaction, &mut BackgroundColor),
-    (Changed<Interaction>, With<Button>),
+    (Changed<Interaction>, (With<Home>, With<Button>)),
     >,
     mut next_state: ResMut<NextState<AppState>>,
 ) {
-    // 全てのインタラクション状態を持つボタンに対して処理を行う
+    // 全てのインタラクション状態を持つホームボタンに対して処理を行う
+    for (interaction, mut color) in &mut interaction_query {
+        match *interaction {
+            // ボタンが押された時の処理
+            Interaction::Pressed => {
+                next_state.set(AppState::Mainmenu);
+            }
+            // ボタンがホバーされた時の処理
+            Interaction::Hovered => {
+                *color = HOUSE_BACKGROUND_COLOR_HOVER.into();
+            }
+            // ボタンに何もされていない時の処理
+            Interaction::None => {
+                *color = BOARD_COLOR.into();
+            }
+        }
+    }
+}
+
+fn retry_button_system(
+    mut interaction_query: Query<
+    (&Interaction, &mut BackgroundColor),
+    (Changed<Interaction>, (With<Retry>, With<Button>)),
+    >,
+    mut next_state: ResMut<NextState<AppState>>,
+) {
+    // 全てのインタラクション状態を持つリトライボタンに対して処理を行う
     for (interaction, mut color) in &mut interaction_query {
         match *interaction {
             // ボタンが押された時の処理
@@ -269,7 +296,10 @@ impl Plugin for GameoverPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(OnEnter(AppState::Gameover), setup)
-            .add_systems(Update, update.run_if(in_state(AppState::Gameover)))
+            .add_systems(Update, (
+                retry_button_system,
+                house_button_system,
+            ).run_if(in_state(AppState::Gameover)))
             .add_systems(OnExit(AppState::Gameover), despawn)
         ;
     }
