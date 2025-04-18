@@ -6,7 +6,7 @@ use crate::{
     AppState,
 };
 
-const FIELD_COLOR: Color = Color::srgb(0.6, 0.6, 0.6);
+const FIELD_COLOR: Color = Color::srgb(0.13, 0.14, 0.21);
 
 #[derive(Component)]
 struct Field;

@@ -16,26 +16,29 @@ const BOARD_HEIGHT: Val = Val::Px(BOARD_SIZE.y);
 const BOARD_LEFT: Val = Val::Px(WINDOW_SIZE.x / 2.0 - BOARD_SIZE.x / 2.0);
 const BOARD_TOP: Val = Val::Px(WINDOW_SIZE.y / 2.0 - BOARD_SIZE.y / 2.0);
 const BOARD_PADDING: Val = Val::Px(16.0);
-const BOARD_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
+const BOARD_COLOR: Color = Color::srgb(0.13, 0.14, 0.24);
 
 const TITLE_TEXT: &str = GAMETITLE;
 const TITLE_FONT_SIZE: f32 = 24.0;
-const TITLE_COLOR: Color = Color::srgb(0.1, 0.1, 0.1);
+const TITLE_COLOR: Color = Color::srgb(0.79, 0.83, 0.96);
 
 const BUTTON_WIDTH: Val = Val::Px(128.0);
 const BUTTON_HEIGHT: Val = Val::Px(48.0);
 
 const PLAY_TEXT: &str = "はじめる";
 const PLAY_FONT_SIZE: f32 = 20.0;
-const PLAY_COLOR: Color = Color::srgb(0.1, 0.1, 0.1);
-const PLAY_BACKGROUND_COLOR_HOVER: Color = Color::srgb(0.4, 0.8, 0.4);
+const PLAY_COLOR: Color = Color::srgb(0.79, 0.83, 0.96);
+const PLAY_COLOR_HOVER: Color = Color::srgb(0.31, 0.84, 0.75);
 
 const BORDER_SIZE: Val = Val::Px(4.0);
-const BORDER_COLOR: Color = Color::srgb(0.5, 0.5, 1.0);
+const BORDER_COLOR: Color = Color::srgb(0.79, 0.83, 0.96);
 const BORDER_RADIUS: Val = Val::Px(10.0);
 
 #[derive(Component)]
 struct Mainmenu;
+
+#[derive(Component)]
+struct Play;
 
 impl Mainmenu {
     /// メインメニュー画面のルートノードを生成します
@@ -180,26 +183,26 @@ fn setup(
                 .with_children(|parent| {
                     // プレイボタンノードを作成
                     parent
-                        .spawn(Mainmenu::from_button())
+                        .spawn((Mainmenu::from_button(), Play))
                         .with_children(|parent| {
                             // ボタンテキストノードを作成
-                            parent.spawn(Mainmenu::from_text(font.clone()));
+                            parent.spawn((Mainmenu::from_text(font.clone()), Play));
                         });
                 });
         });
 }
 
 fn update(
-    mut interaction_query: Query<
-    (&Interaction, &mut BackgroundColor),
-    (Changed<Interaction>, With<Button>),
-    >,
+    mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<Play>)>,
+    mut text_query: Query<&mut TextColor, With<Play>>,
     mut next_state: ResMut<NextState<AppState>>,
 ) {
     info_once!("update");
 
     // 全てのインタラクション状態を持つボタンに対して処理を行う
-    for (interaction, mut color) in &mut interaction_query {
+    for interaction in &mut interaction_query {
+        let mut color = text_query.single_mut();
+
         match *interaction {
             // ボタンが押された時の処理
             Interaction::Pressed => {
@@ -207,11 +210,11 @@ fn update(
             }
             // ボタンがホバーされた時の処理
             Interaction::Hovered => {
-                *color = PLAY_BACKGROUND_COLOR_HOVER.into();
+                *color = TextColor(PLAY_COLOR_HOVER);
             }
             // ボタンに何もされていない時の処理
             Interaction::None => {
-                *color = BOARD_COLOR.into();
+                *color = TextColor(PLAY_COLOR);
             }
         }
     }

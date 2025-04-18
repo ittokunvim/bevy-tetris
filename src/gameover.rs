@@ -15,11 +15,11 @@ const BOARD_SIZE: Vec2 = Vec2::new(360.0, 270.0);
 const BOARD_LEFT: Val = Val::Px(WINDOW_SIZE.x / 2.0 - BOARD_SIZE.x / 2.0);
 const BOARD_TOP: Val = Val::Px(WINDOW_SIZE.y / 2.0 - BOARD_SIZE.y / 2.0);
 const BOARD_PADDING: Val = Val::Px(16.0);
-const BOARD_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
+const BOARD_COLOR: Color = Color::srgb(0.13, 0.14, 0.24);
 
 const TITLE_TEXT: &str = "ゲームオーバー";
 const TITLE_FONT_SIZE: f32 = 24.0;
-const TITLE_COLOR: Color = Color::srgb(0.1, 0.1, 0.1);
+const TITLE_COLOR: Color = Color::srgb(0.79, 0.83, 0.96);
 
 const LIST_WIDTH: Val = Val::Px(BOARD_SIZE.x);
 const LIST_HEIGHT: Val = Val::Px(48.0);
@@ -27,12 +27,10 @@ const LIST_HEIGHT: Val = Val::Px(48.0);
 const ICON_SIZE: Vec2 = Vec2::new(24.0, 24.0);
 const BUTTON_WIDTH: Val = Val::Px(ICON_SIZE.x * 2.0);
 const BUTTON_HEIGHT: Val = Val::Px(ICON_SIZE.y * 2.0);
-
-const HOUSE_COLOR_HOVER: Color = Color::srgb(0.4, 0.8, 0.4);
-const RETRY_COLOR_HOVER: Color = Color::srgb(0.4, 0.4, 0.8);
+const ICON_COLOR_HOVER: Color = Color::srgb(0.39, 0.43, 0.65);
 
 const BORDER_SIZE: Val = Val::Px(4.0);
-const BORDER_COLOR: Color = Color::srgb(0.5, 0.5, 1.0);
+const BORDER_COLOR: Color = Color::srgb(0.79, 0.83, 0.96);
 const BORDER_RADIUS: Val = Val::Px(10.0);
 
 #[derive(Component)]
@@ -249,7 +247,7 @@ fn house_button_system(
             }
             // ボタンがホバーされた時の処理
             Interaction::Hovered => {
-                *color = HOUSE_COLOR_HOVER.into();
+                *color = ICON_COLOR_HOVER.into();
             }
             // ボタンに何もされていない時の処理
             Interaction::None => {
@@ -277,7 +275,7 @@ fn retry_button_system(
             }
             // ボタンがホバーされた時の処理
             Interaction::Hovered => {
-                *color = RETRY_COLOR_HOVER.into();
+                *color = ICON_COLOR_HOVER.into();
             }
             // ボタンに何もされていない時の処理
             Interaction::None => {
