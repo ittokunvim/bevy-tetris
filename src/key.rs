@@ -23,6 +23,8 @@ fn move_event(
     mut timer: ResMut<FallingTimer>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
+    info_once!("move_event");
+
     let mut closure = |direction: Direction| {
         events.send(MoveEvent(direction));
         if direction == Direction::Bottom {
@@ -48,6 +50,8 @@ fn rotation_event(
     mut events: EventWriter<RotationEvent>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
+    info_once!("rotation_event");
+
     let mut closure = |direction: Direction| {
         events.send(RotationEvent(direction));
     };

@@ -23,6 +23,8 @@ pub fn block_falling(
     mut events: EventWriter<MoveEvent>,
     time: Res<Time>,
 ) {
+    info_once!("block_falling");
+
     // タイマーを進める
     timer.tick(time.delta());
 
@@ -46,6 +48,8 @@ pub fn block_movement(
     mut current_block: ResMut<CurrentBlock>,
     block_query: Query<&Transform, With<Block>>,
 ) {
+    info_once!("block_movement");
+
     for event in move_events.read() {
         let direction = event.0;
 

@@ -162,6 +162,8 @@ fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
 ) {
+    info_once!("setup");
+
     let font = asset_server.load(PATH_FONT);
 
     commands
@@ -194,6 +196,8 @@ fn update(
     >,
     mut next_state: ResMut<NextState<AppState>>,
 ) {
+    info_once!("update");
+
     // 全てのインタラクション状態を持つボタンに対して処理を行う
     for (interaction, mut color) in &mut interaction_query {
         match *interaction {
@@ -217,6 +221,8 @@ fn despawn(
     mut commands: Commands,
     query: Query<Entity, With<Mainmenu>>,
 ) {
+    info_once!("despawn");
+
     for entity in &query {
         commands.entity(entity).despawn();
     }

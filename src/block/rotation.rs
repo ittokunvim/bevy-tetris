@@ -27,6 +27,8 @@ pub fn block_rotation(
     mut current_block: ResMut<CurrentBlock>,
     block_query: Query<&Transform, With<Block>>,
 ) {
+    info_once!("block_rotation");
+
     for event in events.read() {
         let direction = event.0;
         let mut count = 0;

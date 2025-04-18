@@ -24,6 +24,8 @@ pub fn block_clear(
     mut block_map: ResMut<BlockMap>,
     mut spawn_events: EventWriter<SpawnEvent>,
 ) {
+    info_once!("block_clear");
+
     // イベントをチェック
     if fix_events.is_empty() {
         return;
