@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 mod block;
+mod bgm;
 mod blockdata;
 mod field;
 mod key;
@@ -84,21 +85,14 @@ fn main() {
         .add_plugins(field::FieldPlugin)
         .add_plugins(key::KeyPlugin)
         .add_plugins(block::BlockPlugin)
+        .add_plugins(bgm::BgmPlugin)
         .add_plugins(mainmenu::MainmenuPlugin)
         .add_plugins(gameover::GameoverPlugin)
         .add_systems(Startup, setup)
         .run();
 }
 
-fn setup(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-) {
-    // camera
+fn setup(mut commands: Commands) {
     commands.spawn(Camera2d::default());
-    // bgm
-    let sound = AudioPlayer::new(asset_server.load(PATH_SOUND_BGM));
-    let settings = PlaybackSettings::LOOP;
-    commands.spawn((sound, settings));
 }
 
