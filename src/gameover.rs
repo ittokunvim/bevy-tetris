@@ -8,23 +8,28 @@ use crate::{
     AppState,
 };
 
-const BOARD_WIDTH: Val = Val::Px(360.0);
-const BOARD_HEIGHT: Val = Val::Px(270.0);
-const BOARD_LEFT: Val = Val::Px(WINDOW_SIZE.x / 2.0 - 360.0 / 2.0);
-const BOARD_TOP: Val = Val::Px(WINDOW_SIZE.y / 2.0 - 270.0 / 2.0);
+const ROOT_WIDTH: Val = Val::Percent(100.0);
+const ROOT_HEIGHT: Val = Val::Percent(100.0);
+
+const BOARD_SIZE: Vec2 = Vec2::new(360.0, 270.0);
+const BOARD_LEFT: Val = Val::Px(WINDOW_SIZE.x / 2.0 - BOARD_SIZE.x / 2.0);
+const BOARD_TOP: Val = Val::Px(WINDOW_SIZE.y / 2.0 - BOARD_SIZE.y / 2.0);
 const BOARD_PADDING: Val = Val::Px(16.0);
 const BOARD_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
 
-const GAMEOVER_TEXT: &str = "ゲームオーバー";
-const GAMEOVER_FONT_SIZE: f32 = 24.0;
-const GAMEOVER_COLOR: Color = Color::srgb(0.1, 0.1, 0.1);
+const TITLE_TEXT: &str = "ゲームオーバー";
+const TITLE_FONT_SIZE: f32 = 24.0;
+const TITLE_COLOR: Color = Color::srgb(0.1, 0.1, 0.1);
 
-const LIST_WIDTH: Val = BOARD_WIDTH;
+const LIST_WIDTH: Val = Val::Px(BOARD_SIZE.x);
 const LIST_HEIGHT: Val = Val::Px(48.0);
 
 const ICON_SIZE: Vec2 = Vec2::new(24.0, 24.0);
-const HOUSE_BACKGROUND_COLOR_HOVER: Color = Color::srgb(0.4, 0.8, 0.4);
-const RETRY_BACKGROUND_COLOR_HOVER: Color = Color::srgb(0.4, 0.4, 0.8);
+const BUTTON_WIDTH: Val = Val::Px(ICON_SIZE.x * 2.0);
+const BUTTON_HEIGHT: Val = Val::Px(ICON_SIZE.y * 2.0);
+
+const HOUSE_COLOR_HOVER: Color = Color::srgb(0.4, 0.8, 0.4);
+const RETRY_COLOR_HOVER: Color = Color::srgb(0.4, 0.4, 0.8);
 
 const BORDER_SIZE: Val = Val::Px(4.0);
 const BORDER_COLOR: Color = Color::srgb(0.5, 0.5, 1.0);
@@ -49,13 +54,12 @@ impl Gameover {
         (
             Self,
             Node {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
+                width: ROOT_WIDTH,
+                height: ROOT_HEIGHT,
                 ..Default::default()
             }
         )
     }
-
     /// ゲームオーバー画面の背景を生成します。
     ///
     /// Returns:
@@ -68,8 +72,8 @@ impl Gameover {
         (
             Self,
             Node {
-                width: BOARD_WIDTH,
-                height: BOARD_HEIGHT,
+                width: Val::Px(BOARD_SIZE.x),
+                height: Val::Px(BOARD_SIZE.y),
                 border: UiRect::all(BORDER_SIZE),
                 position_type: PositionType::Absolute,
                 left: BOARD_LEFT,
@@ -85,7 +89,6 @@ impl Gameover {
             BorderRadius::all(BORDER_RADIUS),
         )
     }
-
     /// ゲームオーバーメッセージを表示するテキストを生成します。
     ///
     /// Params:
@@ -96,19 +99,18 @@ impl Gameover {
     /// * `Text`: ゲームオーバーメッセージのテキスト。
     /// * `TextFont`: フォントスタイル。
     /// * `TextColor`: テキストの色
-    fn from_text(font: Handle<Font>) -> (Self, Text, TextFont, TextColor) {
+    fn from_title(font: Handle<Font>) -> (Self, Text, TextFont, TextColor) {
         (
             Self,
-            Text::new(GAMEOVER_TEXT),
+            Text::new(TITLE_TEXT),
             TextFont {
                 font: font.clone(),
-                font_size: GAMEOVER_FONT_SIZE,
+                font_size: TITLE_FONT_SIZE,
                 ..Default::default()
             },
-            TextColor(GAMEOVER_COLOR),
+            TextColor(TITLE_COLOR),
         )
     }
-
     /// ゲームオーバー画面に表示するボタンの配置を決めるノード
     ///
     /// Returns:
@@ -127,8 +129,7 @@ impl Gameover {
             }
         )
     }
-
-    /// ゲームオーバー画面に表示する「リトライ」ボタンを生成します。
+    /// ゲームオーバー画面に表示するボタンを生成します。
     ///
     /// Returns:
     /// * `Self`: Gameoverのインスタンス。
@@ -140,8 +141,8 @@ impl Gameover {
         (
             Self,
             Node {
-                width: Val::Px(ICON_SIZE.x * 2.0),
-                height: Val::Px(ICON_SIZE.y * 2.0),
+                width: BUTTON_WIDTH,
+                height: BUTTON_HEIGHT,
                 border: UiRect::all(BORDER_SIZE),
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Center,
@@ -152,16 +153,15 @@ impl Gameover {
             Button,
         )
     }
-
-    /// ゲームオーバー画面に表示するリトライアイコンを生成します。
+    /// ゲームオーバー画面に表示するアイコンを生成します。
     ///
     /// Params:
-    /// * `image`: リトライアイコン
+    /// * `image`: アイコン画像
     ///
     /// Returns:
     /// * `Self`: Gameoverのインスタンス。
     /// * `ImageNode`: 画像のノード
-    /// * `Node`: リトライアイコンのサイズ、レイアウトを表すノード。
+    /// * `Node`: アイコンのサイズ、レイアウトを表すノード。
     fn from_icon(image: Handle<Image>) -> (Self, ImageNode, Node) {
         (
             Self,
@@ -201,7 +201,7 @@ fn setup(
                 .spawn(Gameover::from_board())
                 .with_children(|parent| {
                     // ゲームオーバーテキストノードを生成
-                    parent.spawn(Gameover::from_text(font));
+                    parent.spawn(Gameover::from_title(font));
                 })
                 .with_children(|parent| {
                     parent
@@ -245,7 +245,7 @@ fn house_button_system(
             }
             // ボタンがホバーされた時の処理
             Interaction::Hovered => {
-                *color = HOUSE_BACKGROUND_COLOR_HOVER.into();
+                *color = HOUSE_COLOR_HOVER.into();
             }
             // ボタンに何もされていない時の処理
             Interaction::None => {
@@ -271,7 +271,7 @@ fn retry_button_system(
             }
             // ボタンがホバーされた時の処理
             Interaction::Hovered => {
-                *color = RETRY_BACKGROUND_COLOR_HOVER.into();
+                *color = RETRY_COLOR_HOVER.into();
             }
             // ボタンに何もされていない時の処理
             Interaction::None => {
