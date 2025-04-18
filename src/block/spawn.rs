@@ -23,6 +23,8 @@ pub fn block_spawn(
     mut current_block: ResMut<CurrentBlock>,
     query: Query<&Transform, With<Block>>,
 ) {
+    info_once!("block_spawn");
+
     // イベントをチェック
     if events.is_empty() {
         return;

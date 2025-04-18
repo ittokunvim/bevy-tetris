@@ -102,6 +102,8 @@ fn main() {
 }
 
 fn setup(mut commands: Commands) {
+    info_once!("setup");
+
     commands.spawn(Camera2d::default());
 }
 

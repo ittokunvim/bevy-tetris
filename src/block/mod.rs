@@ -220,7 +220,11 @@ impl BlockType {
     }
 }
 
-fn setup(mut events: EventWriter<SpawnEvent>) { events.send_default(); }
+fn setup(mut events: EventWriter<SpawnEvent>) {
+    info_once!("setup");
+
+    events.send_default();
+}
 
 /// ゲームオーバーを管理する関数
 /// `FixEvent`を受け取り、固定されたブロックから
@@ -231,6 +235,8 @@ fn gameover(
     mut next_state: ResMut<NextState<AppState>>,
     query: Query<&Transform, With<PlayerBlock>>,
 ) {
+    info_once!("gameover");
+
     // イベントをチェック
     if events.is_empty() {
         return;
@@ -256,6 +262,8 @@ fn despawn(
     mut commands: Commands,
     query: Query<Entity, With<Block>>,
 ) {
+    info_once!("despawn");
+
     for entity in &query {
         commands.entity(entity).despawn();
     }
@@ -265,6 +273,8 @@ fn reset(
     mut rotation_block: ResMut<CurrentBlock>,
     mut block_map: ResMut<BlockMap>,
 ) {
+    info_once!("reset");
+
     *rotation_block = CurrentBlock::new();
     *block_map = BlockMap(BLOCK_MAP);
 }

@@ -16,8 +16,10 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    // field
+    info_once!("setup");
+
     let shape = meshes.add(Rectangle::new(FIELD_SIZE.x, FIELD_SIZE.y));
+
     commands.spawn((
         Mesh2d(shape),
         MeshMaterial2d(materials.add(FIELD_COLOR)),
@@ -30,6 +32,8 @@ fn despawn(
     mut commands: Commands,
     query: Query<Entity, With<Field>>,
 ) {
+    info_once!("despawn");
+
     for entity in &query {
         commands.entity(entity).despawn();
     }
