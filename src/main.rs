@@ -1,4 +1,7 @@
-use bevy::prelude::*;
+use bevy::{
+    prelude::*,
+    log::LogPlugin,
+};
 
 mod block;
 mod bgm;
@@ -12,6 +15,7 @@ mod gameover;
 const GAMETITLE: &str = "テトリス";
 const WINDOW_SIZE: Vec2 = Vec2::new(640.0, 480.0);
 const BACKGROUND_COLOR: Color = Color::srgb(0.1, 0.1, 0.1);
+const LOG_FILTER: &str = "info,wgpu_core=warn,wgpu_hal=warn,ittokunvim_tetris=debug";
 const PATH_FONT: &str = "fonts/misaki_gothic.ttf";
 const PATH_IMAGE_HOUSE: &str = "images/house.png";
 const PATH_IMAGE_RETRY: &str = "images/retry.png";
@@ -71,6 +75,11 @@ fn main() {
                     title: GAMETITLE.to_string(),
                     ..Default::default()
                 }),
+                ..Default::default()
+            })
+            .set(LogPlugin {
+                filter: LOG_FILTER.into(),
+                level: bevy::log::Level::DEBUG,
                 ..Default::default()
             })
         )
