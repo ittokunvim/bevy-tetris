@@ -17,8 +17,8 @@ const WINDOW_SIZE: Vec2 = Vec2::new(640.0, 480.0);
 const BACKGROUND_COLOR: Color = Color::srgb(0.1, 0.1, 0.1);
 const LOG_FILTER: &str = "info,wgpu_core=warn,wgpu_hal=warn,ittokunvim_tetris=debug";
 const PATH_FONT: &str = "fonts/misaki_gothic.ttf";
-const PATH_IMAGE_HOUSE: &str = "images/house.png";
-const PATH_IMAGE_RETRY: &str = "images/retry.png";
+const PATH_IMAGE_HOUSE: &str = "images/house-dark.png";
+const PATH_IMAGE_RETRY: &str = "images/rotate-left-dark.png";
 const PATH_SOUND_BGM: &str = "bevy-tetris/bgm.ogg";
 
 const GRID_SIZE: f32 = 20.0;
