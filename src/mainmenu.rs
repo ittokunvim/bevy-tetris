@@ -7,21 +7,28 @@ use crate::{
     AppState,
 };
 
-const BOARD_WIDTH: Val = Val::Px(360.0);
-const BOARD_HEIGHT: Val = Val::Px(270.0);
-const BOARD_LEFT: Val = Val::Px(WINDOW_SIZE.x / 2.0 - 360.0 / 2.0);
-const BOARD_TOP: Val = Val::Px(WINDOW_SIZE.y / 2.0 - 270.0 / 2.0);
+const ROOT_WIDTH: Val = Val::Percent(100.0);
+const ROOT_HEIGHT: Val = Val::Percent(100.0);
+
+const BOARD_SIZE: Vec2 = Vec2::new(360.0, 270.0);
+const BOARD_WIDTH: Val = Val::Px(BOARD_SIZE.x);
+const BOARD_HEIGHT: Val = Val::Px(BOARD_SIZE.y);
+const BOARD_LEFT: Val = Val::Px(WINDOW_SIZE.x / 2.0 - BOARD_SIZE.x / 2.0);
+const BOARD_TOP: Val = Val::Px(WINDOW_SIZE.y / 2.0 - BOARD_SIZE.y / 2.0);
 const BOARD_PADDING: Val = Val::Px(16.0);
 const BOARD_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
 
+const TITLE_TEXT: &str = GAMETITLE;
 const TITLE_FONT_SIZE: f32 = 24.0;
 const TITLE_COLOR: Color = Color::srgb(0.1, 0.1, 0.1);
 
-const PLAY_SIZE: Vec2 = Vec2::new(64.0, 24.0);
+const BUTTON_WIDTH: Val = Val::Px(128.0);
+const BUTTON_HEIGHT: Val = Val::Px(48.0);
+
 const PLAY_TEXT: &str = "はじめる";
 const PLAY_FONT_SIZE: f32 = 20.0;
 const PLAY_COLOR: Color = Color::srgb(0.1, 0.1, 0.1);
-const PLAY_BACKGROUND_COLOR_HOVER: Color = Color::srgb(0.1, 1.0, 0.1);
+const PLAY_BACKGROUND_COLOR_HOVER: Color = Color::srgb(0.4, 0.8, 0.4);
 
 const BORDER_SIZE: Val = Val::Px(4.0);
 const BORDER_COLOR: Color = Color::srgb(0.5, 0.5, 1.0);
@@ -40,13 +47,12 @@ impl Mainmenu {
         (
             Self,
             Node {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
+                width: ROOT_WIDTH,
+                height: ROOT_HEIGHT,
                 ..Default::default()
             }
         )
     }
-
     /// メインメニュー画面の背景を生成します。
     ///
     /// Returns:
@@ -76,8 +82,7 @@ impl Mainmenu {
             BorderRadius::all(BORDER_RADIUS),
         )
     }
-
-    /// ゲームタイトルを表示するテキストを生成します。
+    /// ゲームタイトルを表示するタイトルを生成します。
     ///
     /// Params:
     /// * `font`: テキストに使用するフォント
@@ -90,7 +95,7 @@ impl Mainmenu {
     fn from_title(font: Handle<Font>) -> (Self, Text, TextFont, TextColor) {
         (
             Self,
-            Text::new(GAMETITLE),
+            Text::new(TITLE_TEXT),
             TextFont {
                 font: font.clone(),
                 font_size: TITLE_FONT_SIZE,
@@ -99,8 +104,7 @@ impl Mainmenu {
             TextColor(TITLE_COLOR),
          )
     }
-
-    /// メインメニュー画面に表示する「プレイ」ボタンを生成します。
+    /// メインメニュー画面に表示するボタンを生成します。
     ///
     /// Returns:
     /// * `Self`: Mainmenuのインスタンス。
@@ -112,8 +116,8 @@ impl Mainmenu {
         (
             Self,
             Node {
-                width: Val::Px(PLAY_SIZE.x * 2.0),
-                height: Val::Px(PLAY_SIZE.y * 2.0),
+                width: BUTTON_WIDTH,
+                height: BUTTON_HEIGHT,
                 border: UiRect::all(BORDER_SIZE),
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Center,
@@ -124,8 +128,7 @@ impl Mainmenu {
             Button,
          )
     }
-
-    /// プレイボタンを表示するテキストを生成します。
+    /// ボタンのテキストを生成します。
     ///
     /// Params:
     /// * `font`: テキストに使用するフォント
