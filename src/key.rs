@@ -4,6 +4,7 @@ use crate::{
     BLOCK_SPEED,
     MoveEvent,
     RotationEvent,
+    HardDropEvent,
     Direction,
     FallingTimer,
     AppState,
@@ -17,6 +18,7 @@ const KEY_BLOCK_BOTTOM_1: KeyCode = KeyCode::ArrowDown;
 const KEY_BLOCK_BOTTOM_2: KeyCode = KeyCode::KeyS;
 const KEY_BLOCK_ROTATION_LEFT: KeyCode = KeyCode::KeyZ;
 const KEY_BLOCK_ROTATION_RIGHT: KeyCode = KeyCode::ArrowUp;
+const KEY_BLOCK_HARDDROP: KeyCode = KeyCode::Space;
 
 fn move_event(
     mut events: EventWriter<MoveEvent>,
@@ -32,15 +34,15 @@ fn move_event(
         }
     };
     for key in keyboard_input.get_just_pressed() {
-        match key {
-            &KEY_BLOCK_LEFT_1   | &KEY_BLOCK_LEFT_2   => closure(Direction::Left),
-            &KEY_BLOCK_RIGHT_1  | &KEY_BLOCK_RIGHT_2  => closure(Direction::Right),
-            &KEY_BLOCK_BOTTOM_1 | &KEY_BLOCK_BOTTOM_2 => closure(Direction::Bottom),
+        match *key {
+            KEY_BLOCK_LEFT_1   | KEY_BLOCK_LEFT_2   => closure(Direction::Left),
+            KEY_BLOCK_RIGHT_1  | KEY_BLOCK_RIGHT_2  => closure(Direction::Right),
+            KEY_BLOCK_BOTTOM_1 | KEY_BLOCK_BOTTOM_2 => closure(Direction::Bottom),
             _ => {},
         }
     }
     for key in keyboard_input.get_just_released() {
-        if key == &KEY_BLOCK_BOTTOM_1 || key == &KEY_BLOCK_BOTTOM_2 {
+        if *key == KEY_BLOCK_BOTTOM_1 || *key == KEY_BLOCK_BOTTOM_2 {
             timer.0 = FallingTimer::update_timer(BLOCK_SPEED);
         }
     }
@@ -56,11 +58,24 @@ fn rotation_event(
         events.send(RotationEvent(direction));
     };
     for key in keyboard_input.get_just_pressed() {
-        match key {
-            &KEY_BLOCK_ROTATION_LEFT  => closure(Direction::Left),
-            &KEY_BLOCK_ROTATION_RIGHT => closure(Direction::Right),
+        match *key {
+            KEY_BLOCK_ROTATION_LEFT  => closure(Direction::Left),
+            KEY_BLOCK_ROTATION_RIGHT => closure(Direction::Right),
             _ => {},
         };
+    }
+}
+
+fn harddrop_event(
+    mut events: EventWriter<HardDropEvent>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+) {
+    info_once!("harddrop_event");
+
+    for key in  keyboard_input.get_just_pressed() {
+        if *key == KEY_BLOCK_HARDDROP {
+            events.send_default();
+        }
     }
 }
 
@@ -72,6 +87,7 @@ impl Plugin for KeyPlugin {
             .add_systems(Update, (
                 move_event,
                 rotation_event,
+                harddrop_event,
             ).run_if(in_state(AppState::InGame)))
         ;
     }
