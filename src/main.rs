@@ -54,6 +54,9 @@ enum Direction {
 struct FallingTimer(Timer);
 
 #[derive(Resource, Deref, DerefMut)]
+struct MoveLeftTimer(Stopwatch);
+
+#[derive(Resource, Deref, DerefMut)]
 struct MoveBottomTimer(Stopwatch);
 
 #[derive(States, Default, Debug, Clone, PartialEq, Eq, Hash)]
@@ -96,6 +99,7 @@ fn main() {
         .add_event::<SpawnEvent>()
         .add_event::<FixEvent>()
         .insert_resource(FallingTimer::new())
+        .insert_resource(MoveLeftTimer(Stopwatch::new()))
         .insert_resource(MoveBottomTimer(Stopwatch::new()))
         .add_plugins(field::FieldPlugin)
         .add_plugins(key::KeyPlugin)
