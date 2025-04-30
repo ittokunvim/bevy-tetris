@@ -48,7 +48,7 @@ fn key_block_moveleft(
     }
 
     // ブロック左移動キーを離した時
-    if keyboard_input.just_released(KEY_BLOCK_MOVE_BOTTOM) {
+    if keyboard_input.just_released(KEY_BLOCK_MOVE_LEFT) {
         // ブロック左移動タイマーをリセット
         moveleft_timer.0.reset();
     }
@@ -81,8 +81,8 @@ fn key_block_moveright(
         }
     }
 
-    // ブロック左移動キーを離した時
-    if keyboard_input.just_released(KEY_BLOCK_MOVE_BOTTOM) {
+    // ブロック右移動キーを離した時
+    if keyboard_input.just_released(KEY_BLOCK_MOVE_RIGHT) {
         // ブロック右移動タイマーをリセット
         moveright_timer.0.reset();
     }
