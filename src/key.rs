@@ -13,12 +13,9 @@ use crate::{
     AppState,
 };
 
-const KEY_BLOCK_LEFT_1: KeyCode = KeyCode::ArrowLeft;
-const KEY_BLOCK_LEFT_2: KeyCode = KeyCode::KeyA;
-const KEY_BLOCK_RIGHT_1: KeyCode = KeyCode::ArrowRight;
-const KEY_BLOCK_RIGHT_2: KeyCode = KeyCode::KeyD;
-const KEY_BLOCK_BOTTOM_1: KeyCode = KeyCode::ArrowDown;
-const KEY_BLOCK_BOTTOM_2: KeyCode = KeyCode::KeyS;
+const KEY_BLOCK_MOVE_LEFT: KeyCode = KeyCode::ArrowLeft;
+const KEY_BLOCK_MOVE_RIGHT: KeyCode = KeyCode::ArrowRight;
+const KEY_BLOCK_MOVE_BOTTOM: KeyCode = KeyCode::ArrowDown;
 const KEY_BLOCK_ROTATION_LEFT: KeyCode = KeyCode::KeyZ;
 const KEY_BLOCK_ROTATION_RIGHT: KeyCode = KeyCode::ArrowUp;
 const KEY_BLOCK_HARDDROP: KeyCode = KeyCode::Space;
@@ -31,16 +28,14 @@ fn key_block_moveleft(
 ) {
     info_once!("key_block_moveleft");
 
-    let block_left_keys = [KEY_BLOCK_LEFT_1, KEY_BLOCK_LEFT_2];
-
     // ブロック左移動キー入力時
-    if keyboard_input.any_just_pressed(block_left_keys) {
+    if keyboard_input.just_pressed(KEY_BLOCK_MOVE_LEFT) {
         // ブロック移動イベントを発火
         events.send(MoveEvent(Direction::Left));
     }
 
     // ブロック左移動キー長押し時
-    if keyboard_input.any_pressed(block_left_keys) {
+    if keyboard_input.pressed(KEY_BLOCK_MOVE_LEFT) {
         // ブロック左移動タイマーを進める
         moveleft_timer.0.tick(time.delta());
         // タイマーが切れたら
@@ -53,7 +48,7 @@ fn key_block_moveleft(
     }
 
     // ブロック左移動キーを離した時
-    if keyboard_input.any_just_released(block_left_keys) {
+    if keyboard_input.just_released(KEY_BLOCK_MOVE_BOTTOM) {
         // ブロック左移動タイマーをリセット
         moveleft_timer.0.reset();
     }
@@ -67,16 +62,14 @@ fn key_block_moveright(
 ) {
     info_once!("key_block_moveright");
 
-    let block_right_keys = [KEY_BLOCK_RIGHT_1, KEY_BLOCK_RIGHT_2];
-
     // ブロック右移動キー入力時
-    if keyboard_input.any_just_pressed(block_right_keys) {
+    if keyboard_input.just_pressed(KEY_BLOCK_MOVE_RIGHT) {
         // ブロック移動イベントを発火
         events.send(MoveEvent(Direction::Right));
     }
 
     // ブロック右移動キー長押し時
-    if keyboard_input.any_pressed(block_right_keys) {
+    if keyboard_input.pressed(KEY_BLOCK_MOVE_RIGHT) {
         // ブロック右移動タイマーを進める
         moveright_timer.0.tick(time.delta());
         // タイマーが切れたら
@@ -89,7 +82,7 @@ fn key_block_moveright(
     }
 
     // ブロック左移動キーを離した時
-    if keyboard_input.any_just_released(block_right_keys) {
+    if keyboard_input.just_released(KEY_BLOCK_MOVE_BOTTOM) {
         // ブロック右移動タイマーをリセット
         moveright_timer.0.reset();
     }
@@ -104,10 +97,8 @@ fn key_block_movebottom(
 ) {
     info_once!("key_block_movebottom");
 
-    let block_bottom_keys = [KEY_BLOCK_BOTTOM_1, KEY_BLOCK_BOTTOM_2];
-
     // ブロック下移動キー入力時
-    if keyboard_input.any_just_pressed(block_bottom_keys) {
+    if keyboard_input.just_pressed(KEY_BLOCK_MOVE_BOTTOM) {
         // ブロック移動イベントを発火
         events.send(MoveEvent(Direction::Bottom));
         // ブロック落下タイマーを一時停止
@@ -117,7 +108,7 @@ fn key_block_movebottom(
     }
 
     // ブロック下移動キー長押し時
-    if keyboard_input.any_pressed(block_bottom_keys) {
+    if keyboard_input.pressed(KEY_BLOCK_MOVE_BOTTOM) {
         // ブロック下移動タイマーを進める
         movebottom_timer.0.tick(time.delta());
 
@@ -130,7 +121,7 @@ fn key_block_movebottom(
     }
 
     // ブロック下移動キー離した時
-    if keyboard_input.any_just_released(block_bottom_keys) {
+    if keyboard_input.just_released(KEY_BLOCK_MOVE_BOTTOM) {
         // ブロック下移動タイマーをリセット
         movebottom_timer.0.reset();
         // ブロック落下タイマーの一時停止を解除
