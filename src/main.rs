@@ -1,6 +1,7 @@
 use bevy::{
     prelude::*,
     log::LogPlugin,
+    time::Stopwatch,
 };
 
 mod block;
@@ -22,7 +23,8 @@ const PATH_IMAGE_RETRY: &str = "images/rotate-left-dark.png";
 const PATH_SOUND_BGM: &str = "bevy-tetris/bgm.ogg";
 
 const GRID_SIZE: f32 = 20.0;
-const BLOCK_SPEED: f32 = 0.5;
+const BLOCK_FALL_SPEED: f32 = 0.5;
+const BLOCK_MOVE_SPEED: f32 = 0.25;
 const FIELD_SIZE: Vec2 = Vec2::new(10.0 * GRID_SIZE, 20.0 * GRID_SIZE);
 const FIELD_POSITION: Vec3 = Vec3::new(0.0, 0.0, -10.0);
 
@@ -51,6 +53,9 @@ enum Direction {
 #[derive(Resource, Deref, DerefMut)]
 struct FallingTimer(Timer);
 
+#[derive(Resource, Deref, DerefMut)]
+struct MoveBottomTimer(Stopwatch);
+
 #[derive(States, Default, Debug, Clone, PartialEq, Eq, Hash)]
 enum AppState {
     #[default]
@@ -61,11 +66,7 @@ enum AppState {
 
 impl FallingTimer {
     fn new() -> Self {
-        Self(Timer::from_seconds(BLOCK_SPEED, TimerMode::Repeating))
-    }
-
-    fn update_timer(seconds: f32) -> Timer {
-        Timer::from_seconds(seconds, TimerMode::Repeating)
+        Self(Timer::from_seconds(BLOCK_FALL_SPEED, TimerMode::Repeating))
     }
 }
 
@@ -95,6 +96,7 @@ fn main() {
         .add_event::<SpawnEvent>()
         .add_event::<FixEvent>()
         .insert_resource(FallingTimer::new())
+        .insert_resource(MoveBottomTimer(Stopwatch::new()))
         .add_plugins(field::FieldPlugin)
         .add_plugins(key::KeyPlugin)
         .add_plugins(block::BlockPlugin)

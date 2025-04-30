@@ -1,12 +1,13 @@
 use bevy::prelude::*;
 
 use crate::{
-    BLOCK_SPEED,
+    BLOCK_MOVE_SPEED,
     MoveEvent,
     RotationEvent,
     HardDropEvent,
     Direction,
     FallingTimer,
+    MoveBottomTimer,
     AppState,
 };
 
@@ -22,29 +23,62 @@ const KEY_BLOCK_HARDDROP: KeyCode = KeyCode::Space;
 
 fn move_event(
     mut events: EventWriter<MoveEvent>,
-    mut timer: ResMut<FallingTimer>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
     info_once!("move_event");
 
     let mut closure = |direction: Direction| {
         events.send(MoveEvent(direction));
-        if direction == Direction::Bottom {
-            timer.0 = FallingTimer::update_timer(BLOCK_SPEED / 2.0);
-        }
     };
     for key in keyboard_input.get_just_pressed() {
         match *key {
             KEY_BLOCK_LEFT_1   | KEY_BLOCK_LEFT_2   => closure(Direction::Left),
             KEY_BLOCK_RIGHT_1  | KEY_BLOCK_RIGHT_2  => closure(Direction::Right),
-            KEY_BLOCK_BOTTOM_1 | KEY_BLOCK_BOTTOM_2 => closure(Direction::Bottom),
             _ => {},
         }
     }
-    for key in keyboard_input.get_just_released() {
-        if *key == KEY_BLOCK_BOTTOM_1 || *key == KEY_BLOCK_BOTTOM_2 {
-            timer.0 = FallingTimer::update_timer(BLOCK_SPEED);
+}
+
+fn key_block_movebottom(
+    mut events: EventWriter<MoveEvent>,
+    mut falling_timer: ResMut<FallingTimer>,
+    mut movebottom_timer: ResMut<MoveBottomTimer>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    time: Res<Time>,
+) {
+    info_once!("key_block_movebottom");
+
+    let block_bottom_keys = [KEY_BLOCK_BOTTOM_1, KEY_BLOCK_BOTTOM_2];
+
+    // ブロック下移動キー入力時
+    if keyboard_input.any_just_pressed(block_bottom_keys) {
+        // ブロック移動イベントを発火
+        events.send(MoveEvent(Direction::Bottom));
+        // ブロック落下タイマーを一時停止
+        falling_timer.0.pause();
+        // ブロック落下タイマーをリセット
+        falling_timer.0.reset();
+    }
+
+    // ブロック下移動キー長押し時
+    if keyboard_input.any_pressed(block_bottom_keys) {
+        // ブロック下移動タイマーを進める
+        movebottom_timer.0.tick(time.delta());
+
+        if movebottom_timer.0.elapsed_secs() > BLOCK_MOVE_SPEED {
+            // ブロック下移動タイマーをリセット
+            movebottom_timer.0.reset();
+            // ブロック移動イベントを発火
+            events.send(MoveEvent(Direction::Bottom));
         }
+    }
+
+    // ブロック下移動キー離した時
+    if keyboard_input.any_just_released(block_bottom_keys) {
+        // ブロック下移動タイマーをリセット
+        movebottom_timer.0.reset();
+        // ブロック落下タイマーの一時停止を解除
+        falling_timer.0.unpause();
     }
 }
 
@@ -57,6 +91,7 @@ fn rotation_event(
     let mut closure = |direction: Direction| {
         events.send(RotationEvent(direction));
     };
+
     for key in keyboard_input.get_just_pressed() {
         match *key {
             KEY_BLOCK_ROTATION_LEFT  => closure(Direction::Left),
@@ -86,6 +121,7 @@ impl Plugin for KeyPlugin {
         app
             .add_systems(Update, (
                 move_event,
+                key_block_movebottom,
                 rotation_event,
                 harddrop_event,
             ).run_if(in_state(AppState::InGame)))
