@@ -2,6 +2,7 @@ use bevy::{
     prelude::*,
     log::LogPlugin,
     time::Stopwatch,
+    asset::AssetMetaCheck,
 };
 
 mod block;
@@ -90,6 +91,10 @@ fn main() {
             .set(LogPlugin {
                 filter: LOG_FILTER.into(),
                 level: bevy::log::Level::DEBUG,
+                ..Default::default()
+            })
+            .set(AssetPlugin {
+                meta_check: AssetMetaCheck::Never,
                 ..Default::default()
             })
         )
