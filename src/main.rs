@@ -20,7 +20,7 @@ const LOG_FILTER: &str = "info,wgpu_core=warn,wgpu_hal=warn,ittoku_tetris=debug"
 const PATH_FONT: &str = "fonts/misaki_gothic.ttf";
 const PATH_IMAGE_HOUSE: &str = "images/house-dark.png";
 const PATH_IMAGE_RETRY: &str = "images/rotate-left-dark.png";
-const PATH_SOUND_BGM: &str = "bevy-tetris/bgm.ogg";
+const PATH_SOUND_BGM: &str = "ittoku-tetris/bgm.ogg";
 
 const GRID_SIZE: f32 = 20.0;
 const BLOCK_FALL_SPEED: f32 = 0.5;
