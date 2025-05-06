@@ -16,6 +16,7 @@ use crate::{
 use crate::blockdata::*;
 
 mod clear;
+mod gizmos;
 mod harddrop;
 mod movement;
 mod rotation;
@@ -294,6 +295,7 @@ impl Plugin for BlockPlugin {
                 rotation::block_rotation,
                 movement::block_movement,
                 harddrop::block_harddrop,
+                gizmos::draw_gizmos_block,
                 gameover,
                 clear::block_clear,
             ).chain().run_if(in_state(AppState::InGame)))
