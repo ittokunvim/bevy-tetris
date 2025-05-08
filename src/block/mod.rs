@@ -53,8 +53,15 @@ struct CurrentBlock {
 #[derive(Resource)]
 struct BlockMap([[usize; 10]; 24]);
 
+/// 次に生成するブロックの表示に用いるリソース
+///
+/// 値は[BlockType; 3]で定義されており
+/// ブロックの形に関する値が格納されている
+#[derive(Resource)]
+pub struct NextBlockList(pub [BlockType; 3]);
+
 #[derive(Copy, Clone)]
-enum BlockType {
+pub enum BlockType {
     TypeI,
     TypeJ,
     TypeL,
@@ -196,7 +203,7 @@ impl BlockType {
 
     // ブロックの形状データを取得するメソッド
     // 各ブロックタイプに対応する4回転分の形状を持つ
-    fn blockdata(&self) -> [[usize; 16]; 4] {
+    pub fn blockdata(&self) -> [[usize; 16]; 4] {
         match self {
             BlockType::TypeI => I_BLOCK,
             BlockType::TypeJ => J_BLOCK,
@@ -209,7 +216,7 @@ impl BlockType {
     }
 
     // ブロックに対応する色を取得するメソッド
-    fn color(&self) -> Color {
+    pub fn color(&self) -> Color {
         match self {
             BlockType::TypeI => I_COLOR,
             BlockType::TypeJ => J_COLOR,
@@ -219,6 +226,18 @@ impl BlockType {
             BlockType::TypeT => T_COLOR,
             BlockType::TypeZ => Z_COLOR,
         }
+    }
+}
+
+impl NextBlockList {
+    fn new() -> Self {
+        let blocktypes = [
+            BlockType::random(),
+            BlockType::random(),
+            BlockType::random(),
+        ];
+
+        Self(blocktypes)
     }
 }
 
@@ -288,6 +307,7 @@ impl Plugin for BlockPlugin {
         app
             .insert_resource(CurrentBlock::new())
             .insert_resource(BlockMap(BLOCK_MAP))
+            .insert_resource(NextBlockList::new())
             .add_systems(OnEnter(AppState::InGame), setup)
             .add_systems(Update, (
                 spawn::block_spawn,
