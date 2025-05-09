@@ -5,11 +5,12 @@ use crate::{
     PATH_FONT,
     FIELD_SIZE,
     FIELD_POSITION,
+    SpawnEvent,
     AppState,
 };
 use crate::block::{
     BlockType,
-    NextBlockList,
+    NextBlocks,
 };
 
 const BOARD_SIZE: Vec2 = Vec2::new(
@@ -39,7 +40,7 @@ const BLOCK_INIT_POSITION: Vec3 = Vec3::new(
 );
 
 #[derive(Component)]
-pub struct NextBlock;
+pub struct NextBlockMenu;
 
 /// 次に出てくるブロックを描画する関数
 /// フィールド右上に配置し、次回に生成される
@@ -48,7 +49,7 @@ fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    next_block: Res<NextBlockList>,
+    next_block: Res<NextBlocks>,
     asset_server: Res<AssetServer>,
 ) {
     info_once!("setup");
@@ -57,7 +58,7 @@ fn setup(
     commands.spawn((
         Sprite::from_color(BOARD_COLOR, BOARD_SIZE),
         Transform::from_translation(BOARD_POSITION),
-        NextBlock,
+        NextBlockMenu,
     ));
 
     // テキストのフォントをロード
@@ -101,15 +102,39 @@ fn setup(
                 Mesh2d(shape.clone()),
                 MeshMaterial2d(materials.add(color)),
                 Transform::from_translation(translation),
-                NextBlock,
+                NextBlockMenu,
             ));
         }
     }
 }
 
+/// ブロック生成時に次にくるブロックの更新を行う関数
+/// 次ブロックリストの値の更新し画面の更新も行う
 fn update(
+    mut events: EventReader<SpawnEvent>,
+    mut nextblock: ResMut<NextBlocks>,
 ) {
     info_once!("update");
+
+    // ブロック生成イベントがこなければ何もしない
+    if events.is_empty() {
+        return;
+    }
+
+    // イベントをクリア
+    events.clear();
+
+    // NextBlockの値を更新
+    *nextblock = nextblock.update();
+}
+
+fn despawn(
+    mut commands: Commands,
+    query: Query<Entity, With<NextBlockMenu>>,
+) {
+    for entity in &query {
+        commands.entity(entity).despawn();
+    }
 }
 
 pub struct NextBlockPlugin;
@@ -119,6 +144,7 @@ impl Plugin for NextBlockPlugin {
         app
             .add_systems(OnEnter(AppState::InGame), setup)
             .add_systems(Update, update.run_if(in_state(AppState::InGame)))
+            .add_systems(OnExit(AppState::Gameover), despawn)
         ;
     }
 }

@@ -34,6 +34,7 @@ const FIELD_LEFT_TOP: Vec2 = Vec2::new(
     FIELD_POSITION.x - FIELD_SIZE.x / 2.0 + GRID_SIZE / 2.0, 
     FIELD_POSITION.y + FIELD_SIZE.y / 2.0 - GRID_SIZE / 2.0,
 );
+const NEXT_BLOCKS_LENGTH: usize = 3;
 
 /// ブロック回転時に用いるリソース
 ///
@@ -57,10 +58,10 @@ struct BlockMap([[usize; 10]; 24]);
 ///
 /// 値は[BlockType; 3]で定義されており
 /// ブロックの形に関する値が格納されている
-#[derive(Resource)]
-pub struct NextBlockList(pub [BlockType; 3]);
+#[derive(Resource, Debug)]
+pub struct NextBlocks(pub [BlockType; NEXT_BLOCKS_LENGTH]);
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum BlockType {
     TypeI,
     TypeJ,
@@ -229,13 +230,24 @@ impl BlockType {
     }
 }
 
-impl NextBlockList {
+impl NextBlocks {
     fn new() -> Self {
-        let blocktypes = [
-            BlockType::random(),
-            BlockType::random(),
-            BlockType::random(),
-        ];
+        let blocktypes = std::array::from_fn(|_| BlockType::random());
+
+        Self(blocktypes)
+    }
+
+    pub fn update(&self) -> Self {
+        let mut blocktypes = self.0;
+
+        // 配列の長さを保証
+        assert!(blocktypes.len() == NEXT_BLOCKS_LENGTH, "Unexpected blocktypes length");
+
+        // 配列を1つ左にシフト
+        blocktypes.copy_within(1.., 0);
+
+        // 最後の要素をランダム値で更新
+        blocktypes[NEXT_BLOCKS_LENGTH - 1] = BlockType::random();
 
         Self(blocktypes)
     }
@@ -307,7 +319,7 @@ impl Plugin for BlockPlugin {
         app
             .insert_resource(CurrentBlock::new())
             .insert_resource(BlockMap(BLOCK_MAP))
-            .insert_resource(NextBlockList::new())
+            .insert_resource(NextBlocks::new())
             .add_systems(OnEnter(AppState::InGame), setup)
             .add_systems(Update, (
                 spawn::block_spawn,
