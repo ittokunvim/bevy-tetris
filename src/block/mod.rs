@@ -34,7 +34,7 @@ const FIELD_LEFT_TOP: Vec2 = Vec2::new(
     FIELD_POSITION.x - FIELD_SIZE.x / 2.0 + GRID_SIZE / 2.0, 
     FIELD_POSITION.y + FIELD_SIZE.y / 2.0 - GRID_SIZE / 2.0,
 );
-const NEXT_BLOCKS_LENGTH: usize = 4;
+const NEXT_BLOCK_COUNT: usize = 4;
 
 /// ブロック回転時に用いるリソース
 ///
@@ -59,7 +59,7 @@ struct BlockMap([[usize; 10]; 24]);
 /// 値は[BlockType; 3]で定義されており
 /// ブロックの形に関する値が格納されている
 #[derive(Resource, Debug)]
-pub struct NextBlocks(pub [BlockType; NEXT_BLOCKS_LENGTH]);
+pub struct NextBlocks(pub [BlockType; NEXT_BLOCK_COUNT]);
 
 #[derive(Copy, Clone, Debug)]
 pub enum BlockType {
@@ -241,13 +241,13 @@ impl NextBlocks {
         let mut blocktypes = self.0;
 
         // 配列の長さを保証
-        assert!(blocktypes.len() == NEXT_BLOCKS_LENGTH, "Unexpected blocktypes length");
+        assert!(blocktypes.len() == NEXT_BLOCK_COUNT, "Unexpected blocktypes length");
 
         // 配列を1つ左にシフト
         blocktypes.copy_within(1.., 0);
 
         // 最後の要素をランダム値で更新
-        blocktypes[NEXT_BLOCKS_LENGTH - 1] = BlockType::random();
+        blocktypes[NEXT_BLOCK_COUNT - 1] = BlockType::random();
 
         Self(blocktypes)
     }

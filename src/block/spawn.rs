@@ -22,7 +22,7 @@ pub fn block_spawn(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut current_block: ResMut<CurrentBlock>,
-    next_block: ResMut<NextBlocks>,
+    nextblocks: ResMut<NextBlocks>,
     query: Query<&Transform, With<Block>>,
 ) {
     info_once!("block_spawn");
@@ -39,7 +39,7 @@ pub fn block_spawn(
     *current_block = CurrentBlock::new();
 
     // CurrentBlockのBlockTypeをNextBlockに紐付け
-    current_block.blocktype = *next_block.0.first().unwrap();
+    current_block.blocktype = *nextblocks.0.first().unwrap();
 
     // PlayerBlockを生成
     let shape = meshes.add(Rectangle::new(BLOCK_SIZE, BLOCK_SIZE));

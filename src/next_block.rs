@@ -40,10 +40,10 @@ const BLOCK_INIT_POSITION: Vec3 = Vec3::new(
 );
 
 #[derive(Component)]
-pub struct NextBlockMenu;
+pub struct Component;
 
 #[derive(Component, Debug)]
-struct NextBlockData {
+struct NextBlock {
     nextblock_id: usize,
     blocktype: BlockType,
     block_id: usize,
@@ -56,7 +56,7 @@ fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    next_block: Res<NextBlocks>,
+    nextblocks: Res<NextBlocks>,
     asset_server: Res<AssetServer>,
 ) {
     info_once!("setup");
@@ -65,7 +65,7 @@ fn setup(
     commands.spawn((
         Sprite::from_color(BOARD_COLOR, BOARD_SIZE),
         Transform::from_translation(BOARD_POSITION),
-        NextBlockMenu,
+        Component,
     ));
 
     // テキストのフォントをロード
@@ -86,7 +86,7 @@ fn setup(
     let shape = meshes.add(Rectangle::new(BLOCK_SIZE.x, BLOCK_SIZE.y));
 
     // 次に生成されるブロックのリストをループ
-    for (nextblock_id, blocktype) in next_block.0.iter().enumerate() {
+    for (nextblock_id, blocktype) in nextblocks.0.iter().enumerate() {
         if nextblock_id <= 0 {
             continue;
         }
@@ -114,8 +114,8 @@ fn setup(
                 Mesh2d(shape.clone()),
                 MeshMaterial2d(materials.add(color)),
                 Transform::from_translation(translation),
-                NextBlockMenu,
-                NextBlockData {
+                Component,
+                NextBlock {
                     nextblock_id,
                     blocktype: *blocktype,
                     block_id: *value,
@@ -132,8 +132,8 @@ fn update(
     mut query: Query<(
         &mut Transform,
         &mut MeshMaterial2d<ColorMaterial>,
-        &mut NextBlockData
-    ), With<NextBlockData>>,
+        &mut NextBlock
+    ), With<NextBlock>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut nextblock: ResMut<NextBlocks>,
 ) {
@@ -191,7 +191,7 @@ fn update(
 
 fn despawn(
     mut commands: Commands,
-    query: Query<Entity, With<NextBlockMenu>>,
+    query: Query<Entity, With<Component>>,
 ) {
     for entity in &query {
         commands.entity(entity).despawn();
