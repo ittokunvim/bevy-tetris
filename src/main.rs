@@ -10,6 +10,7 @@ mod bgm;
 mod blockdata;
 mod field;
 mod key;
+mod next_block;
 
 mod mainmenu;
 mod gameover;
@@ -24,6 +25,7 @@ const PATH_IMAGE_RETRY: &str = "images/rotate-left-dark.png";
 const PATH_SOUND_BGM: &str = "ittoku-tetris/bgm.ogg";
 
 const GRID_SIZE: f32 = 20.0;
+const GRID_SIZE_HALF: f32 = GRID_SIZE / 2.0;
 const BLOCK_FALL_SPEED: f32 = 0.5;
 const BLOCK_MOVE_SPEED: f32 = 0.25;
 const FIELD_SIZE: Vec2 = Vec2::new(10.0 * GRID_SIZE, 20.0 * GRID_SIZE);
@@ -114,6 +116,7 @@ fn main() {
         .add_plugins(key::KeyPlugin)
         .add_plugins(block::BlockPlugin)
         .add_plugins(bgm::BgmPlugin)
+        .add_plugins(next_block::NextBlockPlugin)
         .add_plugins(mainmenu::MainmenuPlugin)
         .add_plugins(gameover::GameoverPlugin)
         .add_systems(Startup, setup)

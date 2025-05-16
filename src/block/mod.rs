@@ -34,6 +34,7 @@ const FIELD_LEFT_TOP: Vec2 = Vec2::new(
     FIELD_POSITION.x - FIELD_SIZE.x / 2.0 + GRID_SIZE / 2.0, 
     FIELD_POSITION.y + FIELD_SIZE.y / 2.0 - GRID_SIZE / 2.0,
 );
+const NEXT_BLOCK_COUNT: usize = 4;
 
 /// ブロック回転時に用いるリソース
 ///
@@ -53,8 +54,15 @@ struct CurrentBlock {
 #[derive(Resource)]
 struct BlockMap([[usize; 10]; 24]);
 
-#[derive(Copy, Clone)]
-enum BlockType {
+/// 次に生成するブロックの表示に用いるリソース
+///
+/// 値は[BlockType; 3]で定義されており
+/// ブロックの形に関する値が格納されている
+#[derive(Resource, Debug)]
+pub struct NextBlocks(pub [BlockType; NEXT_BLOCK_COUNT]);
+
+#[derive(Copy, Clone, Debug)]
+pub enum BlockType {
     TypeI,
     TypeJ,
     TypeL,
@@ -196,7 +204,7 @@ impl BlockType {
 
     // ブロックの形状データを取得するメソッド
     // 各ブロックタイプに対応する4回転分の形状を持つ
-    fn blockdata(&self) -> [[usize; 16]; 4] {
+    pub fn blockdata(&self) -> [[usize; 16]; 4] {
         match self {
             BlockType::TypeI => I_BLOCK,
             BlockType::TypeJ => J_BLOCK,
@@ -209,7 +217,7 @@ impl BlockType {
     }
 
     // ブロックに対応する色を取得するメソッド
-    fn color(&self) -> Color {
+    pub fn color(&self) -> Color {
         match self {
             BlockType::TypeI => I_COLOR,
             BlockType::TypeJ => J_COLOR,
@@ -219,6 +227,29 @@ impl BlockType {
             BlockType::TypeT => T_COLOR,
             BlockType::TypeZ => Z_COLOR,
         }
+    }
+}
+
+impl NextBlocks {
+    fn new() -> Self {
+        let blocktypes = std::array::from_fn(|_| BlockType::random());
+
+        Self(blocktypes)
+    }
+
+    pub fn update(&self) -> Self {
+        let mut blocktypes = self.0;
+
+        // 配列の長さを保証
+        assert!(blocktypes.len() == NEXT_BLOCK_COUNT, "Unexpected blocktypes length");
+
+        // 配列を1つ左にシフト
+        blocktypes.copy_within(1.., 0);
+
+        // 最後の要素をランダム値で更新
+        blocktypes[NEXT_BLOCK_COUNT - 1] = BlockType::random();
+
+        Self(blocktypes)
     }
 }
 
@@ -288,6 +319,7 @@ impl Plugin for BlockPlugin {
         app
             .insert_resource(CurrentBlock::new())
             .insert_resource(BlockMap(BLOCK_MAP))
+            .insert_resource(NextBlocks::new())
             .add_systems(OnEnter(AppState::InGame), setup)
             .add_systems(Update, (
                 spawn::block_spawn,
