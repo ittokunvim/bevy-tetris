@@ -129,11 +129,17 @@ fn setup(
 /// 次ブロックリストの値の更新し画面の更新も行う
 fn update(
     mut events: EventReader<SpawnEvent>,
+    mut query: Query<(
+        &mut Transform,
+        &mut MeshMaterial2d<ColorMaterial>,
+        &mut NextBlockData
+    ), With<NextBlockData>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
     mut nextblock: ResMut<NextBlocks>,
 ) {
     info_once!("update");
 
-    // ブロック生成イベントがこなければ何もしない
+    // ブロック生成イベント時に処理を実行
     if events.is_empty() {
         return;
     }
@@ -141,8 +147,46 @@ fn update(
     // イベントをクリア
     events.clear();
 
-    // NextBlockの値を更新
+    // 次ブロックデータを更新
     *nextblock = nextblock.update();
+
+    // 次ブロック一覧をループ
+    for (mut transform, mut color, mut nextblockdata) in &mut query {
+        // 初めの次ブロックは対象外
+        if nextblockdata.nextblock_id <= 0 {
+            continue;
+        }
+
+        let nextblock_id = nextblockdata.nextblock_id;
+        let prev_blocktype = nextblockdata.blocktype;
+        let block_id = nextblockdata.block_id;
+
+        // 次ブロックの色を更新
+        *color = MeshMaterial2d(materials.add(nextblockdata.blocktype.color()));
+        // 次ブロックのブロックの形を更新
+        nextblockdata.blocktype = nextblock.0[nextblock_id];
+
+        // 現在のブロックデータ配列内に該当するindexを検索
+        if let Some((index, _)) = prev_blocktype.blockdata()[0]
+            .iter()
+            .enumerate()
+            .find(|(_, &blockdata_value)| blockdata_value == block_id)
+        {
+            // ブロックの描画y座標を計算
+            let y = BLOCK_INIT_POSITION.y - GRID_SIZE_HALF * 5.0 * (nextblock_id - 1) as f32;
+            // 初期位置y座標反映＋ブロックタイプごとのオフセット計算
+            let init_position = calculate_nextblock_position(
+                &prev_blocktype,
+                BLOCK_INIT_POSITION.with_y(y),
+            );
+            // インデックスからブロックの座標を計算し、位置を更新
+            transform.translation = Vec3::new(
+                init_position.x + GRID_SIZE_HALF * ((index % 4) as f32),
+                init_position.y - GRID_SIZE_HALF * ((index / 4) as f32),
+                10.0,
+            );
+        }
+    }
 }
 
 fn despawn(
