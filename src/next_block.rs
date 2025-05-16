@@ -28,7 +28,7 @@ const NEXT_TEXT: &str = "NEXT";
 const NEXT_FONT_SIZE: f32 = 20.0;
 const NEXT_POSITION: Vec3 = Vec3::new(
     BOARD_POSITION.x, 
-    BOARD_POSITION.y + GRID_SIZE_HALF * 9.0 - NEXT_FONT_SIZE / 2.0, 
+    BOARD_POSITION.y + BOARD_SIZE.y / 2.0 - NEXT_FONT_SIZE / 2.0 - GRID_SIZE_HALF * 1.75,
     10.0, 
 );
 
