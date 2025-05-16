@@ -34,7 +34,7 @@ const FIELD_LEFT_TOP: Vec2 = Vec2::new(
     FIELD_POSITION.x - FIELD_SIZE.x / 2.0 + GRID_SIZE / 2.0, 
     FIELD_POSITION.y + FIELD_SIZE.y / 2.0 - GRID_SIZE / 2.0,
 );
-const NEXT_BLOCKS_LENGTH: usize = 3;
+const NEXT_BLOCKS_LENGTH: usize = 4;
 
 /// ブロック回転時に用いるリソース
 ///

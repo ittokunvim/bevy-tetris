@@ -35,7 +35,7 @@ const NEXT_POSITION: Vec3 = Vec3::new(
 const BLOCK_SIZE: Vec2 = Vec2::new(GRID_SIZE_HALF, GRID_SIZE_HALF);
 const BLOCK_INIT_POSITION: Vec3 = Vec3::new(
     BOARD_POSITION.x - BOARD_SIZE.x / 2.0 + BLOCK_SIZE.x / 2.0,
-    BOARD_POSITION.y + BOARD_SIZE.y / 2.0 + BLOCK_SIZE.y / 2.0 - GRID_SIZE_HALF * 5.0,
+    BOARD_POSITION.y + BOARD_SIZE.y / 2.0 - BLOCK_SIZE.y / 2.0 - GRID_SIZE_HALF * 5.0,
     10.0,
 );
 
@@ -79,12 +79,16 @@ fn setup(
     let shape = meshes.add(Rectangle::new(BLOCK_SIZE.x, BLOCK_SIZE.y));
 
     // 次に生成されるブロックのリストをループ
-    for (index, blocktype) in next_block.0.iter().enumerate() {
+    for (nextblock_id, blocktype) in next_block.0.iter().enumerate() {
+        if nextblock_id <= 0 {
+            continue;
+        }
+
         let color = blocktype.color();
-        let init_position = calculate_nextblock_position(blocktype, index);
+        let init_position = calculate_nextblock_position(blocktype, nextblock_id);
 
         // BlockTypeからBlockDataを取得しループ
-        for (index, value) in blocktype.blockdata()[0].iter().enumerate() {
+        for (block_id, value) in blocktype.blockdata()[0].iter().enumerate() {
             // ブロックの値が0であればスキップ
             if *value == 0 {
                 continue;
@@ -92,8 +96,8 @@ fn setup(
 
             // ブロックの位置を計算
             let translation = Vec3::new(
-                init_position.x + GRID_SIZE_HALF * ((index % 4) as f32),
-                init_position.y - GRID_SIZE_HALF * ((index / 4) as f32),
+                init_position.x + GRID_SIZE_HALF * ((block_id % 4) as f32),
+                init_position.y - GRID_SIZE_HALF * ((block_id / 4) as f32),
                 10.0,
             );
 
