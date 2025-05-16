@@ -42,6 +42,13 @@ const BLOCK_INIT_POSITION: Vec3 = Vec3::new(
 #[derive(Component)]
 pub struct NextBlockMenu;
 
+#[derive(Component, Debug)]
+struct NextBlockData {
+    nextblock_id: usize,
+    blocktype: BlockType,
+    block_id: usize,
+}
+
 /// 次に出てくるブロックを描画する関数
 /// フィールド右上に配置し、次回に生成される
 /// ブロックの形を3つ表示する
@@ -85,7 +92,8 @@ fn setup(
         }
 
         let color = blocktype.color();
-        let init_position = calculate_nextblock_position(blocktype, nextblock_id);
+        let init_position = BLOCK_INIT_POSITION.with_y(GRID_SIZE_HALF * 5.0 * nextblock_id as f32);
+        let init_position = calculate_nextblock_position(blocktype, init_position);
 
         // BlockTypeからBlockDataを取得しループ
         for (block_id, value) in blocktype.blockdata()[0].iter().enumerate() {
@@ -107,6 +115,11 @@ fn setup(
                 MeshMaterial2d(materials.add(color)),
                 Transform::from_translation(translation),
                 NextBlockMenu,
+                NextBlockData {
+                    nextblock_id,
+                    blocktype: *blocktype,
+                    block_id: *value,
+                },
             ));
         }
     }
@@ -157,11 +170,8 @@ impl Plugin for NextBlockPlugin {
 /// 各ブロックの種類に応じて微調整する関数
 fn calculate_nextblock_position(
     blocktype: &BlockType,
-    step: usize,
+    init_position: Vec3,
 ) -> Vec2 {
-    let y = BLOCK_INIT_POSITION.y - GRID_SIZE_HALF * 5.0 * step as f32;
-    let init_position = BLOCK_INIT_POSITION.with_y(y);
-
     match blocktype {
         BlockType::TypeI => Vec2::new(
             init_position.x + GRID_SIZE_HALF * 0.5,
