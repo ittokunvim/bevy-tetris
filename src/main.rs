@@ -11,6 +11,7 @@ mod blockdata;
 mod field;
 mod key;
 mod next_block;
+mod holdblock;
 
 mod mainmenu;
 mod gameover;
@@ -117,6 +118,7 @@ fn main() {
         .add_plugins(block::BlockPlugin)
         .add_plugins(bgm::BgmPlugin)
         .add_plugins(next_block::NextBlockPlugin)
+        .add_plugins(holdblock::HoldBlockPlugin)
         .add_plugins(mainmenu::MainmenuPlugin)
         .add_plugins(gameover::GameoverPlugin)
         .add_systems(Startup, setup)
