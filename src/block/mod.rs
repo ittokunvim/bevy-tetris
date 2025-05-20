@@ -41,8 +41,8 @@ const NEXT_BLOCK_COUNT: usize = 4;
 /// idには[usize; 16]で定義されているindexが格納される
 /// posには回転時に軸となるXYZ軸が定義される
 #[derive(Resource)]
-struct CurrentBlock {
-    blocktype: BlockType,
+pub struct CurrentBlock {
+    pub blocktype: BlockType,
     blockid: usize,
     pos: Vec3,
 }
@@ -61,6 +61,12 @@ struct BlockMap([[usize; 10]; 24]);
 #[derive(Resource, Debug)]
 pub struct NextBlocks(pub [BlockType; NEXT_BLOCK_COUNT]);
 
+#[derive(Resource)]
+pub struct HoldBlocks {
+    pub can_hold: bool,
+    pub blocktype: Option<BlockType>,
+}
+
 #[derive(Copy, Clone, Debug)]
 pub enum BlockType {
     TypeI,
@@ -76,7 +82,7 @@ pub enum BlockType {
 ///
 /// 値には1~4に定義されているブロックのIDが格納される
 #[derive(Component)]
-struct PlayerBlock(usize);
+pub struct PlayerBlock(usize);
 
 /// 移動、回転しないブロックを識別するコンポーネント
 ///
@@ -174,6 +180,15 @@ impl BlockMap {
         // clear top line
         block_map[0] = [0; 10];
         block_map
+    }
+}
+
+impl HoldBlocks {
+    fn new() -> Self {
+        Self {
+            can_hold: true,
+            blocktype: None,
+        }
     }
 }
 
@@ -320,6 +335,7 @@ impl Plugin for BlockPlugin {
             .insert_resource(CurrentBlock::new())
             .insert_resource(BlockMap(BLOCK_MAP))
             .insert_resource(NextBlocks::new())
+            .insert_resource(HoldBlocks::new())
             .add_systems(OnEnter(AppState::InGame), setup)
             .add_systems(Update, (
                 spawn::block_spawn,

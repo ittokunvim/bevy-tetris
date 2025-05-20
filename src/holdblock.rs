@@ -6,11 +6,15 @@ use crate::{
     PATH_FONT,
     FIELD_SIZE,
     FIELD_POSITION,
+    SpawnEvent,
+    HoldEvent,
     AppState,
 };
 
 use crate::block::{
+    PlayerBlock,
     BlockType,
+    HoldBlocks,
 };
 
 const BOARD_SIZE: Vec2 = Vec2::new(
@@ -45,6 +49,8 @@ struct HoldBoard;
 
 #[derive(Component, Debug)]
 struct HoldBlock {
+    blocktype: Option<BlockType>,
+    block_id: usize,
 }
 
 /// ホールドされたブロックを描画する関数
@@ -86,14 +92,73 @@ fn setup(
             Mesh2d(shape.clone()),
             MeshMaterial2d(materials.add(color)),
             HoldBoard,
-            HoldBlock { }
+            HoldBlock { blocktype: None, block_id, }
         ));
     }
 }
 
+/// ホールドしたブロックを更新する関数
+/// ホールドブロックの状態をゲーム進行に合わせて
+/// 更新を行う
 fn update(
+    mut commands: Commands,
+    mut hold_events: EventReader<HoldEvent>,
+    mut spawn_events: EventWriter<SpawnEvent>,
+    mut holdblocks: ResMut<HoldBlocks>,
+    mut holdblock_query: Query<(
+        &mut Transform,
+        &mut MeshMaterial2d<ColorMaterial>,
+        &mut HoldBlock
+    ), With<HoldBlock>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+    player_query: Query<Entity, With<PlayerBlock>>,
 ) {
     info_once!("update");
+
+    // ホールドイベントが発生した時の処理
+    for event in hold_events.read() {
+        let blocktype = event.0;
+
+        // プレイヤーブロックを削除する
+        for entity in player_query.iter() {
+            commands.entity(entity).despawn();
+        }
+
+        // 全壊ホールドしたブロックを新規ブロックとして生成
+        // 初回はデフォルト生成
+        spawn_events.send_default();
+
+        // 今回ホールドしたブロックタイプを登録
+        holdblocks.blocktype = Some(blocktype);
+
+        // ホールドされたブロックを表示を更新
+        if let Some(blocktype) = holdblocks.blocktype {
+            let blockdata = &blocktype.blockdata()[0];
+
+            for (mut transform, mut color, mut holdblock) in &mut holdblock_query.iter_mut() {
+                // 現在のホールドブロックIDが形状データに含まれるか検索
+                if let Some((index, _)) = blockdata
+                    .iter()
+                    .enumerate()
+                    .find(|(_, &v)| v == holdblock.block_id)
+                {
+                    // ブロックの色を更新
+                    *color = MeshMaterial2d(materials.add(holdblocks.blocktype.unwrap().color()));
+                    // ブロックタイプを更新
+                    holdblock.blocktype = Some(blocktype);
+
+                    // ブロック表示位置を計算（タイプごとに微調整）
+                    let pos = calculate_nextblock_position(blocktype, BLOCK_INIT_POSITION);
+                    // ブロックの座標を設定
+                    transform.translation = Vec3::new(
+                        pos.x + GRID_SIZE_HALF * ((index % 4) as f32),
+                        pos.y - GRID_SIZE_HALF * ((index / 4) as f32),
+                        10.0,
+                    );
+                }
+            }
+        }
+    }
 }
 
 fn despawn(
@@ -117,3 +182,40 @@ impl Plugin for HoldBlockPlugin {
     }
 }
 
+/// 次ブロックの生成ポジションを
+/// 各ブロックの種類に応じて微調整する関数
+fn calculate_nextblock_position(
+    blocktype: BlockType,
+    init_position: Vec3,
+) -> Vec2 {
+    match blocktype {
+        BlockType::TypeI => Vec2::new(
+            init_position.x + GRID_SIZE_HALF * 0.5,
+            init_position.y - GRID_SIZE_HALF * 1.0,
+        ),
+        BlockType::TypeJ => Vec2::new(
+            init_position.x + GRID_SIZE_HALF * 1.0,
+            init_position.y - GRID_SIZE_HALF * 1.5,
+        ),
+        BlockType::TypeL => Vec2::new(
+            init_position.x + GRID_SIZE_HALF * 1.0,
+            init_position.y - GRID_SIZE_HALF * 1.5,
+        ),
+        BlockType::TypeO => Vec2::new(
+            init_position.x + GRID_SIZE_HALF * 0.5,
+            init_position.y - GRID_SIZE_HALF * 0.5,
+        ),
+        BlockType::TypeS => Vec2::new(
+            init_position.x + GRID_SIZE_HALF * 1.0,
+            init_position.y - GRID_SIZE_HALF * 0.5,
+        ),
+        BlockType::TypeT => Vec2::new(
+            init_position.x + GRID_SIZE_HALF * 1.0,
+            init_position.y - GRID_SIZE_HALF * 1.5,
+        ),
+        BlockType::TypeZ => Vec2::new(
+            init_position.x + GRID_SIZE_HALF * 1.0,
+            init_position.y - GRID_SIZE_HALF * 0.5,
+        ),
+    }
+}
