@@ -6,7 +6,6 @@ use crate::{
     PATH_FONT,
     FIELD_SIZE,
     FIELD_POSITION,
-    SpawnEvent,
     HoldEvent,
     AppState,
 };
@@ -14,7 +13,6 @@ use crate::{
 use crate::block::{
     PlayerBlock,
     BlockType,
-    HoldBlocks,
 };
 
 const BOARD_SIZE: Vec2 = Vec2::new(
@@ -103,8 +101,6 @@ fn setup(
 fn update(
     mut commands: Commands,
     mut hold_events: EventReader<HoldEvent>,
-    mut spawn_events: EventWriter<SpawnEvent>,
-    mut holdblocks: ResMut<HoldBlocks>,
     mut holdblock_query: Query<(
         &mut Transform,
         &mut MeshMaterial2d<ColorMaterial>,
@@ -124,38 +120,29 @@ fn update(
             commands.entity(entity).despawn();
         }
 
-        // 全壊ホールドしたブロックを新規ブロックとして生成
-        // 初回はデフォルト生成
-        spawn_events.send_default();
-
-        // 今回ホールドしたブロックタイプを登録
-        holdblocks.blocktype = Some(blocktype);
-
         // ホールドされたブロックを表示を更新
-        if let Some(blocktype) = holdblocks.blocktype {
-            let blockdata = &blocktype.blockdata()[0];
+        let blockdata = &blocktype.blockdata()[0];
 
-            for (mut transform, mut color, mut holdblock) in &mut holdblock_query.iter_mut() {
-                // 現在のホールドブロックIDが形状データに含まれるか検索
-                if let Some((index, _)) = blockdata
-                    .iter()
-                    .enumerate()
-                    .find(|(_, &v)| v == holdblock.block_id)
-                {
-                    // ブロックの色を更新
-                    *color = MeshMaterial2d(materials.add(holdblocks.blocktype.unwrap().color()));
-                    // ブロックタイプを更新
-                    holdblock.blocktype = Some(blocktype);
+        for (mut transform, mut color, mut holdblock) in &mut holdblock_query.iter_mut() {
+            // 現在のホールドブロックIDが形状データに含まれるか検索
+            if let Some((index, _)) = blockdata
+                .iter()
+                .enumerate()
+                .find(|(_, &v)| v == holdblock.block_id)
+            {
+                // ブロックの色を更新
+                *color = MeshMaterial2d(materials.add(blocktype.color()));
+                // ブロックタイプを更新
+                holdblock.blocktype = Some(blocktype);
 
-                    // ブロック表示位置を計算（タイプごとに微調整）
-                    let pos = calculate_nextblock_position(blocktype, BLOCK_INIT_POSITION);
-                    // ブロックの座標を設定
-                    transform.translation = Vec3::new(
-                        pos.x + GRID_SIZE_HALF * ((index % 4) as f32),
-                        pos.y - GRID_SIZE_HALF * ((index / 4) as f32),
-                        10.0,
-                    );
-                }
+                // ブロック表示位置を計算（タイプごとに微調整）
+                let pos = calculate_nextblock_position(blocktype, BLOCK_INIT_POSITION);
+                // ブロックの座標を設定
+                transform.translation = Vec3::new(
+                    pos.x + GRID_SIZE_HALF * ((index % 4) as f32),
+                    pos.y - GRID_SIZE_HALF * ((index / 4) as f32),
+                    10.0,
+                );
             }
         }
     }

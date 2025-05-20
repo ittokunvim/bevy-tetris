@@ -18,6 +18,7 @@ use crate::blockdata::*;
 mod clear;
 mod gizmos;
 mod harddrop;
+mod hold;
 mod movement;
 mod rotation;
 mod spawn;
@@ -343,6 +344,7 @@ impl Plugin for BlockPlugin {
                 rotation::block_rotation,
                 movement::block_movement,
                 harddrop::block_harddrop,
+                hold::block_hold,
                 gizmos::draw_gizmos_block,
                 gameover,
                 clear::block_clear,
