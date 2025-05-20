@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+pub const BLOCK_UNIT_COUNT: usize = 4;
 pub const BLOCK_MAP: [[usize; 10]; 24] = [
     [0,0,0,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,0,0,0,0],
