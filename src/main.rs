@@ -4,6 +4,7 @@ use bevy::{
     time::Stopwatch,
     asset::AssetMetaCheck,
 };
+use crate::block::BlockType;
 
 mod block;
 mod bgm;
@@ -46,6 +47,9 @@ struct SpawnEvent;
 
 #[derive(Event, Default)]
 struct FixEvent;
+
+#[derive(Event)]
+struct HoldEvent(BlockType);
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 enum Direction {
@@ -109,6 +113,7 @@ fn main() {
         .add_event::<HardDropEvent>()
         .add_event::<SpawnEvent>()
         .add_event::<FixEvent>()
+        .add_event::<HoldEvent>()
         .insert_resource(FallingTimer::new())
         .insert_resource(MoveLeftTimer(Stopwatch::new()))
         .insert_resource(MoveRightTimer(Stopwatch::new()))

@@ -5,12 +5,17 @@ use crate::{
     MoveEvent,
     RotationEvent,
     HardDropEvent,
+    HoldEvent,
     Direction,
     FallingTimer,
     MoveLeftTimer,
     MoveRightTimer,
     MoveBottomTimer,
     AppState,
+};
+use crate::block::{
+    CurrentBlock,
+    HoldBlocks,
 };
 
 const KEY_BLOCK_MOVE_LEFT: KeyCode = KeyCode::ArrowLeft;
@@ -19,6 +24,7 @@ const KEY_BLOCK_MOVE_BOTTOM: KeyCode = KeyCode::ArrowDown;
 const KEY_BLOCK_ROTATION_LEFT: KeyCode = KeyCode::KeyZ;
 const KEY_BLOCK_ROTATION_RIGHT: KeyCode = KeyCode::ArrowUp;
 const KEY_BLOCK_HARDDROP: KeyCode = KeyCode::Space;
+const KEY_BLOCK_HOLD: KeyCode = KeyCode::KeyC;
 
 fn key_block_moveleft(
     mut events: EventWriter<MoveEvent>,
@@ -161,6 +167,23 @@ fn harddrop_event(
     }
 }
 
+fn key_block_hold(
+    mut events: EventWriter<HoldEvent>,
+    mut holdblocks: ResMut<HoldBlocks>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    currentblock: Res<CurrentBlock>,
+) {
+    info_once!("key_block_hold");
+
+   if keyboard_input.just_pressed(KEY_BLOCK_HOLD) {
+        // ホールドが許可されている場合のみ実行
+        if holdblocks.can_hold {
+            holdblocks.can_hold = false;
+            events.send(HoldEvent(currentblock.blocktype));
+        }
+    }
+}
+
 pub struct KeyPlugin;
 
 impl Plugin for KeyPlugin {
@@ -172,6 +195,7 @@ impl Plugin for KeyPlugin {
                 key_block_movebottom,
                 rotation_event,
                 harddrop_event,
+                key_block_hold,
             ).run_if(in_state(AppState::InGame)))
         ;
     }
