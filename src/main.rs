@@ -7,12 +7,12 @@ use bevy::{
 use crate::block::BlockType;
 
 mod block;
-mod bgm;
 mod blockdata;
 mod field;
 mod key;
 mod next_block;
 mod holdblock;
+mod sound;
 
 mod mainmenu;
 mod gameover;
@@ -25,6 +25,7 @@ const PATH_FONT: &str = "fonts/misaki_gothic.ttf";
 const PATH_IMAGE_HOUSE: &str = "images/house-dark.png";
 const PATH_IMAGE_RETRY: &str = "images/rotate-left-dark.png";
 const PATH_SOUND_BGM: &str = "ittoku-tetris/bgm.ogg";
+const PATH_SOUND_CLICK: &str = "sounds/click.ogg";
 
 const GRID_SIZE: f32 = 20.0;
 const GRID_SIZE_HALF: f32 = GRID_SIZE / 2.0;
@@ -70,7 +71,7 @@ struct MoveRightTimer(Stopwatch);
 #[derive(Resource, Deref, DerefMut)]
 struct MoveBottomTimer(Stopwatch);
 
-#[derive(States, Default, Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(States, Default, Debug, Clone, PartialEq, Eq, Hash, Resource)]
 enum AppState {
     #[default]
     Mainmenu,
@@ -121,7 +122,7 @@ fn main() {
         .add_plugins(field::FieldPlugin)
         .add_plugins(key::KeyPlugin)
         .add_plugins(block::BlockPlugin)
-        .add_plugins(bgm::BgmPlugin)
+        .add_plugins(sound::SoundPlugin)
         .add_plugins(next_block::NextBlockPlugin)
         .add_plugins(holdblock::HoldBlockPlugin)
         .add_plugins(mainmenu::MainmenuPlugin)
