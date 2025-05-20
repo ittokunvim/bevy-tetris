@@ -8,6 +8,7 @@ use crate::{
 use crate::block::{
     FIELD_LEFT_TOP,
     BlockMap,
+    HoldBlocks,
     PlayerBlock,
     Block,
 };
@@ -19,6 +20,7 @@ use crate::block::{
 pub fn block_clear(
     mut fix_events: EventReader<FixEvent>,
     mut commands: Commands,
+    mut holdblocks: ResMut<HoldBlocks>,
     mut player_query: Query<(Entity, &mut Transform), (With<PlayerBlock>, Without<Block>)>,
     mut block_query: Query<(Entity, &mut Transform), (With<Block>, Without<PlayerBlock>)>,
     mut block_map: ResMut<BlockMap>,
@@ -33,6 +35,9 @@ pub fn block_clear(
 
     // イベントをクリア
     fix_events.clear();
+
+    // ホールドを有効にする
+    holdblocks.can_hold = true;
 
     // PlayerBlockをBlockに変換
     for (player_entity, player_transform) in &player_query {
