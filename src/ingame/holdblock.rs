@@ -14,7 +14,7 @@ use super::block::{
     PlayerBlock,
     BlockType,
 };
-use super::blockdata::BLOCK_UNIT_COUNT;
+use super::utils::prelude::*;
 
 const BOARD_SIZE: Vec2 = Vec2::new(
     GRID_SIZE_HALF * 6.0,

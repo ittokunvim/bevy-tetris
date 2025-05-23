@@ -5,7 +5,7 @@ use crate::ingame::{
     FIELD_SIZE,
     FIELD_POSITION,
 };
-use crate::ingame::blockdata::BLOCK_MAP;
+use crate::ingame::utils::prelude::*;
 use super::{
     BLOCK_SIZE,
     CurrentBlock,
