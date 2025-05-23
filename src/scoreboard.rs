@@ -34,12 +34,16 @@ const SCORE_POSITION: Vec3 = Vec3::new(
 
 const TEXT_SIZE: f32 = 20.0;
 
-#[derive(Resource, Debug)]
-struct Score(usize);
+#[derive(Resource, Debug, Deref, DerefMut)]
+pub struct Score(pub usize);
 
 #[derive(Component)]
 struct Scoreboard;
 
+#[derive(Component)]
+struct ScoreText;
+
+/// スコアボードのセットアップを行う関数
 fn setup(
     mut commands: Commands,
     score: Res<Score>,
@@ -78,11 +82,19 @@ fn setup(
         },
         Transform::from_translation(SCORE_POSITION),
         Scoreboard,
+        ScoreText,
     ));
 }
 
-fn update() {
+/// スコアを更新する関数
+fn update(
+    mut query: Query<&mut Text2d, With<ScoreText>>,
+    score: Res<Score>,
+) {
     info_once!("update");
+
+    let mut span = query.single_mut();
+    **span = score.0.to_string();
 }
 
 pub struct ScoreboardPlugin;
