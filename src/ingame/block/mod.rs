@@ -7,13 +7,15 @@ use rand::{
 
 use crate::{
     GRID_SIZE,
+    AppState,
+};
+use super::{
     FIELD_SIZE,
     FIELD_POSITION,
     SpawnEvent,
     FixEvent,
-    AppState,
 };
-use crate::blockdata::*;
+use super::blockdata::*;
 
 mod clear;
 mod gizmos;

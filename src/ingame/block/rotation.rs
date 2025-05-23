@@ -1,14 +1,14 @@
 use bevy::prelude::*;
 
-use crate::{
-    GRID_SIZE,
+use crate::GRID_SIZE;
+use crate::ingame::{
     FIELD_SIZE,
     FIELD_POSITION,
     RotationEvent,
     Direction,
     FallingTimer,
 };
-use crate::block::{
+use super::{
     MAX_BLOCK_COUNT,
     MAX_COLLISION_COUNT,
     CurrentBlock,
@@ -19,7 +19,6 @@ use crate::block::{
 /// ブロックの回転を管理する関数
 /// `RotationEvent`を受け取り、ブロックの位置を更新し、
 /// 必要に応じてブロックの衝突を処理します
-///
 pub fn block_rotation(
     mut events: EventReader<RotationEvent>,
     mut timer: ResMut<FallingTimer>,

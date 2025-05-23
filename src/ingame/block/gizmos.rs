@@ -1,11 +1,11 @@
 use bevy::prelude::*;
 
-use crate::{
-    GRID_SIZE,
-    FIELD_POSITION,
+use crate::GRID_SIZE;
+use crate::ingame::{
     FIELD_SIZE,
+    FIELD_POSITION,
 };
-use crate::blockdata::BLOCK_MAP;
+use crate::ingame::blockdata::BLOCK_MAP;
 use super::{
     BLOCK_SIZE,
     CurrentBlock,

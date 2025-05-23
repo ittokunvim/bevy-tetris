@@ -3,9 +3,11 @@ use bevy::prelude::*;
 use crate::{
     GRID_SIZE_HALF,
     PATH_FONT,
+    AppState,
+};
+use super::{
     FIELD_SIZE,
     FIELD_POSITION,
-    AppState,
 };
 
 const BOARD_SIZE: Vec2 = Vec2::new(

@@ -1,10 +1,8 @@
 use bevy::prelude::*;
 
-use crate::{
-    GRID_SIZE,
-    SpawnEvent,
-};
-use crate::block::{
+use crate::GRID_SIZE;
+use crate::ingame::SpawnEvent;
+use super::{
     BLOCK_POSITION,
     BLOCK_SIZE,
     CurrentBlock,
@@ -15,7 +13,6 @@ use crate::block::{
 
 /// ブロック生成イベントを処理する関数
 /// `SpawnEvent`を受け取り、新しいブロックを生成してフィールドに配置します
-///
 pub fn block_spawn(
     mut events: EventReader<SpawnEvent>,
     mut commands: Commands,

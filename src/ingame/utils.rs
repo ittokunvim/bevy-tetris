@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use rand::prelude::*;
 use std::collections::VecDeque;
 
-use crate::block::BlockType;
+use super::block::BlockType;
 
 const RANDOMIZER_POOL_COUNT: usize = 35;
 const RANDOMIZER_HISTORY_COUNT: usize = 4;

@@ -1,18 +1,18 @@
 use bevy::prelude::*;
 
-use crate::{
-    GRID_SIZE,
+use crate::GRID_SIZE;
+use crate::ingame::{
     SpawnEvent,
     FixEvent,
 };
-use crate::block::{
+use crate::ingame::scoreboard::Score;
+use super::{
     FIELD_LEFT_TOP,
     BlockMap,
     HoldBlocks,
     PlayerBlock,
     Block,
 };
-use crate::scoreboard::Score;
 
 /// ブロックの削除を管理する関数
 /// `FixEvent`を受け取り、プレイヤーブロックを固定ブロックに変換し、

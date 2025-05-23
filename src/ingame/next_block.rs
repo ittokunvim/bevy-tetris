@@ -3,16 +3,18 @@ use bevy::prelude::*;
 use crate::{
     GRID_SIZE_HALF,
     PATH_FONT,
+    AppState,
+};
+use super::{
     FIELD_SIZE,
     FIELD_POSITION,
     SpawnEvent,
-    AppState,
 };
-use crate::block::{
+use super::block::{
     BlockType,
     NextBlocks,
 };
-use crate::utils::BlockRandomizer;
+use super::utils::BlockRandomizer;
 
 const BOARD_SIZE: Vec2 = Vec2::new(
     GRID_SIZE_HALF * 6.0,

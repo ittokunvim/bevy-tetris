@@ -1,19 +1,20 @@
 use bevy::prelude::*;
 
-use crate::blockdata::BLOCK_UNIT_COUNT;
 use crate::{
     GRID_SIZE_HALF,
     PATH_FONT,
+    AppState,
+};
+use super::{
     FIELD_SIZE,
     FIELD_POSITION,
     HoldEvent,
-    AppState,
 };
-
-use crate::block::{
+use super::block::{
     PlayerBlock,
     BlockType,
 };
+use super::blockdata::BLOCK_UNIT_COUNT;
 
 const BOARD_SIZE: Vec2 = Vec2::new(
     GRID_SIZE_HALF * 6.0,

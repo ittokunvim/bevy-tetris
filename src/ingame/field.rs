@@ -1,9 +1,9 @@
 use bevy::prelude::*;
 
-use crate::{
+use crate::AppState;
+use super::{
     FIELD_SIZE,
     FIELD_POSITION,
-    AppState,
 };
 
 const FIELD_COLOR: Color = Color::srgb(0.13, 0.14, 0.21);

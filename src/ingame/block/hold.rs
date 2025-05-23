@@ -1,11 +1,10 @@
 use bevy::prelude::*;
 
-use crate::{
-    GRID_SIZE,
+use crate::GRID_SIZE;
+use crate::ingame::{
     SpawnEvent,
     HoldEvent,
 };
-
 use super::{
     BLOCK_SIZE,
     BLOCK_POSITION,

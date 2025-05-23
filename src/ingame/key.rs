@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
-use crate::{
+use crate::AppState;
+use super::{
     BLOCK_MOVE_SPEED,
     MoveEvent,
     RotationEvent,
@@ -11,9 +12,8 @@ use crate::{
     MoveLeftTimer,
     MoveRightTimer,
     MoveBottomTimer,
-    AppState,
 };
-use crate::block::{
+use super::block::{
     CurrentBlock,
     HoldBlocks,
 };

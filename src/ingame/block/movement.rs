@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
-use crate::{
-    GRID_SIZE,
+use crate::GRID_SIZE;
+use crate::ingame::{
     FIELD_SIZE,
     FIELD_POSITION,
     MoveEvent,
@@ -9,7 +9,7 @@ use crate::{
     Direction,
     FallingTimer,
 };
-use crate::block::{
+use super::{
     CurrentBlock,
     PlayerBlock,
     Block,
