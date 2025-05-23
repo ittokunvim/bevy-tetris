@@ -14,7 +14,7 @@ use super::block::{
     BlockType,
     NextBlocks,
 };
-use super::utils::BlockRandomizer;
+use super::utils::prelude::*;
 
 const BOARD_SIZE: Vec2 = Vec2::new(
     GRID_SIZE_HALF * 6.0,
