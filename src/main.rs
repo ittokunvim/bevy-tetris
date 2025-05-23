@@ -14,6 +14,7 @@ mod next_block;
 mod holdblock;
 mod sound;
 mod utils;
+mod scoreboard;
 
 mod mainmenu;
 mod gameover;
@@ -127,6 +128,7 @@ fn main() {
         .add_plugins(next_block::NextBlockPlugin)
         .add_plugins(holdblock::HoldBlockPlugin)
         .add_plugins(utils::UtilsPlugin)
+        .add_plugins(scoreboard::ScoreboardPlugin)
         .add_plugins(mainmenu::MainmenuPlugin)
         .add_plugins(gameover::GameoverPlugin)
         .add_systems(Startup, setup)
