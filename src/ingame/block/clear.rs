@@ -6,13 +6,7 @@ use crate::ingame::{
     FixEvent,
 };
 use crate::ingame::scoreboard::Score;
-use super::{
-    FIELD_LEFT_TOP,
-    BlockMap,
-    HoldBlocks,
-    PlayerBlock,
-    Block,
-};
+use crate::ingame::utils::prelude::*;
 
 /// ブロックの削除を管理する関数
 /// `FixEvent`を受け取り、プレイヤーブロックを固定ブロックに変換し、

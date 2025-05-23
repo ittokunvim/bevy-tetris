@@ -8,13 +8,7 @@ use crate::ingame::{
     Direction,
     FallingTimer,
 };
-use super::{
-    MAX_BLOCK_COUNT,
-    MAX_COLLISION_COUNT,
-    CurrentBlock,
-    PlayerBlock,
-    Block,
-};
+use crate::ingame::utils::prelude::*;
 
 /// ブロックの回転を管理する関数
 /// `RotationEvent`を受け取り、ブロックの位置を更新し、

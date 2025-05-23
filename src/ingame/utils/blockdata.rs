@@ -1,5 +1,25 @@
 use bevy::prelude::*;
 
+use crate::GRID_SIZE;
+use crate::ingame::{
+    FIELD_SIZE,
+    FIELD_POSITION,
+};
+
+pub const MAX_BLOCK_COUNT: usize = 4;
+pub const MAX_COLLISION_COUNT: usize = 3;
+pub const BLOCK_SIZE: f32 = GRID_SIZE - 1.0;
+pub const BLOCK_POSITION: Vec3 = Vec3::new(
+    FIELD_POSITION.x + GRID_SIZE / 2.0 - GRID_SIZE * 2.0,
+    FIELD_POSITION.y + GRID_SIZE / 2.0 + FIELD_SIZE.y / 2.0 - GRID_SIZE * 1.0,
+    10.0,
+);
+pub const FIELD_LEFT_TOP: Vec2 = Vec2::new(
+    FIELD_POSITION.x - FIELD_SIZE.x / 2.0 + GRID_SIZE / 2.0, 
+    FIELD_POSITION.y + FIELD_SIZE.y / 2.0 - GRID_SIZE / 2.0,
+);
+pub const NEXT_BLOCK_COUNT: usize = 4;
+
 pub const BLOCK_UNIT_COUNT: usize = 4;
 pub const BLOCK_MAP: [[usize; 10]; 24] = [
     [0,0,0,0,0,0,0,0,0,0],

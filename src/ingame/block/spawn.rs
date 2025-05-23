@@ -2,14 +2,7 @@ use bevy::prelude::*;
 
 use crate::GRID_SIZE;
 use crate::ingame::SpawnEvent;
-use super::{
-    BLOCK_POSITION,
-    BLOCK_SIZE,
-    CurrentBlock,
-    NextBlocks,
-    PlayerBlock,
-    Block,
-};
+use crate::ingame::utils::prelude::*;
 
 /// ブロック生成イベントを処理する関数
 /// `SpawnEvent`を受け取り、新しいブロックを生成してフィールドに配置します

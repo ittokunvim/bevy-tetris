@@ -10,10 +10,6 @@ use super::{
     FIELD_POSITION,
     HoldEvent,
 };
-use super::block::{
-    PlayerBlock,
-    BlockType,
-};
 use super::utils::prelude::*;
 
 const BOARD_SIZE: Vec2 = Vec2::new(

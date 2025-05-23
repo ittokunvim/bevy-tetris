@@ -5,14 +5,7 @@ use crate::ingame::{
     SpawnEvent,
     HoldEvent,
 };
-use super::{
-    BLOCK_SIZE,
-    BLOCK_POSITION,
-    CurrentBlock,
-    HoldBlocks,
-    PlayerBlock,
-    Block,
-};
+use crate::ingame::utils::prelude::*;
 
 pub fn block_hold(
     mut hold_events: EventReader<HoldEvent>,

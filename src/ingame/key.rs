@@ -13,10 +13,7 @@ use super::{
     MoveRightTimer,
     MoveBottomTimer,
 };
-use super::block::{
-    CurrentBlock,
-    HoldBlocks,
-};
+use super::utils::prelude::*;
 
 const KEY_BLOCK_MOVE_LEFT: KeyCode = KeyCode::ArrowLeft;
 const KEY_BLOCK_MOVE_RIGHT: KeyCode = KeyCode::ArrowRight;

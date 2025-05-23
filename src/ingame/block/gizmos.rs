@@ -6,12 +6,6 @@ use crate::ingame::{
     FIELD_POSITION,
 };
 use crate::ingame::utils::prelude::*;
-use super::{
-    BLOCK_SIZE,
-    CurrentBlock,
-    Block,
-    PlayerBlock,
-};
 
 /// ブロックの落下地点を予測し描画する関数
 pub fn draw_gizmos_block(

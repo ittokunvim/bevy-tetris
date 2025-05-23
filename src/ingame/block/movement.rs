@@ -9,11 +9,7 @@ use crate::ingame::{
     Direction,
     FallingTimer,
 };
-use super::{
-    CurrentBlock,
-    PlayerBlock,
-    Block,
-};
+use crate::ingame::utils::prelude::*;
 
 /// ブロックの落下を管理する関数
 /// `FallingTimer`を使用して一定間隔でブロックを下に移動させる

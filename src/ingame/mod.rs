@@ -3,7 +3,7 @@ use bevy::{
     time::Stopwatch,
 };
 use crate::GRID_SIZE;
-use crate::ingame::block::BlockType;
+use crate::ingame::utils::prelude::*;
 
 mod block;
 mod field;

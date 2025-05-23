@@ -7,10 +7,7 @@ use crate::ingame::{
     HardDropEvent,
     FixEvent,
 };
-use super::{
-    PlayerBlock,
-    Block,
-};
+use crate::ingame::utils::prelude::*;
 
 /// ブロックを一番下に固定する関数
 /// 衝突判定が出るまで、ブロックを下に移動させて固定する
