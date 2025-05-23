@@ -9,7 +9,7 @@ mod block;
 mod blockdata;
 mod field;
 mod key;
-mod next_block;
+mod nextblock;
 mod holdblock;
 mod utils;
 mod scoreboard;
@@ -80,7 +80,7 @@ impl Plugin for IngamePlugin {
             .add_plugins(field::FieldPlugin)
             .add_plugins(key::KeyPlugin)
             .add_plugins(block::BlockPlugin)
-            .add_plugins(next_block::NextBlockPlugin)
+            .add_plugins(nextblock::NextBlockPlugin)
             .add_plugins(holdblock::HoldBlockPlugin)
             .add_plugins(utils::UtilsPlugin)
             .add_plugins(scoreboard::ScoreboardPlugin)
