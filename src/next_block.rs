@@ -15,7 +15,7 @@ use crate::block::{
 use crate::utils::BlockRandomizer;
 
 const BOARD_SIZE: Vec2 = Vec2::new(
-    GRID_SIZE_HALF * 5.0,
+    GRID_SIZE_HALF * 6.0,
     GRID_SIZE_HALF * 20.0,
 );
 const BOARD_POSITION: Vec3 = Vec3::new(

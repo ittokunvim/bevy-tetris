@@ -12,6 +12,7 @@ use crate::block::{
     PlayerBlock,
     Block,
 };
+use crate::scoreboard::Score;
 
 /// ブロックの削除を管理する関数
 /// `FixEvent`を受け取り、プレイヤーブロックを固定ブロックに変換し、
@@ -24,6 +25,7 @@ pub fn block_clear(
     mut player_query: Query<(Entity, &mut Transform), (With<PlayerBlock>, Without<Block>)>,
     mut block_query: Query<(Entity, &mut Transform), (With<Block>, Without<PlayerBlock>)>,
     mut block_map: ResMut<BlockMap>,
+    mut score: ResMut<Score>,
     mut spawn_events: EventWriter<SpawnEvent>,
 ) {
     info_once!("block_clear");
@@ -76,6 +78,8 @@ pub fn block_clear(
                     block_transform.translation.y -= GRID_SIZE;
                 }
             }
+
+            **score += 1;
         }
     }
 
