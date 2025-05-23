@@ -68,7 +68,7 @@ pub struct HoldBlocks {
     pub blocktype: Option<BlockType>,
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum BlockType {
     TypeI,
     TypeJ,
