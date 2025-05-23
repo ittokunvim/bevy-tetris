@@ -12,6 +12,7 @@ use crate::block::{
     BlockType,
     NextBlocks,
 };
+use crate::utils::BlockRandomizer;
 
 const BOARD_SIZE: Vec2 = Vec2::new(
     GRID_SIZE_HALF * 5.0,
@@ -56,10 +57,13 @@ fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    nextblocks: Res<NextBlocks>,
+    mut nextblocks: ResMut<NextBlocks>,
+    mut block_randomizer: ResMut<BlockRandomizer>,
     asset_server: Res<AssetServer>,
 ) {
     info_once!("setup");
+
+    nextblocks.0 = std::array::from_fn(|_| block_randomizer.next().unwrap());
 
     // ボードを生成する
     commands.spawn((
@@ -136,6 +140,7 @@ fn update(
     ), With<NextBlock>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut nextblock: ResMut<NextBlocks>,
+    mut block_randomizer: ResMut<BlockRandomizer>,
 ) {
     info_once!("update");
 
@@ -148,7 +153,7 @@ fn update(
     events.clear();
 
     // 次ブロックデータを更新
-    *nextblock = nextblock.update();
+    *nextblock = nextblock.update(block_randomizer.next().unwrap());
 
     // 次ブロック一覧をループ
     for (mut transform, mut color, mut nextblockdata) in &mut query {

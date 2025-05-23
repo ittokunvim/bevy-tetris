@@ -95,7 +95,7 @@ impl CurrentBlock {
     // リソースを初期化
     fn new() -> Self {
         CurrentBlock {
-            blocktype: BlockType::random(),
+            blocktype: BlockType::TypeI,
             blockid: 0,
             pos: BLOCK_POSITION,
         }
@@ -193,30 +193,33 @@ impl HoldBlocks {
     }
 }
 
+/// ブロックの種類をランダムにサンプリングできるようにする
+/// (rand::randomなどで利用可)
 impl Distribution<BlockType> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> BlockType {
-        // 配列を使用してインデックスでブロックを選ぶ
-        const BLOCK_TYPES: [BlockType; 7] = [
-            BlockType::TypeI,
-            BlockType::TypeJ,
-            BlockType::TypeL,
-            BlockType::TypeO,
-            BlockType::TypeS,
-            BlockType::TypeT,
-            BlockType::TypeZ,
-        ];
-
-        let index: usize = rng.gen_range(0..BLOCK_TYPES.len());
-        BLOCK_TYPES[index]
+        let idx: usize = rng.gen_range(0..BlockType::ALL.len());
+        BlockType::ALL[idx]
     }
 }
 
 impl BlockType {
-    // `BlockType`をランダムに生成するヘルパーメソッド
-    fn random() -> Self {
-        let mut rng = rand::thread_rng();
-        rng.gen()
-    }
+    /// 全てのテトリスブロック
+    pub const ALL: [BlockType; 7] = [
+        BlockType::TypeI,
+        BlockType::TypeJ,
+        BlockType::TypeL,
+        BlockType::TypeO,
+        BlockType::TypeS,
+        BlockType::TypeT,
+        BlockType::TypeZ,
+    ];
+    /// 最初に生成されるであろうブロック（THM3準拠）
+    pub const FIRST_CANDIDATES: [BlockType; 4] = [
+        BlockType::TypeI,
+        BlockType::TypeJ,
+        BlockType::TypeL,
+        BlockType::TypeT,
+    ];
 
     // ブロックの形状データを取得するメソッド
     // 各ブロックタイプに対応する4回転分の形状を持つ
@@ -248,12 +251,12 @@ impl BlockType {
 
 impl NextBlocks {
     fn new() -> Self {
-        let blocktypes = std::array::from_fn(|_| BlockType::random());
+        let blocktypes = std::array::from_fn(|_| BlockType::TypeI);
 
         Self(blocktypes)
     }
 
-    pub fn update(&self) -> Self {
+    pub fn update(&self, blocktype: BlockType) -> Self {
         let mut blocktypes = self.0;
 
         // 配列の長さを保証
@@ -263,7 +266,7 @@ impl NextBlocks {
         blocktypes.copy_within(1.., 0);
 
         // 最後の要素をランダム値で更新
-        blocktypes[NEXT_BLOCK_COUNT - 1] = BlockType::random();
+        blocktypes[NEXT_BLOCK_COUNT - 1] = blocktype;
 
         Self(blocktypes)
     }
