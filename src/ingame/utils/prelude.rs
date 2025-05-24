@@ -5,6 +5,10 @@ pub use super::{
     CurrentBlock,
     HoldBlocks,
     NextBlocks,
+    FallingTimer,
+    MoveLeftTimer,
+    MoveRightTimer,
+    MoveBottomTimer,
 };
 pub use super::blockdata::*;
 pub use super::blockrandomizer::BlockRandomizer;

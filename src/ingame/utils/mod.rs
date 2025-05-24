@@ -1,4 +1,7 @@
-use bevy::prelude::*;
+use bevy::{
+    prelude::*,
+    time::Stopwatch,
+};
 
 use crate::GRID_SIZE;
 use super::utils::{
@@ -182,6 +185,24 @@ impl NextBlocks {
     }
 }
 
+#[derive(Resource, Deref, DerefMut)]
+pub struct FallingTimer(pub Timer);
+
+impl FallingTimer {
+    pub fn new() -> Self {
+        Self(Timer::from_seconds(BLOCK_FALL_SPEED, TimerMode::Repeating))
+    }
+}
+
+#[derive(Resource, Deref, DerefMut)]
+pub struct MoveLeftTimer(pub Stopwatch);
+
+#[derive(Resource, Deref, DerefMut)]
+pub struct MoveRightTimer(pub Stopwatch);
+
+#[derive(Resource, Deref, DerefMut)]
+pub struct MoveBottomTimer(pub Stopwatch);
+
 pub struct UtilsPlugin;
 
 impl Plugin for UtilsPlugin {
@@ -192,6 +213,11 @@ impl Plugin for UtilsPlugin {
             .insert_resource(BlockRandomizer::new())
             .insert_resource(HoldBlocks::new())
             .insert_resource(NextBlocks::new())
+            .insert_resource(FallingTimer::new())
+            .insert_resource(MoveLeftTimer(Stopwatch::new()))
+            .insert_resource(MoveRightTimer(Stopwatch::new()))
+            .insert_resource(MoveBottomTimer(Stopwatch::new()))
+
          ;
     }
 }

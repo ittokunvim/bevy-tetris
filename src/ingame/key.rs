@@ -8,10 +8,6 @@ use super::{
     HardDropEvent,
     HoldEvent,
     Direction,
-    FallingTimer,
-    MoveLeftTimer,
-    MoveRightTimer,
-    MoveBottomTimer,
 };
 use super::utils::prelude::*;
 
