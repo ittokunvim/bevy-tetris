@@ -2,8 +2,6 @@ use bevy::prelude::*;
 
 use crate::GRID_SIZE;
 use crate::ingame::{
-    FIELD_SIZE,
-    FIELD_POSITION,
     RotationEvent,
     Direction,
     FallingTimer,
@@ -15,7 +13,7 @@ use crate::ingame::utils::prelude::*;
 /// 必要に応じてブロックの衝突を処理します
 pub fn block_rotation(
     mut events: EventReader<RotationEvent>,
-    mut timer: ResMut<FallingTimer>,
+    mut falling_timer: ResMut<FallingTimer>,
     mut player_query: Query<(&PlayerBlock, &mut Transform), (With<PlayerBlock>, Without<Block>)>,
     mut current_block: ResMut<CurrentBlock>,
     block_query: Query<&Transform, With<Block>>,
@@ -29,7 +27,7 @@ pub fn block_rotation(
         let mut collision_y = 0.0;
 
         // タイマーをリセット
-        timer.reset();
+        falling_timer.reset();
 
         // 現在のブロックIDを更新
         current_block.blockid = match direction {
@@ -88,10 +86,10 @@ pub fn block_rotation(
             current_block.pos.y -= collision_y;
             return;
         }
+
         // ブロックを回転させる
         for (player, mut player_transform) in &mut player_query {
             player_transform.translation = current_block.position(player.0);
         }
     }
 }
-

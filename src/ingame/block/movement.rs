@@ -2,8 +2,6 @@ use bevy::prelude::*;
 
 use crate::GRID_SIZE;
 use crate::ingame::{
-    FIELD_SIZE,
-    FIELD_POSITION,
     MoveEvent,
     FixEvent,
     Direction,
@@ -13,7 +11,6 @@ use crate::ingame::utils::prelude::*;
 
 /// ブロックの落下を管理する関数
 /// `FallingTimer`を使用して一定間隔でブロックを下に移動させる
-///
 pub fn block_falling(
     mut timer: ResMut<FallingTimer>,
     mut events: EventWriter<MoveEvent>,
@@ -36,7 +33,6 @@ pub fn block_falling(
 /// ブロックの移動を管理する関数
 /// `MoveEvent`を受け取り、ブロックの位置を更新し、
 /// 必要に応じてブロックを固定する
-///
 pub fn block_movement(
     mut move_events: EventReader<MoveEvent>,
     mut fix_events: EventWriter<FixEvent>,
@@ -117,4 +113,3 @@ pub fn block_movement(
         }
     }
 }
-

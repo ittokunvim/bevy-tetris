@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+
 use crate::ingame::utils::prelude::*;
 
 mod block;
@@ -9,24 +10,31 @@ mod holdblock;
 mod utils;
 mod scoreboard;
 
+/// ブロック移動イベント（左右下移動）
 #[derive(Event)]
 struct MoveEvent(Direction);
 
+/// ブロック回転イベント（左右回転）
 #[derive(Event)]
 struct RotationEvent(Direction);
 
+/// ハードドロップイベント
 #[derive(Event, Default)]
 struct HardDropEvent;
 
+/// ブロック生成イベント
 #[derive(Event, Default)]
 struct SpawnEvent;
 
+/// ブロック固定イベント
 #[derive(Event, Default)]
 struct FixEvent;
 
+/// ブロックホールドイベント
 #[derive(Event)]
 struct HoldEvent(BlockType);
 
+/// ブロックの移動や回転の方向
 #[derive(Copy, Clone, PartialEq, Debug)]
 enum Direction {
     Left,

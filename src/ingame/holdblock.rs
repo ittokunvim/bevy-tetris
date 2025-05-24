@@ -42,6 +42,7 @@ const BLOCK_INIT_POSITION: Vec3 = Vec3::new(
 #[derive(Component)]
 struct HoldBoard;
 
+/// ホールドされたブロックを記憶するコンポーネント
 #[derive(Component, Debug)]
 struct HoldBlock {
     blocktype: Option<BlockType>,
@@ -93,8 +94,7 @@ fn setup(
 }
 
 /// ホールドしたブロックを更新する関数
-/// ホールドブロックの状態をゲーム進行に合わせて
-/// 更新を行う
+/// ブロックの状態をゲーム進行に合わせて更新を行う
 fn update(
     mut commands: Commands,
     mut hold_events: EventReader<HoldEvent>,
@@ -145,6 +145,8 @@ fn update(
     }
 }
 
+/// ホールドブロックを削除する関数
+/// ゲームオーバーから抜けた時に実行される
 fn despawn(
     mut commands: Commands,
     query: Query<Entity, With<HoldBoard>>,

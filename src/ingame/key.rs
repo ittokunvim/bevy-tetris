@@ -2,7 +2,6 @@ use bevy::prelude::*;
 
 use crate::AppState;
 use super::{
-    BLOCK_MOVE_SPEED,
     MoveEvent,
     RotationEvent,
     HardDropEvent,
@@ -19,6 +18,7 @@ const KEY_BLOCK_ROTATION_RIGHT: KeyCode = KeyCode::ArrowUp;
 const KEY_BLOCK_HARDDROP: KeyCode = KeyCode::Space;
 const KEY_BLOCK_HOLD: KeyCode = KeyCode::KeyC;
 
+/// ブロック左移動キーが入力された時の挙動を決める関数
 fn key_block_moveleft(
     mut events: EventWriter<MoveEvent>,
     mut moveleft_timer: ResMut<MoveLeftTimer>,
@@ -29,7 +29,7 @@ fn key_block_moveleft(
 
     // ブロック左移動キー入力時
     if keyboard_input.just_pressed(KEY_BLOCK_MOVE_LEFT) {
-        // ブロック移動イベントを発火
+        // ブロック左移動イベントを発火
         events.send(MoveEvent(Direction::Left));
     }
 
@@ -37,11 +37,9 @@ fn key_block_moveleft(
     if keyboard_input.pressed(KEY_BLOCK_MOVE_LEFT) {
         // ブロック左移動タイマーを進める
         moveleft_timer.0.tick(time.delta());
-        // タイマーが切れたら
+        // ブロック左移動タイマーが切れたら、タイマーをリセットし、イベントを発火
         if moveleft_timer.0.elapsed_secs() > BLOCK_MOVE_SPEED {
-            // ブロック左移動タイマーをリセット
             moveleft_timer.0.reset();
-            // ブロック移動イベントを発火
             events.send(MoveEvent(Direction::Left));
         }
     }
@@ -53,6 +51,7 @@ fn key_block_moveleft(
     }
 }
 
+/// ブロック右移動キーが入力された時の挙動を決める関数
 fn key_block_moveright(
     mut events: EventWriter<MoveEvent>,
     mut moveright_timer: ResMut<MoveRightTimer>,
@@ -63,7 +62,7 @@ fn key_block_moveright(
 
     // ブロック右移動キー入力時
     if keyboard_input.just_pressed(KEY_BLOCK_MOVE_RIGHT) {
-        // ブロック移動イベントを発火
+        // ブロック右移動イベントを発火
         events.send(MoveEvent(Direction::Right));
     }
 
@@ -71,11 +70,9 @@ fn key_block_moveright(
     if keyboard_input.pressed(KEY_BLOCK_MOVE_RIGHT) {
         // ブロック右移動タイマーを進める
         moveright_timer.0.tick(time.delta());
-        // タイマーが切れたら
+        // ブロック右移動タイマーが切れたら、タイマーをリセットし、イベントを発火
         if moveright_timer.0.elapsed_secs() > BLOCK_MOVE_SPEED {
-            // ブロック右移動タイマーをリセット
             moveright_timer.0.reset();
-            // ブロック移動イベントを発火
             events.send(MoveEvent(Direction::Right));
         }
     }
@@ -87,6 +84,7 @@ fn key_block_moveright(
     }
 }
 
+/// ブロック下移動キーが入力された時の挙動を決める関数
 fn key_block_movebottom(
     mut events: EventWriter<MoveEvent>,
     mut falling_timer: ResMut<FallingTimer>,
@@ -98,11 +96,10 @@ fn key_block_movebottom(
 
     // ブロック下移動キー入力時
     if keyboard_input.just_pressed(KEY_BLOCK_MOVE_BOTTOM) {
-        // ブロック移動イベントを発火
+        // ブロック下移動イベントを発火
         events.send(MoveEvent(Direction::Bottom));
-        // ブロック落下タイマーを一時停止
+        // ブロック落下タイマーを一時停止し、タイマーをリセット
         falling_timer.0.pause();
-        // ブロック落下タイマーをリセット
         falling_timer.0.reset();
     }
 
@@ -110,56 +107,61 @@ fn key_block_movebottom(
     if keyboard_input.pressed(KEY_BLOCK_MOVE_BOTTOM) {
         // ブロック下移動タイマーを進める
         movebottom_timer.0.tick(time.delta());
-
+        // ブロック下移動タイマーが切れたら、タイマーをリセットし、イベントを発火
         if movebottom_timer.0.elapsed_secs() > BLOCK_MOVE_SPEED {
-            // ブロック下移動タイマーをリセット
             movebottom_timer.0.reset();
-            // ブロック移動イベントを発火
             events.send(MoveEvent(Direction::Bottom));
         }
     }
 
     // ブロック下移動キー離した時
     if keyboard_input.just_released(KEY_BLOCK_MOVE_BOTTOM) {
-        // ブロック下移動タイマーをリセット
+        // ブロック下移動タイマーをリセットし、一時停止を解除
         movebottom_timer.0.reset();
-        // ブロック落下タイマーの一時停止を解除
         falling_timer.0.unpause();
     }
 }
 
-fn rotation_event(
+/// ブロック左回転キーが入力された時の挙動を決める関数
+fn key_block_rotationleft(
     mut events: EventWriter<RotationEvent>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
-    info_once!("rotation_event");
+    info_once!("key_block_rotationleft");
 
-    let mut closure = |direction: Direction| {
-        events.send(RotationEvent(direction));
-    };
-
-    for key in keyboard_input.get_just_pressed() {
-        match *key {
-            KEY_BLOCK_ROTATION_LEFT  => closure(Direction::Left),
-            KEY_BLOCK_ROTATION_RIGHT => closure(Direction::Right),
-            _ => {},
-        };
+    // ブロック左回転キーが押されたら、イベントを発火
+    if keyboard_input.just_pressed(KEY_BLOCK_ROTATION_LEFT) {
+        events.send(RotationEvent(Direction::Left));
     }
 }
 
-fn harddrop_event(
+/// ブロック右回転キーが入力された時の挙動を決める関数
+fn key_block_rotationright(
+    mut events: EventWriter<RotationEvent>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+) {
+    info_once!("key_block_rotationright");
+
+    // ブロック右回転キーが押されたら、イベントを発火
+    if keyboard_input.just_pressed(KEY_BLOCK_ROTATION_RIGHT) {
+        events.send(RotationEvent(Direction::Right));
+    }
+}
+
+/// ハードドロップキーが入力された時の挙動を決める関数
+fn key_block_harddrop(
     mut events: EventWriter<HardDropEvent>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
-    info_once!("harddrop_event");
+    info_once!("key_block_harddrop");
 
-    for key in  keyboard_input.get_just_pressed() {
-        if *key == KEY_BLOCK_HARDDROP {
-            events.send_default();
-        }
+    // ハードドロップキーが押されたら、イベントを発火
+    if keyboard_input.just_pressed(KEY_BLOCK_HARDDROP) {
+        events.send_default();
     }
 }
 
+/// ブロックホールドキーが入力された時の挙動を決める関数
 fn key_block_hold(
     mut events: EventWriter<HoldEvent>,
     mut holdblocks: ResMut<HoldBlocks>,
@@ -168,8 +170,9 @@ fn key_block_hold(
 ) {
     info_once!("key_block_hold");
 
+    // ブロックホールドキーが押されたら
    if keyboard_input.just_pressed(KEY_BLOCK_HOLD) {
-        // ホールドが許可されている場合のみ実行
+        // ホールドが許可されていたら、許可を取り消し、イベントを発火
         if holdblocks.can_hold {
             holdblocks.can_hold = false;
             events.send(HoldEvent(currentblock.blocktype));
@@ -186,8 +189,9 @@ impl Plugin for KeyPlugin {
                 key_block_moveright,
                 key_block_moveleft,
                 key_block_movebottom,
-                rotation_event,
-                harddrop_event,
+                key_block_rotationleft,
+                key_block_rotationright,
+                key_block_harddrop,
                 key_block_hold,
             ).run_if(in_state(AppState::InGame)))
         ;

@@ -79,4 +79,3 @@ pub fn draw_gizmos_block(
         gizmos.primitive_2d(&primitive, isometry, color);
     }
 }
-

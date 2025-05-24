@@ -11,6 +11,7 @@ const FIELD_COLOR: Color = Color::srgb(0.13, 0.14, 0.21);
 #[derive(Component)]
 struct Field;
 
+/// フィールドのセットアップを行う関数
 fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -18,8 +19,8 @@ fn setup(
 ) {
     info_once!("setup");
 
+    // フィールドを作成
     let shape = meshes.add(Rectangle::new(FIELD_SIZE.x, FIELD_SIZE.y));
-
     commands.spawn((
         Mesh2d(shape),
         MeshMaterial2d(materials.add(FIELD_COLOR)),
@@ -28,6 +29,8 @@ fn setup(
     ));
 }
 
+/// フィールドを削除する関数
+/// ステートがゲームオーバーから抜けた時に実行されます
 fn despawn(
     mut commands: Commands,
     query: Query<Entity, With<Field>>,

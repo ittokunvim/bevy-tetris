@@ -37,7 +37,7 @@ pub fn block_spawn(
     let mut init_position = BLOCK_POSITION;
 
     for (index, value) in blocktype.blockdata()[0].iter().enumerate() {
-        // ブロックの値が0であればスキップ
+        // ブロックデータの値が0であればスキップ
         if *value == 0 {
             continue;
         }
@@ -66,4 +66,3 @@ pub fn block_spawn(
         ));
     }
 }
-

@@ -2,8 +2,6 @@ use bevy::prelude::*;
 
 use crate::GRID_SIZE;
 use crate::ingame::{
-    FIELD_SIZE,
-    FIELD_POSITION,
     HardDropEvent,
     FixEvent,
 };

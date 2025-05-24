@@ -36,12 +36,14 @@ const SCORE_POSITION: Vec3 = Vec3::new(
 
 const TEXT_SIZE: f32 = 20.0;
 
+/// スコアの点数を管理するリソース
 #[derive(Resource, Debug, Deref, DerefMut)]
 pub struct Score(pub usize);
 
 #[derive(Component)]
 struct Scoreboard;
 
+/// スコアの点数の更新をするためのコンポーネント
 #[derive(Component)]
 struct ScoreText;
 
@@ -89,7 +91,7 @@ fn setup(
 }
 
 /// スコアを更新する関数
-fn update(
+fn update_score(
     mut query: Query<&mut Text2d, With<ScoreText>>,
     score: Res<Score>,
 ) {
@@ -106,7 +108,7 @@ impl Plugin for ScoreboardPlugin {
         app
             .insert_resource(Score(0))
             .add_systems(OnEnter(AppState::InGame), setup)
-            .add_systems(Update, update.run_if(in_state(AppState::InGame)))
+            .add_systems(Update, update_score.run_if(in_state(AppState::InGame)))
         ;
     }
 }

@@ -7,6 +7,9 @@ use crate::ingame::{
 };
 use crate::ingame::utils::prelude::*;
 
+/// ブロックをホールドした時の挙動を決める関数
+/// ホールドされたらプレイヤーブロックを削除して
+/// 新しいプレイヤーブロックを再度生成する
 pub fn block_hold(
     mut hold_events: EventReader<HoldEvent>,
     mut spawn_events: EventWriter<SpawnEvent>,

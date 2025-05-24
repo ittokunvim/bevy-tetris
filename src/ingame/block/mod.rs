@@ -56,6 +56,8 @@ fn gameover(
     }
 }
 
+/// ブロックを全て削除する関数
+/// ゲームオーバを抜けた時に実行される
 fn despawn(
     mut commands: Commands,
     query: Query<Entity, With<Block>>,
@@ -67,6 +69,8 @@ fn despawn(
     }
 }
 
+/// リソースをリセットする関数
+/// ゲームオーバを抜けた時に実行される
 fn reset(
     mut rotation_block: ResMut<CurrentBlock>,
     mut block_map: ResMut<BlockMap>,

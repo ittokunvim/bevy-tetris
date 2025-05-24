@@ -39,8 +39,9 @@ const BLOCK_INIT_POSITION: Vec3 = Vec3::new(
 );
 
 #[derive(Component)]
-pub struct Component;
+pub struct NextBoard;
 
+/// 次にくるブロックを記憶するコンポーネント
 #[derive(Component, Debug)]
 struct NextBlock {
     nextblock_id: usize,
@@ -48,7 +49,7 @@ struct NextBlock {
     block_id: usize,
 }
 
-/// 次に出てくるブロックを描画する関数
+/// 次にくるブロックを描画する関数
 /// フィールド右上に配置し、次回に生成される
 /// ブロックの形を3つ表示する
 fn setup(
@@ -67,13 +68,11 @@ fn setup(
     commands.spawn((
         Sprite::from_color(BOARD_COLOR, BOARD_SIZE),
         Transform::from_translation(BOARD_POSITION),
-        Component,
+        NextBoard,
     ));
 
-    // テキストのフォントをロード
-    let font = asset_server.load(PATH_FONT);
-
     // テキストを生成する
+    let font = asset_server.load(PATH_FONT);
     commands.spawn((
         Text2d::new(NEXT_TEXT),
         TextFont {
@@ -84,22 +83,26 @@ fn setup(
         Transform::from_translation(NEXT_POSITION),
     ));
 
-    // ブロックの大きさと四角形を定義
+    // 次にくるブロックを生成する
     let shape = meshes.add(Rectangle::new(BLOCK_SIZE.x, BLOCK_SIZE.y));
-
-    // 次に生成されるブロックのリストをループ
     for (nextblock_id, blocktype) in nextblocks.0.iter().enumerate() {
+        // 現在動かしているブロックは表示しない
         if nextblock_id <= 0 {
             continue;
         }
 
-        let color = blocktype.color();
-        let init_position = BLOCK_INIT_POSITION.with_y(GRID_SIZE_HALF * 5.0 * nextblock_id as f32);
-        let init_position = calculate_nextblock_position(blocktype, init_position);
+        // ブロックの初期位置を計算
+        let y = BLOCK_INIT_POSITION.y - GRID_SIZE_HALF * 5.0 * (nextblock_id - 1) as f32;
+        let init_position = calculate_nextblock_position(
+            blocktype,
+            BLOCK_INIT_POSITION.with_y(y),
+        );
 
+       // ブロックの色を定義
+        let color = blocktype.color();
         // BlockTypeからBlockDataを取得しループ
         for (block_id, value) in blocktype.blockdata()[0].iter().enumerate() {
-            // ブロックの値が0であればスキップ
+            // ブロックデータの値が0であればスキップ
             if *value == 0 {
                 continue;
             }
@@ -116,7 +119,7 @@ fn setup(
                 Mesh2d(shape.clone()),
                 MeshMaterial2d(materials.add(color)),
                 Transform::from_translation(translation),
-                Component,
+                NextBoard,
                 NextBlock {
                     nextblock_id,
                     blocktype: *blocktype,
@@ -137,7 +140,7 @@ fn update(
         &mut NextBlock
     ), With<NextBlock>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    mut nextblock: ResMut<NextBlocks>,
+    mut nextblocks: ResMut<NextBlocks>,
     mut block_randomizer: ResMut<BlockRandomizer>,
 ) {
     info_once!("update");
@@ -151,11 +154,12 @@ fn update(
     events.clear();
 
     // 次ブロックデータを更新
-    *nextblock = nextblock.update(block_randomizer.next().unwrap());
+    let blocktype = block_randomizer.next().unwrap();
+    *nextblocks = nextblocks.update(blocktype);
 
     // 次ブロック一覧をループ
     for (mut transform, mut color, mut nextblockdata) in &mut query {
-        // 初めの次ブロックは対象外
+        // 現在動かしているブロックは対象外
         if nextblockdata.nextblock_id <= 0 {
             continue;
         }
@@ -164,10 +168,10 @@ fn update(
         let prev_blocktype = nextblockdata.blocktype;
         let block_id = nextblockdata.block_id;
 
-        // 次ブロックの色を更新
+        // ブロックの色を更新
         *color = MeshMaterial2d(materials.add(nextblockdata.blocktype.color()));
-        // 次ブロックのブロックの形を更新
-        nextblockdata.blocktype = nextblock.0[nextblock_id];
+        // ブロックの形を更新
+        nextblockdata.blocktype = nextblocks.0[nextblock_id];
 
         // 現在のブロックデータ配列内に該当するindexを検索
         if let Some((index, _)) = prev_blocktype.blockdata()[0]
@@ -182,6 +186,7 @@ fn update(
                 &prev_blocktype,
                 BLOCK_INIT_POSITION.with_y(y),
             );
+
             // インデックスからブロックの座標を計算し、位置を更新
             transform.translation = Vec3::new(
                 init_position.x + GRID_SIZE_HALF * ((index % 4) as f32),
@@ -192,9 +197,11 @@ fn update(
     }
 }
 
+/// 次にくるブロックを削除する関数
+/// ゲームオーバーを抜けた時に実行される
 fn despawn(
     mut commands: Commands,
-    query: Query<Entity, With<Component>>,
+    query: Query<Entity, With<NextBoard>>,
 ) {
     for entity in &query {
         commands.entity(entity).despawn();

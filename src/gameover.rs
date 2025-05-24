@@ -58,6 +58,7 @@ impl Gameover {
             }
         )
     }
+
     /// ゲームオーバー画面の背景を生成します。
     ///
     /// Returns:
@@ -87,6 +88,7 @@ impl Gameover {
             BorderRadius::all(BORDER_RADIUS),
         )
     }
+
     /// ゲームオーバーメッセージを表示するテキストを生成します。
     ///
     /// Params:
@@ -109,6 +111,7 @@ impl Gameover {
             TextColor(TITLE_COLOR),
         )
     }
+
     /// ゲームオーバー画面に表示するボタンの配置を決めるノード
     ///
     /// Returns:
@@ -127,6 +130,7 @@ impl Gameover {
             }
         )
     }
+
     /// ゲームオーバー画面に表示するボタンを生成します。
     ///
     /// Returns:
@@ -151,6 +155,7 @@ impl Gameover {
             Button,
         )
     }
+
     /// ゲームオーバー画面に表示するアイコンを生成します。
     ///
     /// Params:
@@ -173,6 +178,7 @@ impl Gameover {
     }
 }
 
+/// ゲームオーバー画面のセットアップを行う関数
 /// 構造:
 /// * root
 ///   * board
@@ -193,35 +199,27 @@ fn setup(
     let retry_image = asset_server.load(PATH_IMAGE_RETRY);
 
     commands
-        // ルートノードを生成
         .spawn(Gameover::from_root())
         .with_children(|parent| {
             parent
-                // ボードノードを生成
                 .spawn(Gameover::from_board())
                 .with_children(|parent| {
-                    // ゲームオーバーテキストノードを生成
                     parent.spawn(Gameover::from_title(font));
                 })
                 .with_children(|parent| {
                     parent
-                        // ボタンリストを生成
                         .spawn(Gameover::from_button_list())
                         .with_children(|parent| {
                             parent
-                                // ホームボタンノードを生成
                                 .spawn((Gameover::from_button(), Home))
                                 .with_children(|parent| {
-                                    // ホームアイコンノードを生成
                                     parent.spawn(Gameover::from_icon(house_image.clone()));
                                 });
                         })
                         .with_children(|parent| {
                             parent
-                                // リトライボタンノードを生成
                                 .spawn((Gameover::from_button(), Retry))
                                 .with_children(|parent| {
-                                    // リトライアイコンノードを生成
                                     parent.spawn(Gameover::from_icon(retry_image.clone()));
                                 });
                         });
@@ -229,6 +227,8 @@ fn setup(
         });
 }
 
+/// ホームボタンの挙動を決める関数
+/// ボタンが押されたらメインメニュー画面に戻リマス
 fn house_button_system(
     mut interaction_query: Query<
     (&Interaction, &mut BackgroundColor),
@@ -257,6 +257,8 @@ fn house_button_system(
     }
 }
 
+/// リトライボタンの挙動を決める関数
+/// ボタンが押されたらもう一度ゲームを遊ぶことができます
 fn retry_button_system(
     mut interaction_query: Query<
     (&Interaction, &mut BackgroundColor),
@@ -285,6 +287,8 @@ fn retry_button_system(
     }
 }
 
+/// ゲームオーバーのコンポーネントを全て削除する関数
+/// ステートがゲームオーバーから抜ける時に実行されます
 fn despawn(
     mut commands: Commands,
     query: Query<Entity, With<Gameover>>,

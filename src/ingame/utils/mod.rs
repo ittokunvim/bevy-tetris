@@ -217,7 +217,6 @@ impl Plugin for UtilsPlugin {
             .insert_resource(MoveLeftTimer(Stopwatch::new()))
             .insert_resource(MoveRightTimer(Stopwatch::new()))
             .insert_resource(MoveBottomTimer(Stopwatch::new()))
-
          ;
     }
 }

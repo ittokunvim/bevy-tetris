@@ -11,7 +11,6 @@ use crate::ingame::utils::prelude::*;
 /// ブロックの削除を管理する関数
 /// `FixEvent`を受け取り、プレイヤーブロックを固定ブロックに変換し、
 /// ブロックマップを更新して、ラインが揃った場合にブロックを削除します。
-///
 pub fn block_clear(
     mut fix_events: EventReader<FixEvent>,
     mut commands: Commands,
@@ -46,14 +45,15 @@ pub fn block_clear(
     }
 
     let map = block_map.0;
-
-    // ブロックを削除
     for (index, row) in map.iter().enumerate() {
+        // ブロックマップで横1列に1が並んでいたら、その列のブロックを削除する
         if *row == [1; 10] {
+            // 削除するブロックのy座標を定義
             let y = FIELD_LEFT_TOP.y + GRID_SIZE * 4.0 - GRID_SIZE * index as f32;
+            // 削除後のブロックマップを更新
             block_map.0 = block_map.clearline(index);
 
-            // プレイヤーブロックをチェック
+            // プレイヤーブロックをチェックし、削除するY座標と同じなら削除
             for (player_entity, mut player_transform) in &mut player_query {
                 if player_transform.translation.y == y {
                     commands.entity(player_entity).despawn();
@@ -63,7 +63,7 @@ pub fn block_clear(
                 }
             }
 
-            // 固定ブロックをチェック
+            // 固定ブロックをチェックし、削除するY座標と同じなら削除
             for (block_entity, mut block_transform) in &mut block_query {
                 if block_transform.translation.y == y {
                     commands.entity(block_entity).despawn();
@@ -73,6 +73,7 @@ pub fn block_clear(
                 }
             }
 
+            // スコアを更新
             **score += 1;
         }
     }
