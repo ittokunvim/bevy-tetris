@@ -133,7 +133,7 @@ fn update(
                 holdblock.blocktype = Some(blocktype);
 
                 // ブロック表示位置を計算（タイプごとに微調整）
-                let pos = calculate_nextblock_position(blocktype, BLOCK_INIT_POSITION);
+                let pos = blocktype.calculate_position(BLOCK_INIT_POSITION);
                 // ブロックの座標を設定
                 transform.translation = Vec3::new(
                     pos.x + GRID_SIZE_HALF * ((index % 4) as f32),
@@ -165,43 +165,5 @@ impl Plugin for HoldBlockPlugin {
             .add_systems(Update, update.run_if(in_state(AppState::InGame)))
             .add_systems(OnExit(AppState::Gameover), despawn)
         ;
-    }
-}
-
-/// 次ブロックの生成ポジションを
-/// 各ブロックの種類に応じて微調整する関数
-fn calculate_nextblock_position(
-    blocktype: BlockType,
-    init_position: Vec3,
-) -> Vec2 {
-    match blocktype {
-        BlockType::TypeI => Vec2::new(
-            init_position.x + GRID_SIZE_HALF * 0.5,
-            init_position.y - GRID_SIZE_HALF * 1.0,
-        ),
-        BlockType::TypeJ => Vec2::new(
-            init_position.x + GRID_SIZE_HALF * 1.0,
-            init_position.y - GRID_SIZE_HALF * 1.5,
-        ),
-        BlockType::TypeL => Vec2::new(
-            init_position.x + GRID_SIZE_HALF * 1.0,
-            init_position.y - GRID_SIZE_HALF * 1.5,
-        ),
-        BlockType::TypeO => Vec2::new(
-            init_position.x + GRID_SIZE_HALF * 0.5,
-            init_position.y - GRID_SIZE_HALF * 0.5,
-        ),
-        BlockType::TypeS => Vec2::new(
-            init_position.x + GRID_SIZE_HALF * 1.0,
-            init_position.y - GRID_SIZE_HALF * 0.5,
-        ),
-        BlockType::TypeT => Vec2::new(
-            init_position.x + GRID_SIZE_HALF * 1.0,
-            init_position.y - GRID_SIZE_HALF * 1.5,
-        ),
-        BlockType::TypeZ => Vec2::new(
-            init_position.x + GRID_SIZE_HALF * 1.0,
-            init_position.y - GRID_SIZE_HALF * 0.5,
-        ),
     }
 }

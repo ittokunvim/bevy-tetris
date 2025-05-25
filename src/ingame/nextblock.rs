@@ -93,10 +93,7 @@ fn setup(
 
         // ブロックの初期位置を計算
         let y = BLOCK_INIT_POSITION.y - GRID_SIZE_HALF * 5.0 * (nextblock_id - 1) as f32;
-        let init_position = calculate_nextblock_position(
-            blocktype,
-            BLOCK_INIT_POSITION.with_y(y),
-        );
+        let init_position = blocktype.calculate_position(BLOCK_INIT_POSITION.with_y(y));
 
        // ブロックの色を定義
         let color = blocktype.color();
@@ -182,10 +179,7 @@ fn update(
             // ブロックの描画y座標を計算
             let y = BLOCK_INIT_POSITION.y - GRID_SIZE_HALF * 5.0 * (nextblock_id - 1) as f32;
             // 初期位置y座標反映＋ブロックタイプごとのオフセット計算
-            let init_position = calculate_nextblock_position(
-                &prev_blocktype,
-                BLOCK_INIT_POSITION.with_y(y),
-            );
+            let init_position = blocktype.calculate_position(BLOCK_INIT_POSITION.with_y(y));
 
             // インデックスからブロックの座標を計算し、位置を更新
             transform.translation = Vec3::new(
@@ -217,43 +211,5 @@ impl Plugin for NextBlockPlugin {
             .add_systems(Update, update.run_if(in_state(AppState::InGame)))
             .add_systems(OnExit(AppState::Gameover), despawn)
         ;
-    }
-}
-
-/// 次ブロックの生成ポジションを
-/// 各ブロックの種類に応じて微調整する関数
-fn calculate_nextblock_position(
-    blocktype: &BlockType,
-    init_position: Vec3,
-) -> Vec2 {
-    match blocktype {
-        BlockType::TypeI => Vec2::new(
-            init_position.x + GRID_SIZE_HALF * 0.5,
-            init_position.y - GRID_SIZE_HALF * 1.0,
-        ),
-        BlockType::TypeJ => Vec2::new(
-            init_position.x + GRID_SIZE_HALF * 1.0,
-            init_position.y - GRID_SIZE_HALF * 1.5,
-        ),
-        BlockType::TypeL => Vec2::new(
-            init_position.x + GRID_SIZE_HALF * 1.0,
-            init_position.y - GRID_SIZE_HALF * 1.5,
-        ),
-        BlockType::TypeO => Vec2::new(
-            init_position.x + GRID_SIZE_HALF * 0.5,
-            init_position.y - GRID_SIZE_HALF * 0.5,
-        ),
-        BlockType::TypeS => Vec2::new(
-            init_position.x + GRID_SIZE_HALF * 1.0,
-            init_position.y - GRID_SIZE_HALF * 0.5,
-        ),
-        BlockType::TypeT => Vec2::new(
-            init_position.x + GRID_SIZE_HALF * 1.0,
-            init_position.y - GRID_SIZE_HALF * 1.5,
-        ),
-        BlockType::TypeZ => Vec2::new(
-            init_position.x + GRID_SIZE_HALF * 1.0,
-            init_position.y - GRID_SIZE_HALF * 0.5,
-        ),
     }
 }
