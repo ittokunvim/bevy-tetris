@@ -81,4 +81,3 @@ pub fn block_clear(
     // ブロックを生成するイベントを送信
     spawn_events.send_default();
 }
-
