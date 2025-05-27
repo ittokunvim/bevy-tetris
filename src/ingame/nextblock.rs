@@ -62,7 +62,7 @@ fn setup(
 ) {
     info_once!("setup");
 
-    nextblocks.0 = std::array::from_fn(|_| block_randomizer.next().unwrap());
+    **nextblocks = std::array::from_fn(|_| block_randomizer.next().unwrap());
 
     // ボードを生成する
     commands.spawn((
@@ -81,6 +81,7 @@ fn setup(
             ..Default::default()
         },
         Transform::from_translation(NEXT_POSITION),
+        NextBoard,
     ));
 
     // 次にくるブロックを生成する

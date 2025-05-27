@@ -4,6 +4,14 @@ use crate::GRID_SIZE;
 use crate::ingame::SpawnEvent;
 use crate::ingame::utils::prelude::*;
 
+/// ゲーム開始時に実行される関数
+/// プレイヤーが動かすブロックを生成する
+pub fn setup_spawn(mut events: EventWriter<SpawnEvent>) {
+    info_once!("setup_spawn");
+
+    events.send_default();
+}
+
 /// ブロック生成イベントを処理する関数
 /// `SpawnEvent`を受け取り、新しいブロックを生成してフィールドに配置します
 pub fn block_spawn(
@@ -12,7 +20,7 @@ pub fn block_spawn(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut current_block: ResMut<CurrentBlock>,
-    nextblocks: ResMut<NextBlocks>,
+    nextblocks: Res<NextBlocks>,
     query: Query<&Transform, With<Block>>,
 ) {
     info_once!("block_spawn");

@@ -3,7 +3,10 @@ use bevy::{
     time::Stopwatch,
 };
 
-use crate::GRID_SIZE;
+use crate::{
+    GRID_SIZE,
+    AppState,
+};
 use super::utils::{
     blockdata::*,
     blockrandomizer::BlockRandomizer,
@@ -17,22 +20,19 @@ mod blockrandomizer;
 mod blocktype;
 
 /// 移動、回転するブロックを識別するコンポーネント
-///
 /// 値には1~4に定義されているブロックのIDが格納される
 #[derive(Component)]
 pub struct PlayerBlock(pub usize);
 
 /// 移動、回転しないブロックを識別するコンポーネント
-///
 /// ブロック削除時に使用される
 #[derive(Component)]
 pub struct Block;
 
 /// ブロック削除時に用いるリソース
-///
 /// 値は[[usize; 10]; 24]で定義されており
 /// フィールド内の各ブロック座標が0 or 1で格納されている
-#[derive(Resource)]
+#[derive(Resource, Deref, DerefMut)]
 pub struct BlockMap(pub [[usize; 10]; 24]);
 
 impl BlockMap {
@@ -88,8 +88,7 @@ impl BlockMap {
     }
 }
 
-/// ブロック回転時に用いるリソース
-///
+/// 現在動かしているブロックを管理するリソース
 /// idには[usize; 16]で定義されているindexが格納される
 /// posには回転時に軸となるXYZ軸が定義される
 #[derive(Resource)]
@@ -108,6 +107,7 @@ impl CurrentBlock {
             pos: BLOCK_POSITION,
         }
     }
+
     /// 渡されたブロックIDの回転後のブロックの位置を返すメソッド
     ///
     /// # Arguments
@@ -155,11 +155,10 @@ impl HoldBlocks {
     }
 }
 
-/// 次に生成するブロックの表示に用いるリソース
-///
-/// 値は[BlockType; 3]で定義されており
-/// ブロックの形に関する値が格納されている
-#[derive(Resource, Debug)]
+/// 次に生成するブロックを管理するリソース
+/// 値は[BlockType; NEXT_BLOCK_COUNT]で定義されており
+/// 値にはランダムなブロックの形が格納されている
+#[derive(Resource, Debug, Deref, DerefMut)]
 pub struct NextBlocks(pub [BlockType; NEXT_BLOCK_COUNT]);
 
 impl NextBlocks {
@@ -203,6 +202,37 @@ pub struct MoveRightTimer(pub Stopwatch);
 #[derive(Resource, Deref, DerefMut)]
 pub struct MoveBottomTimer(pub Stopwatch);
 
+/// ブロックを全て削除する関数
+/// ゲームオーバを抜けた時に実行される
+fn despawn(
+    mut commands: Commands,
+    query: Query<Entity, With<Block>>,
+) {
+    info_once!("despawn");
+
+    for entity in &query {
+        commands.entity(entity).despawn();
+    }
+}
+
+/// リソースをリセットする関数
+/// ゲームオーバを抜けた時に実行される
+fn reset(
+    mut currentblock: ResMut<CurrentBlock>,
+    mut blockmap: ResMut<BlockMap>,
+    mut blockrandomizer: ResMut<BlockRandomizer>,
+    mut holdblocks: ResMut<HoldBlocks>,
+    mut nextblocks: ResMut<NextBlocks>,
+) {
+    info_once!("reset");
+
+    *currentblock = CurrentBlock::new();
+    *blockmap = BlockMap(BLOCK_MAP);
+    *blockrandomizer = BlockRandomizer::new();
+    *holdblocks = HoldBlocks::new();
+    *nextblocks = NextBlocks::new();
+}
+
 pub struct UtilsPlugin;
 
 impl Plugin for UtilsPlugin {
@@ -217,6 +247,8 @@ impl Plugin for UtilsPlugin {
             .insert_resource(MoveLeftTimer(Stopwatch::new()))
             .insert_resource(MoveRightTimer(Stopwatch::new()))
             .insert_resource(MoveBottomTimer(Stopwatch::new()))
+            .add_systems(OnExit(AppState::Gameover), despawn)
+            .add_systems(OnExit(AppState::Gameover), reset)
          ;
     }
 }
