@@ -101,6 +101,15 @@ fn update_score(
     **span = score.0.to_string();
 }
 
+fn despawn(
+    mut commands: Commands,
+    query: Query<Entity, With<Scoreboard>>,
+) {
+    for entity in &query {
+        commands.entity(entity).despawn();
+    }
+}
+
 pub struct ScoreboardPlugin;
 
 impl Plugin for ScoreboardPlugin {
@@ -109,6 +118,7 @@ impl Plugin for ScoreboardPlugin {
             .insert_resource(Score(0))
             .add_systems(OnEnter(AppState::InGame), setup)
             .add_systems(Update, update_score.run_if(in_state(AppState::InGame)))
+            .add_systems(OnExit(AppState::Gameover), despawn)
         ;
     }
 }
