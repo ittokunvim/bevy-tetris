@@ -37,7 +37,7 @@ pub fn block_movement(
     mut move_events: EventReader<MoveEvent>,
     mut fix_events: EventWriter<FixEvent>,
     mut player_query: Query<&mut Transform, (With<PlayerBlock>, Without<Block>)>,
-    mut currentblock: ResMut<CurrentBlock>,
+    mut currentblock: ResMut<CurrentBlocks>,
     block_query: Query<&Transform, With<Block>>,
 ) {
     info_once!("block_movement");

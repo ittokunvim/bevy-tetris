@@ -166,7 +166,7 @@ fn key_block_hold(
     mut events: EventWriter<HoldEvent>,
     mut holdblocks: ResMut<HoldBlocks>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    currentblock: Res<CurrentBlock>,
+    currentblock: Res<CurrentBlocks>,
 ) {
     info_once!("key_block_hold");
 

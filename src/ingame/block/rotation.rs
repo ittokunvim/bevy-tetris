@@ -15,7 +15,7 @@ pub fn block_rotation(
     mut events: EventReader<RotationEvent>,
     mut falling_timer: ResMut<FallingTimer>,
     mut player_query: Query<(&PlayerBlock, &mut Transform), (With<PlayerBlock>, Without<Block>)>,
-    mut currentblock: ResMut<CurrentBlock>,
+    mut currentblock: ResMut<CurrentBlocks>,
     block_query: Query<&Transform, With<Block>>,
 ) {
     info_once!("block_rotation");

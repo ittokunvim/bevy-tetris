@@ -85,16 +85,16 @@ impl BlockMap {
 /// idには[usize; 16]で定義されているindexが格納される
 /// posには回転時に軸となるXYZ軸が定義される
 #[derive(Resource)]
-pub struct CurrentBlock {
+pub struct CurrentBlocks {
     pub blocktype: BlockType,
     pub blockid: usize,
     pub pos: Vec3,
 }
 
-impl CurrentBlock {
+impl CurrentBlocks {
     // リソースを初期化
     pub fn new() -> Self {
-        CurrentBlock {
+        CurrentBlocks {
             blocktype: BlockType::TypeI,
             blockid: 0,
             pos: BLOCK_POSITION,
@@ -217,7 +217,7 @@ fn despawn(
 
 /// リソースをセットアップする関数
 fn setup(
-    mut _currentblock: ResMut<CurrentBlock>,
+    mut _currentblock: ResMut<CurrentBlocks>,
     mut _blockmap: ResMut<BlockMap>,
     mut blockrandomizer: ResMut<BlockRandomizer>,
     mut _holdblocks: ResMut<HoldBlocks>,
@@ -232,7 +232,7 @@ fn setup(
 
 /// リソースをリセットする関数
 fn reset(
-    mut currentblock: ResMut<CurrentBlock>,
+    mut currentblock: ResMut<CurrentBlocks>,
     mut blockmap: ResMut<BlockMap>,
     mut blockrandomizer: ResMut<BlockRandomizer>,
     mut holdblocks: ResMut<HoldBlocks>,
@@ -240,7 +240,7 @@ fn reset(
 ) {
     info_once!("reset");
 
-    *currentblock = CurrentBlock::new();
+    *currentblock = CurrentBlocks::new();
     *blockmap = BlockMap(BLOCK_MAP);
     *blockrandomizer = BlockRandomizer::new();
     *holdblocks = HoldBlocks::new();
@@ -252,7 +252,7 @@ pub struct UtilsPlugin;
 impl Plugin for UtilsPlugin {
     fn build(&self, app: &mut App) {
         app
-            .insert_resource(CurrentBlock::new())
+            .insert_resource(CurrentBlocks::new())
             .insert_resource(BlockMap(BLOCK_MAP))
             .insert_resource(BlockRandomizer::new())
             .insert_resource(HoldBlocks::new())

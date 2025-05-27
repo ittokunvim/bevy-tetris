@@ -2,7 +2,7 @@ pub use super::{
     PlayerBlock,
     Block,
     BlockMap,
-    CurrentBlock,
+    CurrentBlocks,
     HoldBlocks,
     NextBlocks,
     FallingTimer,

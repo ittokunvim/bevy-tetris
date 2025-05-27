@@ -11,7 +11,7 @@ pub fn block_spawn(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    mut current_block: ResMut<CurrentBlock>,
+    mut current_block: ResMut<CurrentBlocks>,
     mut nextblocks: ResMut<NextBlocks>,
     mut blockrandomizer: ResMut<BlockRandomizer>,
     query: Query<&Transform, With<Block>>,
@@ -27,7 +27,7 @@ pub fn block_spawn(
         }
 
         // CurrentBlockをリセット
-        *current_block = CurrentBlock::new();
+        *current_block = CurrentBlocks::new();
 
         // CurrentBlockのBlockTypeをNextBlockに紐付け
         current_block.blocktype = blocktype;
