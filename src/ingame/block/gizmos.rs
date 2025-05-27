@@ -1,10 +1,6 @@
 use bevy::prelude::*;
 
 use crate::GRID_SIZE;
-use crate::ingame::{
-    FIELD_SIZE,
-    FIELD_POSITION,
-};
 use crate::ingame::utils::prelude::*;
 
 /// ブロックの落下地点を予測し描画する関数

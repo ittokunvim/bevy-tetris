@@ -39,18 +39,18 @@ pub fn clear_block(
         commands.entity(player_entity).insert(Block);
 
         // BlockMapを更新
-        let pos = player_transform.translation.truncate();
-        **blockmap = blockmap.insert(pos);
+        blockmap.insert(player_transform.translation.truncate());
     }
 
     let map = blockmap.0;
     for (index, row) in map.iter().enumerate() {
         // ブロックマップで横1列に1が並んでいたら、その列のブロックを削除する
         if *row == [1; 10] {
+            // 削除後のブロックマップを更新
+            blockmap.clearline(index);
+
             // 削除するブロックのy座標を定義
             let y = FIELD_LEFT_TOP.y + GRID_SIZE * 4.0 - GRID_SIZE * index as f32;
-            // 削除後のブロックマップを更新
-            **blockmap = blockmap.clearline(index);
 
             // プレイヤーブロックをチェックし、削除するY座標と同じなら削除
             for (player_entity, mut player_transform) in &mut player_query {
@@ -81,7 +81,7 @@ pub fn clear_block(
     spawn_events.send_default();
 }
 
-/// ホールドの有効性を管理する関数
+/// ホールドができるかどうか管理する関数
 pub fn enable_hold(
     mut events: EventReader<FixEvent>,
     mut holdblocks: ResMut<HoldBlocks>,
@@ -101,8 +101,7 @@ pub fn enable_hold(
 }
 
 /// ゲームオーバーを管理する関数
-/// `FixEvent`を受け取り、固定されたブロックから
-/// ゲームオーバーになるかどうかチェックします
+/// 固定されたブロックからゲームオーバーになるかどうかチェックします
 pub fn check_gameover(
     mut events: EventReader<FixEvent>,
     mut next_state: ResMut<NextState<AppState>>,

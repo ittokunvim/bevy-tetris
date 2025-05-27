@@ -25,41 +25,44 @@ pub fn block_harddrop(
     // イベントをクリア
     harddrop_events.clear();
 
-    // 衝突判定が出るまで、ブロックを下に移動させる
+    // 衝突フラグ
     let mut collision = false;
-    while !collision {
-        // フィールドの衝突をチェック
-        for transform in &mut player_query {
-            let y = transform.translation.y;
+    // 現在のステップ数（移動距離）
+    let mut step = 0;
 
-            // もし下移動後のブロックのY座標がフィールドの底を超えていたら
-            if y - GRID_SIZE < FIELD_POSITION.y - FIELD_SIZE.y / 2.0 {
-                collision = true;
-            }
-        }
+    // フィールドの下限を計算
+    let field_boundary = FIELD_POSITION.y - FIELD_SIZE.y / 2.0;
 
-        // ブロックの衝突をチェック
+    while !collision && step < BLOCK_MAP.len() {
         for player_transform in &mut player_query {
             let player_x = player_transform.translation.x;
-            let player_y = player_transform.translation.y;
+            let player_y = player_transform.translation.y - GRID_SIZE * step as f32;
 
             for block_transform in &block_query {
                 let block_x = block_transform.translation.x;
                 let block_y = block_transform.translation.y;
 
-                // もし下移動後のブロックの座標がブロックの座標が同じなら
+                // プレイヤーブロックがブロックに衝突
                 if player_x == block_x && player_y - GRID_SIZE == block_y {
                     collision = true;
                 }
             }
-        }
 
-        // 現在動かしているブロックを移動
-        if !collision {
-            for mut transform in &mut player_query {
-                transform.translation.y -= GRID_SIZE;
+            // プレイヤーブロックがフィールドの下限に衝突
+            if player_y - GRID_SIZE < field_boundary {
+                collision = true;
             }
         }
+
+        // 衝突しなかったらステップを増加
+        if !collision {
+            step += 1;
+        }
+    }
+
+    // 現在動かしているブロックを移動
+    for mut transform in &mut player_query {
+        transform.translation.y -= GRID_SIZE * step as f32;
     }
 
     // ブロックを固定

@@ -15,7 +15,6 @@ pub struct BlockPlugin;
 impl Plugin for BlockPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(OnEnter(AppState::InGame), spawn::setup_spawn)
             .add_systems(Update, (
                 spawn::block_spawn,
                 movement::block_falling,

@@ -37,7 +37,7 @@ pub fn block_movement(
     mut move_events: EventReader<MoveEvent>,
     mut fix_events: EventWriter<FixEvent>,
     mut player_query: Query<&mut Transform, (With<PlayerBlock>, Without<Block>)>,
-    mut current_block: ResMut<CurrentBlock>,
+    mut currentblock: ResMut<CurrentBlock>,
     block_query: Query<&Transform, With<Block>>,
 ) {
     info_once!("block_movement");
@@ -99,9 +99,9 @@ pub fn block_movement(
 
         // 現在のブロック位置を更新
         match direction {
-            Direction::Left   => current_block.pos.x -= GRID_SIZE,
-            Direction::Right  => current_block.pos.x += GRID_SIZE,
-            Direction::Bottom => current_block.pos.y -= GRID_SIZE,
+            Direction::Left   => currentblock.pos.x -= GRID_SIZE,
+            Direction::Right  => currentblock.pos.x += GRID_SIZE,
+            Direction::Bottom => currentblock.pos.y -= GRID_SIZE,
         }
         // ブロックを移動
         for mut transform in &mut player_query {
