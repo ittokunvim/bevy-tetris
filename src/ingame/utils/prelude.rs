@@ -13,3 +13,4 @@ pub use super::{
 pub use super::blockdata::*;
 pub use super::blockrandomizer::BlockRandomizer;
 pub use super::blocktype::BlockType;
+pub use super::fielddata::*;

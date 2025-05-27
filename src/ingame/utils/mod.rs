@@ -7,10 +7,12 @@ use crate::{
     GRID_SIZE,
     AppState,
 };
+use super::SpawnEvent;
 use super::utils::{
     blockdata::*,
     blockrandomizer::BlockRandomizer,
     blocktype::BlockType,
+    fielddata::*,
 };
 
 pub mod prelude;
@@ -18,6 +20,7 @@ pub mod prelude;
 mod blockdata;
 mod blockrandomizer;
 mod blocktype;
+mod fielddata;
 
 /// 移動、回転するブロックを識別するコンポーネント
 /// 値には1~4に定義されているブロックのIDが格納される
@@ -32,59 +35,49 @@ pub struct Block;
 /// ブロック削除時に用いるリソース
 /// 値は[[usize; 10]; 24]で定義されており
 /// フィールド内の各ブロック座標が0 or 1で格納されている
-#[derive(Resource, Deref, DerefMut)]
+#[derive(Resource, Debug, Deref, DerefMut)]
 pub struct BlockMap(pub [[usize; 10]; 24]);
 
 impl BlockMap {
-    /// 渡されたブロックの座標からブロックマップに値を代入し
-    /// そのブロックマップを返すメソッド
+    /// 渡されたブロックの座標からブロックマップに値を代入するメソッド
     ///
     /// # Arguments
     /// * pos - ブロックの座標
     ///
-    /// # Returns
-    /// * [[usize; 10]; 24] - 更新されたブロックマップ
-    ///
     /// # Panics
     /// * 指定された座標が見つからない場合
-    pub fn insert(&self, pos: Vec2) -> [[usize; 10]; 24] {
-        let mut block_map = self.0;
-        // ブロック座標にブロックマップを追加
-        for y in 0..block_map.len() {
-            for x in 0..block_map[0].len() {
+    pub fn insert(&mut self, pos: Vec2) {
+        let map = self.0;
+        for y in 0..map.len() {
+            for x in 0..map[0].len() {
+                // ループから値に対応したXY座標を取得
                 let current_pos = Vec2::new(
                     FIELD_LEFT_TOP.x + GRID_SIZE * x as f32, 
                     FIELD_LEFT_TOP.y + GRID_SIZE * 4.0 - GRID_SIZE * y as f32,
                 );
+                // そのXY座標と渡された値が一致したら、マップに値を追加
                 if current_pos == pos {
-                    block_map[y][x] = 1;
-                    return block_map
+                    return self.0[y][x] = 1;
                 }
             }
         }
+        // 値は必ず代入されなければならない
         panic!("pos no found: {}", pos);
     }
 
     /// 渡された削除するブロックの列のIDを参照して
-    /// 消されるブロックをブロックマップに更新し
-    /// ブロック削除後のブロックマップを返すメソッド
+    /// 消されるブロックをブロックマップに更新するメソッド
     ///
     /// # Arguments
     /// * index - 削除するブロックの列のID
-    ///
-    /// # Returns
-    /// * [[usize; 10]; 24] - 更新されたブロックマップ
-    pub fn clearline(&self, index: usize) -> [[usize; 10]; 24] {
-        let mut block_map = self.0;
-        // clear index line
-        block_map[index] = [0; 10];
-        // shift down one by one
+    pub fn clearline(&mut self, index: usize) {
+        let map = self.0;
+        // 渡された値の行を全て0にする
+        self.0[index] = [0; 10];
+        // 0にした行から上の値を一段下にずらす
         for i in (1..=index).rev() {
-            block_map[i] = block_map[i - 1];
+            self.0[i] = map[i - 1];
         }
-        // clear top line
-        block_map[0] = [0; 10];
-        block_map
     }
 }
 
@@ -135,11 +128,14 @@ impl CurrentBlock {
                 return Vec3::new(x, y, z);
             }
         }
-        // ブロックIDが見つからなかったらパニック
+        // ブロックIDは見つからなければならない
         panic!("id not found: {}", id);
     }
 }
 
+/// ホールドされたブロックを管理するリソース
+/// - can_hold: ホールドが可能かどうか判定
+/// - blocktype: ホールドされたブロックの形
 #[derive(Resource)]
 pub struct HoldBlocks {
     pub can_hold: bool,
@@ -184,6 +180,8 @@ impl NextBlocks {
     }
 }
 
+/// ブロックが落下する速度を管理するリソース
+/// タイマーが早くなればなるほどブロックが落下する速度も早くなる
 #[derive(Resource, Deref, DerefMut)]
 pub struct FallingTimer(pub Timer);
 
@@ -193,17 +191,19 @@ impl FallingTimer {
     }
 }
 
+/// ブロックが左に移動する速度を管理するリソース
 #[derive(Resource, Deref, DerefMut)]
 pub struct MoveLeftTimer(pub Stopwatch);
 
+/// ブロックが右に移動する速度を管理するリソース
 #[derive(Resource, Deref, DerefMut)]
 pub struct MoveRightTimer(pub Stopwatch);
 
+/// ブロックが下に移動する速度を管理するリソース
 #[derive(Resource, Deref, DerefMut)]
 pub struct MoveBottomTimer(pub Stopwatch);
 
 /// ブロックを全て削除する関数
-/// ゲームオーバを抜けた時に実行される
 fn despawn(
     mut commands: Commands,
     query: Query<Entity, With<Block>>,
@@ -215,8 +215,22 @@ fn despawn(
     }
 }
 
+/// リソースをセットアップする関数
+fn setup(
+    mut _currentblock: ResMut<CurrentBlock>,
+    mut _blockmap: ResMut<BlockMap>,
+    mut blockrandomizer: ResMut<BlockRandomizer>,
+    mut _holdblocks: ResMut<HoldBlocks>,
+    mut nextblocks: ResMut<NextBlocks>,
+    mut events: EventWriter<SpawnEvent>
+) {
+    info_once!("setup");
+
+    **nextblocks = std::array::from_fn(|_| blockrandomizer.next().unwrap());
+    events.send(SpawnEvent(Some(nextblocks[0])));
+}
+
 /// リソースをリセットする関数
-/// ゲームオーバを抜けた時に実行される
 fn reset(
     mut currentblock: ResMut<CurrentBlock>,
     mut blockmap: ResMut<BlockMap>,
@@ -248,6 +262,7 @@ impl Plugin for UtilsPlugin {
             .insert_resource(MoveRightTimer(Stopwatch::new()))
             .insert_resource(MoveBottomTimer(Stopwatch::new()))
             .add_systems(OnExit(AppState::Gameover), despawn)
+            .add_systems(OnEnter(AppState::InGame), setup)
             .add_systems(OnExit(AppState::Gameover), reset)
          ;
     }

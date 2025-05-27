@@ -1,6 +1,10 @@
 use bevy::prelude::*;
 
 use crate::GRID_SIZE;
+use super::fielddata::{
+    FIELD_SIZE,
+    FIELD_POSITION,
+};
 
 pub const MAX_BLOCK_COUNT: usize = 4;
 pub const MAX_COLLISION_COUNT: usize = 3;
@@ -13,13 +17,6 @@ pub const BLOCK_POSITION: Vec3 = Vec3::new(
 pub const BLOCK_FALL_SPEED: f32 = 0.5;
 pub const BLOCK_MOVE_SPEED: f32 = 0.25;
 pub const NEXT_BLOCK_COUNT: usize = 4;
-
-pub const FIELD_SIZE: Vec2 = Vec2::new(10.0 * GRID_SIZE, 20.0 * GRID_SIZE);
-pub const FIELD_POSITION: Vec3 = Vec3::new(0.0, 0.0, -10.0);
-pub const FIELD_LEFT_TOP: Vec2 = Vec2::new(
-    FIELD_POSITION.x - FIELD_SIZE.x / 2.0 + GRID_SIZE / 2.0, 
-    FIELD_POSITION.y + FIELD_SIZE.y / 2.0 - GRID_SIZE / 2.0,
-);
 
 pub const BLOCK_UNIT_COUNT: usize = 4;
 pub const BLOCK_MAP: [[usize; 10]; 24] = [

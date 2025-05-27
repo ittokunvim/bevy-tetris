@@ -69,31 +69,31 @@ impl BlockType {
     pub fn calculate_position(&self, pos: Vec3) -> Vec2 {
         match self {
             BlockType::TypeI => Vec2::new(
-                pos.x + GRID_SIZE_HALF * 0.5,
+                pos.x + GRID_SIZE_HALF * 1.0,
                 pos.y - GRID_SIZE_HALF * 1.0,
             ),
             BlockType::TypeJ => Vec2::new(
-                pos.x + GRID_SIZE_HALF * 1.0,
+                pos.x + GRID_SIZE_HALF * 1.5,
                 pos.y - GRID_SIZE_HALF * 1.5,
             ),
             BlockType::TypeL => Vec2::new(
-                pos.x + GRID_SIZE_HALF * 1.0,
+                pos.x + GRID_SIZE_HALF * 1.5,
                 pos.y - GRID_SIZE_HALF * 1.5,
             ),
             BlockType::TypeO => Vec2::new(
-                pos.x + GRID_SIZE_HALF * 0.5,
+                pos.x + GRID_SIZE_HALF * 1.0,
                 pos.y - GRID_SIZE_HALF * 0.5,
             ),
             BlockType::TypeS => Vec2::new(
-                pos.x + GRID_SIZE_HALF * 1.0,
+                pos.x + GRID_SIZE_HALF * 1.5,
                 pos.y - GRID_SIZE_HALF * 0.5,
             ),
             BlockType::TypeT => Vec2::new(
-                pos.x + GRID_SIZE_HALF * 1.0,
+                pos.x + GRID_SIZE_HALF * 1.5,
                 pos.y - GRID_SIZE_HALF * 1.5,
             ),
             BlockType::TypeZ => Vec2::new(
-                pos.x + GRID_SIZE_HALF * 1.0,
+                pos.x + GRID_SIZE_HALF * 1.5,
                 pos.y - GRID_SIZE_HALF * 0.5,
             ),
         }
