@@ -101,6 +101,7 @@ fn update_score(
     **span = score.0.to_string();
 }
 
+/// スコアボードを削除する関数
 fn despawn(
     mut commands: Commands,
     query: Query<Entity, With<Scoreboard>>,

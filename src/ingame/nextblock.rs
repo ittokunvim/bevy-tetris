@@ -56,13 +56,9 @@ fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    mut nextblocks: ResMut<NextBlocks>,
-    mut block_randomizer: ResMut<BlockRandomizer>,
     asset_server: Res<AssetServer>,
 ) {
     info_once!("setup");
-
-    **nextblocks = std::array::from_fn(|_| block_randomizer.next().unwrap());
 
     // ボードを生成する
     commands.spawn((
@@ -84,45 +80,17 @@ fn setup(
         NextBoard,
     ));
 
-    // 次にくるブロックを生成する
+    // 空の次ブロックを生成する
     let shape = meshes.add(Rectangle::new(BLOCK_SIZE.x, BLOCK_SIZE.y));
-    for (nextblock_id, blocktype) in nextblocks.0.iter().enumerate() {
-        // 現在動かしているブロックは表示しない
-        if nextblock_id <= 0 {
-            continue;
-        }
-
-        // ブロックの初期位置を計算
-        let y = BLOCK_INIT_POSITION.y - GRID_SIZE_HALF * 5.0 * (nextblock_id - 1) as f32;
-        let init_position = blocktype.calculate_position(BLOCK_INIT_POSITION.with_y(y));
-
-       // ブロックの色を定義
-        let color = blocktype.color();
-        // BlockTypeからBlockDataを取得しループ
-        for (block_id, value) in blocktype.blockdata()[0].iter().enumerate() {
-            // ブロックデータの値が0であればスキップ
-            if *value == 0 {
-                continue;
-            }
-
-            // ブロックの位置を計算
-            let translation = Vec3::new(
-                init_position.x + GRID_SIZE_HALF * ((block_id % 4) as f32),
-                init_position.y - GRID_SIZE_HALF * ((block_id / 4) as f32),
-                10.0,
-            );
-
-            // 1つのブロックを生成
+    let color = Color::NONE;
+    let blocktype = BlockType::TypeI;
+    for nextblock_id in 1..=NEXT_BLOCK_COUNT - 1 {
+        for block_id in 1..=BLOCK_UNIT_COUNT {
             commands.spawn((
                 Mesh2d(shape.clone()),
                 MeshMaterial2d(materials.add(color)),
-                Transform::from_translation(translation),
                 NextBoard,
-                NextBlock {
-                    nextblock_id,
-                    blocktype: *blocktype,
-                    block_id: *value,
-                },
+                NextBlock { nextblock_id, blocktype, block_id, },
             ));
         }
     }
@@ -138,8 +106,7 @@ fn update(
         &mut NextBlock
     ), With<NextBlock>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    mut nextblocks: ResMut<NextBlocks>,
-    mut block_randomizer: ResMut<BlockRandomizer>,
+    nextblocks: Res<NextBlocks>,
 ) {
     info_once!("update");
 
@@ -151,28 +118,19 @@ fn update(
     // イベントをクリア
     events.clear();
 
-    // 次ブロックデータを更新
-    let blocktype = block_randomizer.next().unwrap();
-    *nextblocks = nextblocks.update(blocktype);
-
     // 次ブロック一覧をループ
-    for (mut transform, mut color, mut nextblockdata) in &mut query {
-        // 現在動かしているブロックは対象外
-        if nextblockdata.nextblock_id <= 0 {
-            continue;
-        }
-
-        let nextblock_id = nextblockdata.nextblock_id;
-        let prev_blocktype = nextblockdata.blocktype;
-        let block_id = nextblockdata.block_id;
+    for (mut transform, mut color, mut nextblock) in &mut query {
+        let nextblock_id = nextblock.nextblock_id;
+        let block_id = nextblock.block_id;
+        let blocktype = nextblocks[nextblock_id];
 
         // ブロックの色を更新
-        *color = MeshMaterial2d(materials.add(nextblockdata.blocktype.color()));
+        *color = MeshMaterial2d(materials.add(blocktype.color()));
         // ブロックの形を更新
-        nextblockdata.blocktype = nextblocks.0[nextblock_id];
+        nextblock.blocktype = blocktype;
 
         // 現在のブロックデータ配列内に該当するindexを検索
-        if let Some((index, _)) = prev_blocktype.blockdata()[0]
+        if let Some((index, _)) = blocktype.blockdata()[0]
             .iter()
             .enumerate()
             .find(|(_, &blockdata_value)| blockdata_value == block_id)

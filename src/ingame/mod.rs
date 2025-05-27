@@ -23,8 +23,10 @@ struct RotationEvent(Direction);
 struct HardDropEvent;
 
 /// ブロック生成イベント
+/// 引数にブロックタイプが指定されたらそのブロックを生成
+/// なければランダムに生成
 #[derive(Event, Default)]
-struct SpawnEvent;
+struct SpawnEvent(Option<BlockType>);
 
 /// ブロック固定イベント
 #[derive(Event, Default)]

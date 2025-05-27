@@ -5,11 +5,7 @@ use crate::{
     PATH_FONT,
     AppState,
 };
-use super::{
-    FIELD_SIZE,
-    FIELD_POSITION,
-    HoldEvent,
-};
+use super::HoldEvent;
 use super::utils::prelude::*;
 
 const BOARD_SIZE: Vec2 = Vec2::new(
@@ -96,7 +92,6 @@ fn setup(
 /// ホールドしたブロックを更新する関数
 /// ブロックの状態をゲーム進行に合わせて更新を行う
 fn update(
-    mut commands: Commands,
     mut hold_events: EventReader<HoldEvent>,
     mut holdblock_query: Query<(
         &mut Transform,
@@ -104,7 +99,6 @@ fn update(
         &mut HoldBlock
     ), With<HoldBlock>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    player_query: Query<Entity, With<PlayerBlock>>,
 ) {
     info_once!("update");
 
@@ -112,17 +106,9 @@ fn update(
     for event in hold_events.read() {
         let blocktype = event.0;
 
-        // プレイヤーブロックを削除する
-        for entity in player_query.iter() {
-            commands.entity(entity).despawn();
-        }
-
-        // ホールドされたブロックを表示を更新
-        let blockdata = &blocktype.blockdata()[0];
-
         for (mut transform, mut color, mut holdblock) in &mut holdblock_query.iter_mut() {
             // 現在のホールドブロックIDが形状データに含まれるか検索
-            if let Some((index, _)) = blockdata
+            if let Some((index, _)) = &blocktype.blockdata()[0]
                 .iter()
                 .enumerate()
                 .find(|(_, &v)| v == holdblock.block_id)
