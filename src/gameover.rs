@@ -6,6 +6,7 @@ use crate::{
     PATH_IMAGE_HOUSE,
     PATH_IMAGE_RETRY,
     AppState,
+    Score,
 };
 
 const ROOT_WIDTH: Val = Val::Percent(100.0);
@@ -18,8 +19,8 @@ const BOARD_PADDING: Val = Val::Px(16.0);
 const BOARD_COLOR: Color = Color::srgb(0.13, 0.14, 0.24);
 
 const TITLE_TEXT: &str = "ゲームオーバー";
-const TITLE_FONT_SIZE: f32 = 24.0;
-const TITLE_COLOR: Color = Color::srgb(0.79, 0.83, 0.96);
+
+const SCORE_TEXT: &str = "スコア";
 
 const LIST_WIDTH: Val = Val::Px(BOARD_SIZE.x);
 const LIST_HEIGHT: Val = Val::Px(48.0);
@@ -28,6 +29,9 @@ const ICON_SIZE: Vec2 = Vec2::new(24.0, 24.0);
 const BUTTON_WIDTH: Val = Val::Px(ICON_SIZE.x * 2.0);
 const BUTTON_HEIGHT: Val = Val::Px(ICON_SIZE.y * 2.0);
 const ICON_COLOR_HOVER: Color = Color::srgb(0.39, 0.43, 0.65);
+
+const TEXT_FONT_SIZE: f32 = 24.0;
+const TEXT_COLOR: Color = Color::srgb(0.79, 0.83, 0.96);
 
 const BORDER_SIZE: Val = Val::Px(4.0);
 const BORDER_COLOR: Color = Color::srgb(0.79, 0.83, 0.96);
@@ -105,10 +109,30 @@ impl Gameover {
             Text::new(TITLE_TEXT),
             TextFont {
                 font: font.clone(),
-                font_size: TITLE_FONT_SIZE,
+                font_size: TEXT_FONT_SIZE,
                 ..Default::default()
             },
-            TextColor(TITLE_COLOR),
+            TextColor(TEXT_COLOR),
+        )
+    }
+
+    /// ゲームオーバー画面に表示するスコア
+    ///
+    /// Returns:
+    /// * `Self`: Gameoverのインスタンス。
+    /// * `Text`: スコアと点数。
+    /// * `TextFont`: フォントスタイル。
+    /// * `TextColor`: テキストの色
+    fn from_score(font: Handle<Font>, score: String) -> (Self, Text, TextFont, TextColor) {
+        (
+            Self,
+            Text::new(format!("{}  {}", SCORE_TEXT, score)),
+            TextFont {
+                font: font.clone(),
+                font_size: TEXT_FONT_SIZE,
+                ..Default::default()
+            },
+            TextColor(TEXT_COLOR),
         )
     }
 
@@ -183,6 +207,7 @@ impl Gameover {
 /// * root
 ///   * board
 ///     * gameover text
+///     * Score
 ///     * button list
 ///       * house button
 ///         * icon
@@ -191,6 +216,7 @@ impl Gameover {
 fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
+    score: Res<Score>,
 ) {
     info_once!("setup");
 
@@ -204,7 +230,10 @@ fn setup(
             parent
                 .spawn(Gameover::from_board())
                 .with_children(|parent| {
-                    parent.spawn(Gameover::from_title(font));
+                    parent.spawn(Gameover::from_title(font.clone()));
+                })
+                .with_children(|parent| {
+                    parent.spawn(Gameover::from_score(font.clone(), score.to_string()));
                 })
                 .with_children(|parent| {
                     parent
