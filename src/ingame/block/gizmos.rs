@@ -1,24 +1,14 @@
 use bevy::prelude::*;
 
-use crate::{
-    GRID_SIZE,
-    FIELD_POSITION,
-    FIELD_SIZE,
-};
-use crate::blockdata::BLOCK_MAP;
-use super::{
-    BLOCK_SIZE,
-    CurrentBlock,
-    Block,
-    PlayerBlock,
-};
+use crate::GRID_SIZE;
+use crate::ingame::utils::prelude::*;
 
 /// ブロックの落下地点を予測し描画する関数
 pub fn draw_gizmos_block(
     mut gizmos: Gizmos,
     player_query: Query<&Transform, With<PlayerBlock>>,
     block_query: Query<&Transform, With<Block>>,
-    current_block: Res<CurrentBlock>,
+    current_block: Res<CurrentBlocks>,
 ) {
     info_once!("draw_gizmos_block");
 
@@ -85,4 +75,3 @@ pub fn draw_gizmos_block(
         gizmos.primitive_2d(&primitive, isometry, color);
     }
 }
-

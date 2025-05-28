@@ -1,23 +1,16 @@
 use bevy::prelude::*;
 
-use crate::{
-    GRID_SIZE,
-    FIELD_SIZE,
-    FIELD_POSITION,
+use crate::GRID_SIZE;
+use crate::ingame::{
     MoveEvent,
     FixEvent,
     Direction,
     FallingTimer,
 };
-use crate::block::{
-    CurrentBlock,
-    PlayerBlock,
-    Block,
-};
+use crate::ingame::utils::prelude::*;
 
 /// ブロックの落下を管理する関数
 /// `FallingTimer`を使用して一定間隔でブロックを下に移動させる
-///
 pub fn block_falling(
     mut timer: ResMut<FallingTimer>,
     mut events: EventWriter<MoveEvent>,
@@ -40,12 +33,11 @@ pub fn block_falling(
 /// ブロックの移動を管理する関数
 /// `MoveEvent`を受け取り、ブロックの位置を更新し、
 /// 必要に応じてブロックを固定する
-///
 pub fn block_movement(
     mut move_events: EventReader<MoveEvent>,
     mut fix_events: EventWriter<FixEvent>,
     mut player_query: Query<&mut Transform, (With<PlayerBlock>, Without<Block>)>,
-    mut current_block: ResMut<CurrentBlock>,
+    mut currentblock: ResMut<CurrentBlocks>,
     block_query: Query<&Transform, With<Block>>,
 ) {
     info_once!("block_movement");
@@ -107,9 +99,9 @@ pub fn block_movement(
 
         // 現在のブロック位置を更新
         match direction {
-            Direction::Left   => current_block.pos.x -= GRID_SIZE,
-            Direction::Right  => current_block.pos.x += GRID_SIZE,
-            Direction::Bottom => current_block.pos.y -= GRID_SIZE,
+            Direction::Left   => currentblock.pos.x -= GRID_SIZE,
+            Direction::Right  => currentblock.pos.x += GRID_SIZE,
+            Direction::Bottom => currentblock.pos.y -= GRID_SIZE,
         }
         // ブロックを移動
         for mut transform in &mut player_query {
@@ -121,4 +113,3 @@ pub fn block_movement(
         }
     }
 }
-

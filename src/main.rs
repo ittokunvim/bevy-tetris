@@ -1,23 +1,14 @@
 use bevy::{
     prelude::*,
     log::LogPlugin,
-    time::Stopwatch,
     asset::AssetMetaCheck,
 };
-use crate::block::BlockType;
-
-mod block;
-mod blockdata;
-mod field;
-mod key;
-mod next_block;
-mod holdblock;
-mod sound;
-mod utils;
-mod scoreboard;
 
 mod mainmenu;
+mod ingame;
 mod gameover;
+
+mod sound;
 
 const GAMETITLE: &str = "いっとくテトリス";
 const WINDOW_SIZE: Vec2 = Vec2::new(640.0, 480.0);
@@ -31,47 +22,6 @@ const PATH_SOUND_CLICK: &str = "sounds/click.ogg";
 
 const GRID_SIZE: f32 = 20.0;
 const GRID_SIZE_HALF: f32 = GRID_SIZE / 2.0;
-const BLOCK_FALL_SPEED: f32 = 0.5;
-const BLOCK_MOVE_SPEED: f32 = 0.25;
-const FIELD_SIZE: Vec2 = Vec2::new(10.0 * GRID_SIZE, 20.0 * GRID_SIZE);
-const FIELD_POSITION: Vec3 = Vec3::new(0.0, 0.0, -10.0);
-
-#[derive(Event)]
-struct MoveEvent(Direction);
-
-#[derive(Event)]
-struct RotationEvent(Direction);
-
-#[derive(Event, Default)]
-struct HardDropEvent;
-
-#[derive(Event, Default)]
-struct SpawnEvent;
-
-#[derive(Event, Default)]
-struct FixEvent;
-
-#[derive(Event)]
-struct HoldEvent(BlockType);
-
-#[derive(Copy, Clone, PartialEq, Debug)]
-enum Direction {
-    Left,
-    Right,
-    Bottom,
-}
-
-#[derive(Resource, Deref, DerefMut)]
-struct FallingTimer(Timer);
-
-#[derive(Resource, Deref, DerefMut)]
-struct MoveLeftTimer(Stopwatch);
-
-#[derive(Resource, Deref, DerefMut)]
-struct MoveRightTimer(Stopwatch);
-
-#[derive(Resource, Deref, DerefMut)]
-struct MoveBottomTimer(Stopwatch);
 
 #[derive(States, Default, Debug, Clone, PartialEq, Eq, Hash, Resource)]
 enum AppState {
@@ -79,12 +29,6 @@ enum AppState {
     Mainmenu,
     InGame,
     Gameover,
-}
-
-impl FallingTimer {
-    fn new() -> Self {
-        Self(Timer::from_seconds(BLOCK_FALL_SPEED, TimerMode::Repeating))
-    }
 }
 
 fn main() {
@@ -111,27 +55,11 @@ fn main() {
         .init_state::<AppState>()
         .insert_resource(ClearColor(BACKGROUND_COLOR))
         .insert_resource(Time::<Fixed>::from_seconds(1.0 / 60.0))
-        .add_event::<MoveEvent>()
-        .add_event::<RotationEvent>()
-        .add_event::<HardDropEvent>()
-        .add_event::<SpawnEvent>()
-        .add_event::<FixEvent>()
-        .add_event::<HoldEvent>()
-        .insert_resource(FallingTimer::new())
-        .insert_resource(MoveLeftTimer(Stopwatch::new()))
-        .insert_resource(MoveRightTimer(Stopwatch::new()))
-        .insert_resource(MoveBottomTimer(Stopwatch::new()))
-        .add_plugins(field::FieldPlugin)
-        .add_plugins(key::KeyPlugin)
-        .add_plugins(block::BlockPlugin)
-        .add_plugins(sound::SoundPlugin)
-        .add_plugins(next_block::NextBlockPlugin)
-        .add_plugins(holdblock::HoldBlockPlugin)
-        .add_plugins(utils::UtilsPlugin)
-        .add_plugins(scoreboard::ScoreboardPlugin)
         .add_plugins(mainmenu::MainmenuPlugin)
+        .add_plugins(ingame::IngamePlugin)
         .add_plugins(gameover::GameoverPlugin)
         .add_systems(Startup, setup)
+        .add_plugins(sound::SoundPlugin)
         .run();
 }
 

@@ -1,19 +1,12 @@
 use bevy::prelude::*;
 
-use crate::blockdata::BLOCK_UNIT_COUNT;
 use crate::{
     GRID_SIZE_HALF,
     PATH_FONT,
-    FIELD_SIZE,
-    FIELD_POSITION,
-    HoldEvent,
     AppState,
 };
-
-use crate::block::{
-    PlayerBlock,
-    BlockType,
-};
+use super::HoldEvent;
+use super::utils::prelude::*;
 
 const BOARD_SIZE: Vec2 = Vec2::new(
     GRID_SIZE_HALF * 6.0,
@@ -45,6 +38,7 @@ const BLOCK_INIT_POSITION: Vec3 = Vec3::new(
 #[derive(Component)]
 struct HoldBoard;
 
+/// ホールドされたブロックを記憶するコンポーネント
 #[derive(Component, Debug)]
 struct HoldBlock {
     blocktype: Option<BlockType>,
@@ -96,10 +90,8 @@ fn setup(
 }
 
 /// ホールドしたブロックを更新する関数
-/// ホールドブロックの状態をゲーム進行に合わせて
-/// 更新を行う
+/// ブロックの状態をゲーム進行に合わせて更新を行う
 fn update(
-    mut commands: Commands,
     mut hold_events: EventReader<HoldEvent>,
     mut holdblock_query: Query<(
         &mut Transform,
@@ -107,7 +99,6 @@ fn update(
         &mut HoldBlock
     ), With<HoldBlock>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    player_query: Query<Entity, With<PlayerBlock>>,
 ) {
     info_once!("update");
 
@@ -115,17 +106,9 @@ fn update(
     for event in hold_events.read() {
         let blocktype = event.0;
 
-        // プレイヤーブロックを削除する
-        for entity in player_query.iter() {
-            commands.entity(entity).despawn();
-        }
-
-        // ホールドされたブロックを表示を更新
-        let blockdata = &blocktype.blockdata()[0];
-
         for (mut transform, mut color, mut holdblock) in &mut holdblock_query.iter_mut() {
             // 現在のホールドブロックIDが形状データに含まれるか検索
-            if let Some((index, _)) = blockdata
+            if let Some((index, _)) = &blocktype.blockdata()[0]
                 .iter()
                 .enumerate()
                 .find(|(_, &v)| v == holdblock.block_id)
@@ -136,7 +119,7 @@ fn update(
                 holdblock.blocktype = Some(blocktype);
 
                 // ブロック表示位置を計算（タイプごとに微調整）
-                let pos = calculate_nextblock_position(blocktype, BLOCK_INIT_POSITION);
+                let pos = blocktype.calculate_position(BLOCK_INIT_POSITION);
                 // ブロックの座標を設定
                 transform.translation = Vec3::new(
                     pos.x + GRID_SIZE_HALF * ((index % 4) as f32),
@@ -148,6 +131,8 @@ fn update(
     }
 }
 
+/// ホールドブロックを削除する関数
+/// ゲームオーバーから抜けた時に実行される
 fn despawn(
     mut commands: Commands,
     query: Query<Entity, With<HoldBoard>>,
@@ -166,43 +151,5 @@ impl Plugin for HoldBlockPlugin {
             .add_systems(Update, update.run_if(in_state(AppState::InGame)))
             .add_systems(OnExit(AppState::Gameover), despawn)
         ;
-    }
-}
-
-/// 次ブロックの生成ポジションを
-/// 各ブロックの種類に応じて微調整する関数
-fn calculate_nextblock_position(
-    blocktype: BlockType,
-    init_position: Vec3,
-) -> Vec2 {
-    match blocktype {
-        BlockType::TypeI => Vec2::new(
-            init_position.x + GRID_SIZE_HALF * 0.5,
-            init_position.y - GRID_SIZE_HALF * 1.0,
-        ),
-        BlockType::TypeJ => Vec2::new(
-            init_position.x + GRID_SIZE_HALF * 1.0,
-            init_position.y - GRID_SIZE_HALF * 1.5,
-        ),
-        BlockType::TypeL => Vec2::new(
-            init_position.x + GRID_SIZE_HALF * 1.0,
-            init_position.y - GRID_SIZE_HALF * 1.5,
-        ),
-        BlockType::TypeO => Vec2::new(
-            init_position.x + GRID_SIZE_HALF * 0.5,
-            init_position.y - GRID_SIZE_HALF * 0.5,
-        ),
-        BlockType::TypeS => Vec2::new(
-            init_position.x + GRID_SIZE_HALF * 1.0,
-            init_position.y - GRID_SIZE_HALF * 0.5,
-        ),
-        BlockType::TypeT => Vec2::new(
-            init_position.x + GRID_SIZE_HALF * 1.0,
-            init_position.y - GRID_SIZE_HALF * 1.5,
-        ),
-        BlockType::TypeZ => Vec2::new(
-            init_position.x + GRID_SIZE_HALF * 1.0,
-            init_position.y - GRID_SIZE_HALF * 0.5,
-        ),
     }
 }

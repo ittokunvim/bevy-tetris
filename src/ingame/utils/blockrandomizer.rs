@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use rand::prelude::*;
 use std::collections::VecDeque;
 
-use crate::block::BlockType;
+use crate::ingame::BlockType;
 
 const RANDOMIZER_POOL_COUNT: usize = 35;
 const RANDOMIZER_HISTORY_COUNT: usize = 4;
@@ -21,7 +21,7 @@ pub struct BlockRandomizer {
 }
 
 impl BlockRandomizer {
-    fn new() -> Self {
+    pub fn new() -> Self {
         // プールを7x5で埋める（公平性確保）
         let mut pool = [BlockType::TypeI; RANDOMIZER_POOL_COUNT];
         for (i, v) in pool.iter_mut().enumerate() {
@@ -94,15 +94,5 @@ impl Iterator for BlockRandomizer {
         self.history.push_back(picked_piece);
 
         Some(picked_piece)
-    }
-}
-
-pub struct UtilsPlugin;
-
-impl Plugin for UtilsPlugin {
-    fn build(&self, app: &mut App) {
-        app
-            .insert_resource(BlockRandomizer::new())
-        ;
     }
 }

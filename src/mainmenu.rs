@@ -56,6 +56,7 @@ impl Mainmenu {
             }
         )
     }
+
     /// メインメニュー画面の背景を生成します。
     ///
     /// Returns:
@@ -85,6 +86,7 @@ impl Mainmenu {
             BorderRadius::all(BORDER_RADIUS),
         )
     }
+
     /// ゲームタイトルを表示するタイトルを生成します。
     ///
     /// Params:
@@ -105,8 +107,9 @@ impl Mainmenu {
                 ..Default::default()
             },
             TextColor(TITLE_COLOR),
-         )
+        )
     }
+
     /// メインメニュー画面に表示するボタンを生成します。
     ///
     /// Returns:
@@ -129,8 +132,9 @@ impl Mainmenu {
             BorderColor(BORDER_COLOR),
             BorderRadius::all(BORDER_RADIUS),
             Button,
-         )
+        )
     }
+
     /// ボタンのテキストを生成します。
     ///
     /// Params:
@@ -155,6 +159,7 @@ impl Mainmenu {
     }
 }
 
+/// メインメニュー画面のセットアップを行う関数
 /// 構造:
 /// * root
 ///   * board
@@ -168,38 +173,34 @@ fn setup(
     info_once!("setup");
 
     let font = asset_server.load(PATH_FONT);
-
     commands
-        // ルートノードを作成
         .spawn(Mainmenu::from_root())
         .with_children(|parent| {
             parent
-                // ボードノードを作成
                 .spawn(Mainmenu::from_board())
                 .with_children(|parent| {
-                    // タイトルノードを作成
                     parent.spawn(Mainmenu::from_title(font.clone()));
                 })
                 .with_children(|parent| {
-                    // プレイボタンノードを作成
                     parent
                         .spawn((Mainmenu::from_button(), Play))
                         .with_children(|parent| {
-                            // ボタンテキストノードを作成
                             parent.spawn((Mainmenu::from_text(font.clone()), Play));
                         });
                 });
         });
 }
 
-fn update(
+/// プレイボタンの挙動を決める関数
+/// ボタンが押されたらゲームを遊ぶことができます
+fn play_button_system(
     mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<Play>)>,
     mut text_query: Query<&mut TextColor, With<Play>>,
     mut next_state: ResMut<NextState<AppState>>,
 ) {
     info_once!("update");
 
-    // 全てのインタラクション状態を持つボタンに対して処理を行う
+    // 全てのインタラクション状態を持つプレイボタンに対して処理を行う
     for interaction in &mut interaction_query {
         let mut color = text_query.single_mut();
 
@@ -220,6 +221,8 @@ fn update(
     }
 }
 
+/// メインメニューのコンポーネントを全て削除する関数
+/// ステートがメインメニューから抜ける時に実行されます
 fn despawn(
     mut commands: Commands,
     query: Query<Entity, With<Mainmenu>>,
@@ -237,7 +240,7 @@ impl Plugin for MainmenuPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(OnEnter(AppState::Mainmenu), setup)
-            .add_systems(Update, update.run_if(in_state(AppState::Mainmenu)))
+            .add_systems(Update, play_button_system.run_if(in_state(AppState::Mainmenu)))
             .add_systems(OnExit(AppState::Mainmenu), despawn)
         ;
     }
