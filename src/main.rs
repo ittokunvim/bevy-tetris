@@ -31,6 +31,10 @@ enum AppState {
     Gameover,
 }
 
+/// スコアの点数を管理するリソース
+#[derive(Resource, Debug, Deref, DerefMut)]
+pub struct Score(pub usize);
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins
@@ -55,11 +59,13 @@ fn main() {
         .init_state::<AppState>()
         .insert_resource(ClearColor(BACKGROUND_COLOR))
         .insert_resource(Time::<Fixed>::from_seconds(1.0 / 60.0))
+        .insert_resource(Score(0))
         .add_plugins(mainmenu::MainmenuPlugin)
         .add_plugins(ingame::IngamePlugin)
         .add_plugins(gameover::GameoverPlugin)
-        .add_systems(Startup, setup)
         .add_plugins(sound::SoundPlugin)
+        .add_systems(Startup, setup)
+        .add_systems(OnExit(AppState::Gameover), reset_score)
         .run();
 }
 
@@ -69,3 +75,8 @@ fn setup(mut commands: Commands) {
     commands.spawn(Camera2d::default());
 }
 
+fn reset_score(mut score: ResMut<Score>) {
+    info_once!("reset_score");
+
+    **score = 0;
+}
