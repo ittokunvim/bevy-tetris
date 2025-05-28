@@ -4,6 +4,7 @@ use crate::{
     GRID_SIZE_HALF,
     PATH_FONT,
     AppState,
+    Score,
 };
 use super::{
     FIELD_SIZE,
@@ -35,10 +36,6 @@ const SCORE_POSITION: Vec3 = Vec3::new(
 );
 
 const TEXT_SIZE: f32 = 20.0;
-
-/// スコアの点数を管理するリソース
-#[derive(Resource, Debug, Deref, DerefMut)]
-pub struct Score(pub usize);
 
 #[derive(Component)]
 struct Scoreboard;
@@ -116,7 +113,6 @@ pub struct ScoreboardPlugin;
 impl Plugin for ScoreboardPlugin {
     fn build(&self, app: &mut App) {
         app
-            .insert_resource(Score(0))
             .add_systems(OnEnter(AppState::InGame), setup)
             .add_systems(Update, update_score.run_if(in_state(AppState::InGame)))
             .add_systems(OnExit(AppState::Gameover), despawn)

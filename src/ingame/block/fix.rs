@@ -3,12 +3,12 @@ use bevy::prelude::*;
 use crate::{
     GRID_SIZE,
     AppState,
+    Score,
 };
 use crate::ingame::{
     SpawnEvent,
     FixEvent,
 };
-use crate::ingame::scoreboard::Score;
 use crate::ingame::utils::prelude::*;
 
 /// ブロックの削除を管理する関数
