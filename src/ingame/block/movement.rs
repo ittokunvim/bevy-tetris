@@ -27,7 +27,7 @@ pub fn block_falling(
     }
 
     // ブロックを下に移動させるイベントを送信
-    events.send(MoveEvent(Direction::Bottom));
+    events.write(MoveEvent(Direction::Bottom));
 }
 
 /// ブロックの移動を管理する関数
@@ -64,7 +64,7 @@ pub fn block_movement(
                 Direction::Bottom => {
                     if player_y - GRID_SIZE < FIELD_POSITION.y - FIELD_SIZE.y / 2.0 {
                         // ブロックがそこに達した場合、ブロックを固定
-                        fix_events.send_default();
+                        fix_events.write_default();
                         return;
                     }
                 }
@@ -89,7 +89,7 @@ pub fn block_movement(
                     Direction::Bottom => {
                         if player_x == block_x && player_y - GRID_SIZE == block_y {
                             // ブロックが底に達した場合、ブロックを固定
-                            fix_events.send_default();
+                            fix_events.write_default();
                             return;
                         }
                     }

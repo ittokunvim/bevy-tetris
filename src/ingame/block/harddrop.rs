@@ -66,5 +66,5 @@ pub fn block_harddrop(
     }
 
     // ブロックを固定
-    fix_events.send_default();
+    fix_events.write_default();
 }

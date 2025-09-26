@@ -94,7 +94,7 @@ fn update_score(
 ) {
     info_once!("update");
 
-    let mut span = query.single_mut();
+    let mut span = query.single_mut().unwrap();
     **span = score.0.to_string();
 }
 

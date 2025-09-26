@@ -27,9 +27,9 @@ pub fn block_hold(
         }
 
         if let Some(blocktype) = holdblocks.blocktype {
-            spawn_events.send(SpawnEvent(Some(blocktype)));
+            spawn_events.write(SpawnEvent(Some(blocktype)));
         } else {
-            spawn_events.send_default();
+            spawn_events.write_default();
         }
 
         holdblocks.blocktype = Some(blocktype);

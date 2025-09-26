@@ -227,7 +227,7 @@ fn setup(
     info_once!("setup");
 
     **nextblocks = std::array::from_fn(|_| blockrandomizer.next().unwrap());
-    events.send(SpawnEvent(Some(nextblocks[0])));
+    events.write(SpawnEvent(Some(nextblocks[0])));
 }
 
 /// リソースをリセットする関数

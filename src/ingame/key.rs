@@ -30,7 +30,7 @@ fn key_block_moveleft(
     // ブロック左移動キー入力時
     if keyboard_input.just_pressed(KEY_BLOCK_MOVE_LEFT) {
         // ブロック左移動イベントを発火
-        events.send(MoveEvent(Direction::Left));
+        events.write(MoveEvent(Direction::Left));
     }
 
     // ブロック左移動キー長押し時
@@ -40,7 +40,7 @@ fn key_block_moveleft(
         // ブロック左移動タイマーが切れたら、タイマーをリセットし、イベントを発火
         if moveleft_timer.0.elapsed_secs() > BLOCK_MOVE_SPEED {
             moveleft_timer.0.reset();
-            events.send(MoveEvent(Direction::Left));
+            events.write(MoveEvent(Direction::Left));
         }
     }
 
@@ -63,7 +63,7 @@ fn key_block_moveright(
     // ブロック右移動キー入力時
     if keyboard_input.just_pressed(KEY_BLOCK_MOVE_RIGHT) {
         // ブロック右移動イベントを発火
-        events.send(MoveEvent(Direction::Right));
+        events.write(MoveEvent(Direction::Right));
     }
 
     // ブロック右移動キー長押し時
@@ -73,7 +73,7 @@ fn key_block_moveright(
         // ブロック右移動タイマーが切れたら、タイマーをリセットし、イベントを発火
         if moveright_timer.0.elapsed_secs() > BLOCK_MOVE_SPEED {
             moveright_timer.0.reset();
-            events.send(MoveEvent(Direction::Right));
+            events.write(MoveEvent(Direction::Right));
         }
     }
 
@@ -97,7 +97,7 @@ fn key_block_movebottom(
     // ブロック下移動キー入力時
     if keyboard_input.just_pressed(KEY_BLOCK_MOVE_BOTTOM) {
         // ブロック下移動イベントを発火
-        events.send(MoveEvent(Direction::Bottom));
+        events.write(MoveEvent(Direction::Bottom));
         // ブロック落下タイマーを一時停止し、タイマーをリセット
         falling_timer.0.pause();
         falling_timer.0.reset();
@@ -110,7 +110,7 @@ fn key_block_movebottom(
         // ブロック下移動タイマーが切れたら、タイマーをリセットし、イベントを発火
         if movebottom_timer.0.elapsed_secs() > BLOCK_MOVE_SPEED {
             movebottom_timer.0.reset();
-            events.send(MoveEvent(Direction::Bottom));
+            events.write(MoveEvent(Direction::Bottom));
         }
     }
 
@@ -131,7 +131,7 @@ fn key_block_rotationleft(
 
     // ブロック左回転キーが押されたら、イベントを発火
     if keyboard_input.just_pressed(KEY_BLOCK_ROTATION_LEFT) {
-        events.send(RotationEvent(Direction::Left));
+        events.write(RotationEvent(Direction::Left));
     }
 }
 
@@ -144,7 +144,7 @@ fn key_block_rotationright(
 
     // ブロック右回転キーが押されたら、イベントを発火
     if keyboard_input.just_pressed(KEY_BLOCK_ROTATION_RIGHT) {
-        events.send(RotationEvent(Direction::Right));
+        events.write(RotationEvent(Direction::Right));
     }
 }
 
@@ -157,7 +157,7 @@ fn key_block_harddrop(
 
     // ハードドロップキーが押されたら、イベントを発火
     if keyboard_input.just_pressed(KEY_BLOCK_HARDDROP) {
-        events.send_default();
+        events.write_default();
     }
 }
 
@@ -175,7 +175,7 @@ fn key_block_hold(
         // ホールドが許可されていたら、許可を取り消し、イベントを発火
         if holdblocks.can_hold {
             holdblocks.can_hold = false;
-            events.send(HoldEvent(currentblock.blocktype));
+            events.write(HoldEvent(currentblock.blocktype));
         }
     }
 }

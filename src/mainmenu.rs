@@ -202,7 +202,7 @@ fn play_button_system(
 
     // 全てのインタラクション状態を持つプレイボタンに対して処理を行う
     for interaction in &mut interaction_query {
-        let mut color = text_query.single_mut();
+        let mut color = text_query.single_mut().unwrap();
 
         match *interaction {
             // ボタンが押された時の処理

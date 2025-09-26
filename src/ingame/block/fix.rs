@@ -78,7 +78,7 @@ pub fn clear_block(
     }
 
     // ブロックを生成するイベントを送信
-    spawn_events.send_default();
+    spawn_events.write_default();
 }
 
 /// ホールドができるかどうか管理する関数
