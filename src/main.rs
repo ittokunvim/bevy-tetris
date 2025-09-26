@@ -11,7 +11,7 @@ mod gameover;
 mod sound;
 
 const GAMETITLE: &str = "いっとくテトリス";
-const WINDOW_SIZE: Vec2 = Vec2::new(640.0, 480.0);
+const WINDOW_SIZE: Vec2 = Vec2::new(400.0, 600.0);
 const BACKGROUND_COLOR: Color = Color::srgb(0.27, 0.29, 0.45);
 const LOG_FILTER: &str = "info,wgpu_core=warn,wgpu_hal=warn,ittoku_tetris=debug";
 const PATH_FONT: &str = "fonts/misaki_gothic.ttf";
