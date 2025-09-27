@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use crate::ingame::utils::prelude::*;
 
 mod block;
+mod button;
 mod field;
 mod key;
 mod nextblock;
@@ -58,6 +59,7 @@ impl Plugin for IngamePlugin {
             .add_plugins(field::FieldPlugin)
             .add_plugins(key::KeyPlugin)
             .add_plugins(block::BlockPlugin)
+            .add_plugins(button::ButtonPlugin)
             .add_plugins(nextblock::NextBlockPlugin)
             .add_plugins(holdblock::HoldBlockPlugin)
             .add_plugins(utils::UtilsPlugin)
