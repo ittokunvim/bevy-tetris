@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 
 use crate::{
-    AppState,
     WINDOW_SIZE,
     PATH_IMAGE_ANGLE_DOWN,
     PATH_IMAGE_ANGLE_LEFT,
@@ -12,8 +11,14 @@ use crate::{
 };
 
 use super::{
-    Direction,
-    MoveEvent,
+    KeyButton,
+    MoveLeftButton,
+    MoveRightButton,
+    RotateLeftButton,
+    RotateRightButton,
+    HoldButton,
+    FallButton,
+    FixButton,
 };
 
 const BUTTON_FIELD_SIZE: Vec2 = Vec2::new(WINDOW_SIZE.x, WINDOW_SIZE.y / 4.0);
@@ -22,30 +27,6 @@ const BUTTON_SIZE: f32 = 45.0;
 const BUTTON_COLOR: Color = Color::srgb(0.90, 0.90, 0.90);
 const BUTTON_MARGIN: f32 = 5.0;
 const ICON_SIZE: f32 = 35.0;
-
-#[derive(Component, Debug)]
-struct KeyButton;
-
-#[derive(Component, Debug)]
-struct MoveLeftButton;
-
-#[derive(Component, Debug)]
-struct MoveRightButton;
-
-#[derive(Component, Debug)]
-struct RotateLeftButton;
-
-#[derive(Component, Debug)]
-struct RotateRightButton;
-
-#[derive(Component, Debug)]
-struct HoldButton;
-
-#[derive(Component, Debug)]
-struct FallButton;
-
-#[derive(Component, Debug)]
-struct FixButton;
 
 impl KeyButton {
     /// ゲーム画面に配置するボタンの背景を生成します
@@ -136,7 +117,7 @@ impl KeyButton {
 }
 
 /// ゲームを操作するボタンのセットアップを行う関数
-fn setup(
+pub fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
 ) {
@@ -232,13 +213,3 @@ fn setup(
         });
 }
 
-
-pub struct ButtonPlugin;
-
-impl Plugin for ButtonPlugin {
-    fn build(&self, app: &mut App) {
-        app
-            .add_systems(OnEnter(AppState::InGame), setup)
-        ;
-    }
-}
