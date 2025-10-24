@@ -17,8 +17,9 @@ use super::{
 };
 
 const BUTTON_FIELD_SIZE: Vec2 = Vec2::new(WINDOW_SIZE.x, WINDOW_SIZE.y / 4.0);
+const BUTTON_FIELD_COLOR: Color = Color::srgb(0.14, 0.16, 0.23);
 const BUTTON_SIZE: f32 = 45.0;
-const BUTTON_COLOR: Color = Color::srgb(1.0, 1.0, 1.0);
+const BUTTON_COLOR: Color = Color::srgb(0.90, 0.90, 0.90);
 const BUTTON_MARGIN: f32 = 5.0;
 const ICON_SIZE: f32 = 35.0;
 
@@ -58,7 +59,7 @@ impl KeyButton {
                 top: Val::Px(WINDOW_SIZE.y - BUTTON_FIELD_SIZE.y),
                 ..Default::default()
             },
-            BackgroundColor(Color::BLACK),
+            BackgroundColor(BUTTON_FIELD_COLOR),
         )
     }
 
@@ -85,9 +86,9 @@ impl KeyButton {
                 align_items: AlignItems::Center,
                 ..Default::default()
             },
-            BorderColor(Color::WHITE),
+            BorderColor(BUTTON_COLOR),
             BorderRadius::MAX,
-            BackgroundColor(Color::WHITE),
+            BackgroundColor(BUTTON_COLOR),
         )
     }
 
@@ -114,9 +115,9 @@ impl KeyButton {
                 align_items: AlignItems::Center,
                 ..Default::default()
             },
-            BorderColor(Color::WHITE),
+            BorderColor(BUTTON_COLOR),
             BorderRadius::MAX,
-            BackgroundColor(Color::WHITE),
+            BackgroundColor(BUTTON_COLOR),
         )
     }
 
