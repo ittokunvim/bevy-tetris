@@ -1,7 +1,4 @@
-use bevy::{
-    prelude::*,
-    time::Stopwatch,
-};
+use bevy::prelude::*;
 
 use crate::{
     GRID_SIZE,
@@ -191,18 +188,6 @@ impl FallingTimer {
     }
 }
 
-/// ブロックが左に移動する速度を管理するリソース
-#[derive(Resource, Deref, DerefMut)]
-pub struct MoveLeftTimer(pub Stopwatch);
-
-/// ブロックが右に移動する速度を管理するリソース
-#[derive(Resource, Deref, DerefMut)]
-pub struct MoveRightTimer(pub Stopwatch);
-
-/// ブロックが下に移動する速度を管理するリソース
-#[derive(Resource, Deref, DerefMut)]
-pub struct MoveBottomTimer(pub Stopwatch);
-
 /// ブロックを全て削除する関数
 fn despawn(
     mut commands: Commands,
@@ -258,9 +243,6 @@ impl Plugin for UtilsPlugin {
             .insert_resource(HoldBlocks::new())
             .insert_resource(NextBlocks::new())
             .insert_resource(FallingTimer::new())
-            .insert_resource(MoveLeftTimer(Stopwatch::new()))
-            .insert_resource(MoveRightTimer(Stopwatch::new()))
-            .insert_resource(MoveBottomTimer(Stopwatch::new()))
             .add_systems(OnExit(AppState::Gameover), despawn)
             .add_systems(OnEnter(AppState::InGame), setup)
             .add_systems(OnExit(AppState::Gameover), reset)

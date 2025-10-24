@@ -15,7 +15,6 @@ pub const BLOCK_POSITION: Vec3 = Vec3::new(
     10.0,
 );
 pub const BLOCK_FALL_SPEED: f32 = 0.5;
-pub const BLOCK_MOVE_SPEED: f32 = 0.225;
 pub const NEXT_BLOCK_COUNT: usize = 4;
 
 pub const BLOCK_UNIT_COUNT: usize = 4;

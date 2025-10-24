@@ -5,7 +5,6 @@ use crate::ingame::utils::prelude::*;
 mod block;
 mod buttons;
 mod field;
-mod key;
 mod nextblock;
 mod holdblock;
 mod utils;
@@ -57,7 +56,6 @@ impl Plugin for IngamePlugin {
             .add_event::<FixEvent>()
             .add_event::<HoldEvent>()
             .add_plugins(field::FieldPlugin)
-            .add_plugins(key::KeyPlugin)
             .add_plugins(block::BlockPlugin)
             .add_plugins(buttons::ButtonsPlugin)
             .add_plugins(nextblock::NextBlockPlugin)
