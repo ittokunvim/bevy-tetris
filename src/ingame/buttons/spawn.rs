@@ -14,11 +14,11 @@ use super::{
     KeyButton,
     MoveLeftButton,
     MoveRightButton,
+    MoveBottomButton,
     RotateLeftButton,
     RotateRightButton,
     HoldButton,
-    FallButton,
-    FixButton,
+    HarddropButton,
 };
 
 const BUTTON_FIELD_SIZE: Vec2 = Vec2::new(WINDOW_SIZE.x, WINDOW_SIZE.y / 4.0);
@@ -165,7 +165,7 @@ pub fn setup(
         .with_children(|parent| {
             let pos = init_pos.with_y(init_pos.y + BUTTON_SIZE);
             parent
-                .spawn((KeyButton::from_left_button(pos), FallButton))
+                .spawn((KeyButton::from_left_button(pos), MoveBottomButton))
                 .with_children(|parent| {
                     let image = asset_server.load(PATH_IMAGE_ANGLE_DOWN);
                     parent.spawn(KeyButton::from_icon(image));
@@ -205,7 +205,7 @@ pub fn setup(
         .with_children(|parent| {
             let pos = init_pos.with_y(init_pos.y + BUTTON_SIZE);
             parent
-                .spawn((KeyButton::from_right_button(pos), FixButton))
+                .spawn((KeyButton::from_right_button(pos), HarddropButton))
                 .with_children(|parent| {
                     let image = asset_server.load(PATH_IMAGE_FALL);
                     parent.spawn(KeyButton::from_icon(image));
