@@ -173,22 +173,18 @@ fn setup(
     info_once!("setup");
 
     let font = asset_server.load(PATH_FONT);
-    commands
-        .spawn(Mainmenu::from_root())
-        .with_children(|parent| {
-            parent
-                .spawn(Mainmenu::from_board())
-                .with_children(|parent| {
-                    parent.spawn(Mainmenu::from_title(font.clone()));
-                })
-                .with_children(|parent| {
-                    parent
-                        .spawn((Mainmenu::from_button(), Play))
-                        .with_children(|parent| {
-                            parent.spawn((Mainmenu::from_text(font.clone()), Play));
-                        });
-                });
-        });
+    commands.spawn((
+        Mainmenu::from_root(),
+        children![(
+            Mainmenu::from_board(),
+            children![
+                Mainmenu::from_title(font.clone()),
+                (Mainmenu::from_button(), Play, children![(
+                    Mainmenu::from_text(font.clone()), Play,
+                )],
+            )],
+        )],
+    ));
 }
 
 /// プレイボタンの挙動を決める関数

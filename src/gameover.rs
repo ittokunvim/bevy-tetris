@@ -224,36 +224,24 @@ fn setup(
     let house_image = asset_server.load(PATH_IMAGE_HOUSE);
     let retry_image = asset_server.load(PATH_IMAGE_RETRY);
 
-    commands
-        .spawn(Gameover::from_root())
-        .with_children(|parent| {
-            parent
-                .spawn(Gameover::from_board())
-                .with_children(|parent| {
-                    parent.spawn(Gameover::from_title(font.clone()));
-                })
-                .with_children(|parent| {
-                    parent.spawn(Gameover::from_score(font.clone(), score.to_string()));
-                })
-                .with_children(|parent| {
-                    parent
-                        .spawn(Gameover::from_button_list())
-                        .with_children(|parent| {
-                            parent
-                                .spawn((Gameover::from_button(), Home))
-                                .with_children(|parent| {
-                                    parent.spawn(Gameover::from_icon(house_image.clone()));
-                                });
-                        })
-                        .with_children(|parent| {
-                            parent
-                                .spawn((Gameover::from_button(), Retry))
-                                .with_children(|parent| {
-                                    parent.spawn(Gameover::from_icon(retry_image.clone()));
-                                });
-                        });
-                });
-        });
+    commands.spawn((
+        Gameover::from_root(),
+        children![(
+            Gameover::from_board(),
+            children![
+                Gameover::from_title(font.clone()),
+                Gameover::from_score(font.clone(), score.to_string()),
+                (Gameover::from_button_list(), children![
+                    (Gameover::from_button(), Home, children![(
+                        Gameover::from_icon(house_image.clone()),
+                    )]),
+                    (Gameover::from_button(), Retry, children![(
+                        Gameover::from_icon(retry_image.clone()),
+                    )])
+                ]),
+            ],
+        )],
+    ));
 }
 
 /// ホームボタンの挙動を決める関数
