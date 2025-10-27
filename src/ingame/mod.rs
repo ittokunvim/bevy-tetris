@@ -49,12 +49,6 @@ pub struct IngamePlugin;
 impl Plugin for IngamePlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_event::<MoveEvent>()
-            .add_event::<RotationEvent>()
-            .add_event::<HardDropEvent>()
-            .add_event::<SpawnEvent>()
-            .add_event::<FixEvent>()
-            .add_event::<HoldEvent>()
             .add_plugins(field::FieldPlugin)
             .add_plugins(key::KeyPlugin)
             .add_plugins(block::BlockPlugin)

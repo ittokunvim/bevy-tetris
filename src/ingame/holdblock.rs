@@ -92,7 +92,7 @@ fn setup(
 /// ホールドしたブロックを更新する関数
 /// ブロックの状態をゲーム進行に合わせて更新を行う
 fn update(
-    mut hold_events: EventReader<HoldEvent>,
+    holded: On<HoldEvent>,
     mut holdblock_query: Query<(
         &mut Transform,
         &mut MeshMaterial2d<ColorMaterial>,
@@ -103,30 +103,28 @@ fn update(
     info_once!("update");
 
     // ホールドイベントが発生した時の処理
-    for event in hold_events.read() {
-        let blocktype = event.0;
+    let blocktype = holded.0;
 
-        for (mut transform, mut color, mut holdblock) in &mut holdblock_query.iter_mut() {
-            // 現在のホールドブロックIDが形状データに含まれるか検索
-            if let Some((index, _)) = &blocktype.blockdata()[0]
-                .iter()
-                .enumerate()
-                .find(|(_, &v)| v == holdblock.block_id)
-            {
-                // ブロックの色を更新
-                *color = MeshMaterial2d(materials.add(blocktype.color()));
-                // ブロックタイプを更新
-                holdblock.blocktype = Some(blocktype);
+    for (mut transform, mut color, mut holdblock) in &mut holdblock_query.iter_mut() {
+        // 現在のホールドブロックIDが形状データに含まれるか検索
+        if let Some((index, _)) = &blocktype.blockdata()[0]
+            .iter()
+            .enumerate()
+            .find(|(_, &v)| v == holdblock.block_id)
+        {
+            // ブロックの色を更新
+            *color = MeshMaterial2d(materials.add(blocktype.color()));
+            // ブロックタイプを更新
+            holdblock.blocktype = Some(blocktype);
 
-                // ブロック表示位置を計算（タイプごとに微調整）
-                let pos = blocktype.calculate_position(BLOCK_INIT_POSITION);
-                // ブロックの座標を設定
-                transform.translation = Vec3::new(
-                    pos.x + GRID_SIZE_HALF * ((index % 4) as f32),
-                    pos.y - GRID_SIZE_HALF * ((index / 4) as f32),
-                    10.0,
-                );
-            }
+            // ブロック表示位置を計算（タイプごとに微調整）
+            let pos = blocktype.calculate_position(BLOCK_INIT_POSITION);
+            // ブロックの座標を設定
+            transform.translation = Vec3::new(
+                pos.x + GRID_SIZE_HALF * ((index % 4) as f32),
+                pos.y - GRID_SIZE_HALF * ((index / 4) as f32),
+                10.0,
+            );
         }
     }
 }
@@ -148,7 +146,7 @@ impl Plugin for HoldBlockPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(OnEnter(AppState::InGame), setup)
-            .add_systems(Update, update.run_if(in_state(AppState::InGame)))
+            .add_observer(update)
             .add_systems(OnExit(AppState::Gameover), despawn)
         ;
     }

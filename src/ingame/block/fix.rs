@@ -15,23 +15,14 @@ use crate::ingame::utils::prelude::*;
 /// `FixEvent`を受け取り、プレイヤーブロックを固定ブロックに変換し、
 /// ブロックマップを更新して、ラインが揃った場合にブロックを削除します。
 pub fn clear_block(
-    mut fix_events: EventReader<FixEvent>,
+    _fixed: On<FixEvent>,
     mut commands: Commands,
     mut player_query: Query<(Entity, &mut Transform), (With<PlayerBlock>, Without<Block>)>,
     mut block_query: Query<(Entity, &mut Transform), (With<Block>, Without<PlayerBlock>)>,
     mut blockmap: ResMut<BlockMap>,
     mut score: ResMut<Score>,
-    mut spawn_events: EventWriter<SpawnEvent>,
 ) {
     info_once!("clear_block");
-
-    // イベントをチェック
-    if fix_events.is_empty() {
-        return;
-    }
-
-    // イベントをクリア
-    fix_events.clear();
 
     // PlayerBlockをBlockに変換
     for (player_entity, player_transform) in &player_query {
@@ -78,23 +69,15 @@ pub fn clear_block(
     }
 
     // ブロックを生成するイベントを送信
-    spawn_events.write_default();
+    commands.trigger(SpawnEvent(None));
 }
 
 /// ホールドができるかどうか管理する関数
 pub fn enable_hold(
-    mut events: EventReader<FixEvent>,
+    _fixed: On<FixEvent>,
     mut holdblocks: ResMut<HoldBlocks>,
 ) {
     info_once!("enable_hold");
-
-    // イベントをチェック
-    if events.is_empty() {
-        return;
-    }
-
-    // イベントをクリア
-    events.clear();
 
     // ホールドを有効にする
     holdblocks.can_hold = true;
@@ -103,19 +86,11 @@ pub fn enable_hold(
 /// ゲームオーバーを管理する関数
 /// 固定されたブロックからゲームオーバーになるかどうかチェックします
 pub fn check_gameover(
-    mut events: EventReader<FixEvent>,
+    _fixed: On<FixEvent>,
     mut next_state: ResMut<NextState<AppState>>,
     query: Query<&Transform, With<Block>>,
 ) {
     info_once!("check_gameover");
-
-    // イベントをチェック
-    if events.is_empty() {
-        return;
-    }
-
-    // イベントをクリア
-    events.clear();
 
     // ゲームオーバーかどうか判定する
     for transform in &query {

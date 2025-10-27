@@ -82,7 +82,7 @@ impl Mainmenu {
                 ..Default::default()
             },
             BackgroundColor(BOARD_COLOR),
-            BorderColor(BORDER_COLOR),
+            BorderColor::all(BORDER_COLOR),
             BorderRadius::all(BORDER_RADIUS),
         )
     }
@@ -129,7 +129,7 @@ impl Mainmenu {
                 align_items: AlignItems::Center,
                 ..Default::default()
             },
-            BorderColor(BORDER_COLOR),
+            BorderColor::all(BORDER_COLOR),
             BorderRadius::all(BORDER_RADIUS),
             Button,
         )

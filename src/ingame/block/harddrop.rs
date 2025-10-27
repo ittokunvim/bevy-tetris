@@ -10,20 +10,12 @@ use crate::ingame::utils::prelude::*;
 /// ブロックを一番下に固定する関数
 /// 衝突判定が出るまで、ブロックを下に移動させて固定する
 pub fn block_harddrop(
-    mut harddrop_events: EventReader<HardDropEvent>,
-    mut fix_events: EventWriter<FixEvent>,
+    _was_harddrop: On<HardDropEvent>,
+    mut commands: Commands,
     mut player_query: Query<&mut Transform, (With<PlayerBlock>, Without<Block>)>,
     block_query: Query<&Transform, With<Block>>,
 ) {
     info_once!("block_harddrop");
-
-    // HardDropイベントが発火されなかったら何もしない
-    if harddrop_events.is_empty() {
-        return;
-    }
-
-    // イベントをクリア
-    harddrop_events.clear();
 
     // 衝突フラグ
     let mut collision = false;
@@ -66,5 +58,5 @@ pub fn block_harddrop(
     }
 
     // ブロックを固定
-    fix_events.write_default();
+    commands.trigger(FixEvent);
 }

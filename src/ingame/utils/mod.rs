@@ -217,17 +217,17 @@ fn despawn(
 
 /// リソースをセットアップする関数
 fn setup(
+    mut commands: Commands,
     mut _currentblock: ResMut<CurrentBlocks>,
     mut _blockmap: ResMut<BlockMap>,
     mut blockrandomizer: ResMut<BlockRandomizer>,
     mut _holdblocks: ResMut<HoldBlocks>,
     mut nextblocks: ResMut<NextBlocks>,
-    mut events: EventWriter<SpawnEvent>
 ) {
     info_once!("setup");
 
     **nextblocks = std::array::from_fn(|_| blockrandomizer.next().unwrap());
-    events.write(SpawnEvent(Some(nextblocks[0])));
+    commands.trigger(SpawnEvent(Some(nextblocks[0])));
 }
 
 /// リソースをリセットする関数

@@ -10,28 +10,25 @@ use crate::ingame::utils::prelude::*;
 /// ホールドされたらプレイヤーブロックを削除して
 /// 新しいプレイヤーブロックを再度生成する
 pub fn block_hold(
-    mut hold_events: EventReader<HoldEvent>,
-    mut spawn_events: EventWriter<SpawnEvent>,
+    holded: On<HoldEvent>,
     mut commands: Commands,
     mut holdblocks: ResMut<HoldBlocks>,
     player_query: Query<Entity, With<PlayerBlock>>,
 ) {
     info_once!("block_hold");
 
-    for event in hold_events.read() {
-        let blocktype = event.0;
+    let blocktype = holded.0;
 
-        // プレイヤーブロックを削除する
-        for entity in &player_query {
-            commands.entity(entity).despawn();
-        }
+    // プレイヤーブロックを削除する
+    for entity in &player_query {
+        commands.entity(entity).despawn();
+    }
 
-        if let Some(blocktype) = holdblocks.blocktype {
-            spawn_events.write(SpawnEvent(Some(blocktype)));
-        } else {
-            spawn_events.write_default();
-        }
+    if let Some(blocktype) = holdblocks.blocktype {
+        commands.trigger(SpawnEvent(Some(blocktype)));
+    } else {
+        commands.trigger(SpawnEvent(None));
+    }
 
-        holdblocks.blocktype = Some(blocktype);
-   }
+    holdblocks.blocktype = Some(blocktype);
 }
