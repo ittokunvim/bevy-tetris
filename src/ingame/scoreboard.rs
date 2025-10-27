@@ -91,11 +91,12 @@ fn setup(
 fn update_score(
     mut query: Query<&mut Text2d, With<ScoreText>>,
     score: Res<Score>,
-) {
+) -> Result {
     info_once!("update");
 
-    let mut span = query.single_mut().unwrap();
+    let mut span = query.single_mut()?;
     **span = score.0.to_string();
+    Ok(())
 }
 
 /// スコアボードを削除する関数

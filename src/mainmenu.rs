@@ -193,12 +193,12 @@ fn play_button_system(
     mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<Play>)>,
     mut text_query: Query<&mut TextColor, With<Play>>,
     mut next_state: ResMut<NextState<AppState>>,
-) {
+) -> Result {
     info_once!("update");
 
     // 全てのインタラクション状態を持つプレイボタンに対して処理を行う
     for interaction in &mut interaction_query {
-        let mut color = text_query.single_mut().unwrap();
+        let mut color = text_query.single_mut()?;
 
         match *interaction {
             // ボタンが押された時の処理
@@ -215,6 +215,7 @@ fn play_button_system(
             }
         }
     }
+    Ok(())
 }
 
 /// メインメニューのコンポーネントを全て削除する関数
