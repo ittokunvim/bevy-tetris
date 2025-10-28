@@ -82,7 +82,7 @@ impl Mainmenu {
                 ..Default::default()
             },
             BackgroundColor(BOARD_COLOR),
-            BorderColor(BORDER_COLOR),
+            BorderColor::all(BORDER_COLOR),
             BorderRadius::all(BORDER_RADIUS),
         )
     }
@@ -129,7 +129,7 @@ impl Mainmenu {
                 align_items: AlignItems::Center,
                 ..Default::default()
             },
-            BorderColor(BORDER_COLOR),
+            BorderColor::all(BORDER_COLOR),
             BorderRadius::all(BORDER_RADIUS),
             Button,
         )
@@ -173,22 +173,18 @@ fn setup(
     info_once!("setup");
 
     let font = asset_server.load(PATH_FONT);
-    commands
-        .spawn(Mainmenu::from_root())
-        .with_children(|parent| {
-            parent
-                .spawn(Mainmenu::from_board())
-                .with_children(|parent| {
-                    parent.spawn(Mainmenu::from_title(font.clone()));
-                })
-                .with_children(|parent| {
-                    parent
-                        .spawn((Mainmenu::from_button(), Play))
-                        .with_children(|parent| {
-                            parent.spawn((Mainmenu::from_text(font.clone()), Play));
-                        });
-                });
-        });
+    commands.spawn((
+        Mainmenu::from_root(),
+        children![(
+            Mainmenu::from_board(),
+            children![
+                Mainmenu::from_title(font.clone()),
+                (Mainmenu::from_button(), Play, children![(
+                    Mainmenu::from_text(font.clone()), Play,
+                )],
+            )],
+        )],
+    ));
 }
 
 /// プレイボタンの挙動を決める関数
@@ -197,12 +193,12 @@ fn play_button_system(
     mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<Play>)>,
     mut text_query: Query<&mut TextColor, With<Play>>,
     mut next_state: ResMut<NextState<AppState>>,
-) {
+) -> Result {
     info_once!("update");
 
     // 全てのインタラクション状態を持つプレイボタンに対して処理を行う
     for interaction in &mut interaction_query {
-        let mut color = text_query.single_mut();
+        let mut color = text_query.single_mut()?;
 
         match *interaction {
             // ボタンが押された時の処理
@@ -219,6 +215,7 @@ fn play_button_system(
             }
         }
     }
+    Ok(())
 }
 
 /// メインメニューのコンポーネントを全て削除する関数

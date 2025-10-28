@@ -12,29 +12,29 @@ mod scoreboard;
 
 /// ブロック移動イベント（左右下移動）
 #[derive(Event)]
-struct MoveEvent(Direction);
+struct BlockMoved(Direction);
 
 /// ブロック回転イベント（左右回転）
 #[derive(Event)]
-struct RotationEvent(Direction);
+struct BlockRotated(Direction);
 
 /// ハードドロップイベント
 #[derive(Event, Default)]
-struct HardDropEvent;
+struct BlockHarddrop;
 
 /// ブロック生成イベント
 /// 引数にブロックタイプが指定されたらそのブロックを生成
 /// なければランダムに生成
 #[derive(Event, Default)]
-struct SpawnEvent(Option<BlockType>);
+struct BlockSpawned(Option<BlockType>);
 
 /// ブロック固定イベント
 #[derive(Event, Default)]
-struct FixEvent;
+struct BlockFixed;
 
 /// ブロックホールドイベント
 #[derive(Event)]
-struct HoldEvent(BlockType);
+struct BlockHolded(BlockType);
 
 /// ブロックの移動や回転の方向
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -49,12 +49,6 @@ pub struct IngamePlugin;
 impl Plugin for IngamePlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_event::<MoveEvent>()
-            .add_event::<RotationEvent>()
-            .add_event::<HardDropEvent>()
-            .add_event::<SpawnEvent>()
-            .add_event::<FixEvent>()
-            .add_event::<HoldEvent>()
             .add_plugins(field::FieldPlugin)
             .add_plugins(key::KeyPlugin)
             .add_plugins(block::BlockPlugin)
