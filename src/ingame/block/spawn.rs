@@ -1,13 +1,13 @@
 use bevy::prelude::*;
 
 use crate::GRID_SIZE;
-use crate::ingame::SpawnEvent;
+use crate::ingame::BlockSpawned;
 use crate::ingame::utils::prelude::*;
 
 /// ブロック生成イベントを処理する関数
 /// `SpawnEvent`を受け取り、新しいブロックを生成してフィールドに配置します
 pub fn block_spawn(
-    spawned: On<SpawnEvent>,
+    spawned: On<BlockSpawned>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,

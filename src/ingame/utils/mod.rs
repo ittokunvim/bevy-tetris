@@ -7,7 +7,7 @@ use crate::{
     GRID_SIZE,
     AppState,
 };
-use super::SpawnEvent;
+use super::BlockSpawned;
 use super::utils::{
     blockdata::*,
     blockrandomizer::BlockRandomizer,
@@ -227,7 +227,7 @@ fn setup(
     info_once!("setup");
 
     **nextblocks = std::array::from_fn(|_| blockrandomizer.next().unwrap());
-    commands.trigger(SpawnEvent(Some(nextblocks[0])));
+    commands.trigger(BlockSpawned(Some(nextblocks[0])));
 }
 
 /// リソースをリセットする関数

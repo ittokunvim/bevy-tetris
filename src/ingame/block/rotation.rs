@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::GRID_SIZE;
 use crate::ingame::{
-    RotationEvent,
+    BlockRotated,
     Direction,
     FallingTimer,
 };
@@ -12,7 +12,7 @@ use crate::ingame::utils::prelude::*;
 /// `RotationEvent`を受け取り、ブロックの位置を更新し、
 /// 必要に応じてブロックの衝突を処理します
 pub fn block_rotation(
-    rotated: On<RotationEvent>,
+    rotated: On<BlockRotated>,
     mut falling_timer: ResMut<FallingTimer>,
     mut player_query: Query<(&PlayerBlock, &mut Transform), (With<PlayerBlock>, Without<Block>)>,
     mut currentblock: ResMut<CurrentBlocks>,

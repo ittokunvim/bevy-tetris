@@ -2,10 +2,10 @@ use bevy::prelude::*;
 
 use crate::AppState;
 use super::{
-    MoveEvent,
-    RotationEvent,
-    HardDropEvent,
-    HoldEvent,
+    BlockMoved,
+    BlockRotated,
+    BlockHarddrop,
+    BlockHolded,
     Direction,
 };
 use super::utils::prelude::*;
@@ -30,7 +30,7 @@ fn key_block_moveleft(
     // ブロック左移動キー入力時
     if keyboard_input.just_pressed(KEY_BLOCK_MOVE_LEFT) {
         // ブロック左移動イベントを発火
-        commands.trigger(MoveEvent(Direction::Left));
+        commands.trigger(BlockMoved(Direction::Left));
     }
 
     // ブロック左移動キー長押し時
@@ -40,7 +40,7 @@ fn key_block_moveleft(
         // ブロック左移動タイマーが切れたら、タイマーをリセットし、イベントを発火
         if moveleft_timer.0.elapsed_secs() > BLOCK_MOVE_SPEED {
             moveleft_timer.0.reset();
-            commands.trigger(MoveEvent(Direction::Left));
+            commands.trigger(BlockMoved(Direction::Left));
         }
     }
 
@@ -63,7 +63,7 @@ fn key_block_moveright(
     // ブロック右移動キー入力時
     if keyboard_input.just_pressed(KEY_BLOCK_MOVE_RIGHT) {
         // ブロック右移動イベントを発火
-        commands.trigger(MoveEvent(Direction::Right));
+        commands.trigger(BlockMoved(Direction::Right));
     }
 
     // ブロック右移動キー長押し時
@@ -73,7 +73,7 @@ fn key_block_moveright(
         // ブロック右移動タイマーが切れたら、タイマーをリセットし、イベントを発火
         if moveright_timer.0.elapsed_secs() > BLOCK_MOVE_SPEED {
             moveright_timer.0.reset();
-            commands.trigger(MoveEvent(Direction::Right));
+            commands.trigger(BlockMoved(Direction::Right));
         }
     }
 
@@ -97,7 +97,7 @@ fn key_block_movebottom(
     // ブロック下移動キー入力時
     if keyboard_input.just_pressed(KEY_BLOCK_MOVE_BOTTOM) {
         // ブロック下移動イベントを発火
-        commands.trigger(MoveEvent(Direction::Bottom));
+        commands.trigger(BlockMoved(Direction::Bottom));
         // ブロック落下タイマーを一時停止し、タイマーをリセット
         falling_timer.0.pause();
         falling_timer.0.reset();
@@ -110,7 +110,7 @@ fn key_block_movebottom(
         // ブロック下移動タイマーが切れたら、タイマーをリセットし、イベントを発火
         if movebottom_timer.0.elapsed_secs() > BLOCK_MOVE_SPEED {
             movebottom_timer.0.reset();
-            commands.trigger(MoveEvent(Direction::Bottom));
+            commands.trigger(BlockMoved(Direction::Bottom));
         }
     }
 
@@ -123,7 +123,7 @@ fn key_block_movebottom(
 }
 
 /// ブロック左回転キーが入力された時の挙動を決める関数
-fn key_block_rotationleft(
+fn key_block_rotateleft(
     mut commands: Commands,
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
@@ -131,12 +131,12 @@ fn key_block_rotationleft(
 
     // ブロック左回転キーが押されたら、イベントを発火
     if keyboard_input.just_pressed(KEY_BLOCK_ROTATION_LEFT) {
-        commands.trigger(RotationEvent(Direction::Left));
+        commands.trigger(BlockRotated(Direction::Left));
     }
 }
 
 /// ブロック右回転キーが入力された時の挙動を決める関数
-fn key_block_rotationright(
+fn key_block_rotateright(
     mut commands: Commands,
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
@@ -144,7 +144,7 @@ fn key_block_rotationright(
 
     // ブロック右回転キーが押されたら、イベントを発火
     if keyboard_input.just_pressed(KEY_BLOCK_ROTATION_RIGHT) {
-        commands.trigger(RotationEvent(Direction::Right));
+        commands.trigger(BlockRotated(Direction::Right));
     }
 }
 
@@ -157,7 +157,7 @@ fn key_block_harddrop(
 
     // ハードドロップキーが押されたら、イベントを発火
     if keyboard_input.just_pressed(KEY_BLOCK_HARDDROP) {
-        commands.trigger(HardDropEvent);
+        commands.trigger(BlockHarddrop);
     }
 }
 
@@ -175,7 +175,7 @@ fn key_block_hold(
         // ホールドが許可されていたら、許可を取り消し、イベントを発火
         if holdblocks.can_hold {
             holdblocks.can_hold = false;
-            commands.trigger(HoldEvent(currentblock.blocktype));
+            commands.trigger(BlockHolded(currentblock.blocktype));
         }
     }
 }
@@ -189,8 +189,8 @@ impl Plugin for KeyPlugin {
                 key_block_moveright,
                 key_block_moveleft,
                 key_block_movebottom,
-                key_block_rotationleft,
-                key_block_rotationright,
+                key_block_rotateleft,
+                key_block_rotateright,
                 key_block_harddrop,
                 key_block_hold,
             ).run_if(in_state(AppState::InGame)))

@@ -2,8 +2,8 @@ use bevy::prelude::*;
 
 use crate::GRID_SIZE;
 use crate::ingame::{
-    MoveEvent,
-    FixEvent,
+    BlockMoved,
+    BlockFixed,
     Direction,
     FallingTimer,
 };
@@ -27,14 +27,14 @@ pub fn block_falling(
     }
 
     // ブロックを下に移動させるイベントを送信
-    commands.trigger(MoveEvent(Direction::Bottom));
+    commands.trigger(BlockMoved(Direction::Bottom));
 }
 
 /// ブロックの移動を管理する関数
 /// `MoveEvent`を受け取り、ブロックの位置を更新し、
 /// 必要に応じてブロックを固定する
 pub fn block_movement(
-    moved: On<MoveEvent>,
+    moved: On<BlockMoved>,
     mut commands: Commands,
     mut player_query: Query<&mut Transform, (With<PlayerBlock>, Without<Block>)>,
     mut currentblock: ResMut<CurrentBlocks>,
@@ -63,7 +63,7 @@ pub fn block_movement(
             Direction::Bottom => {
                 if player_y - GRID_SIZE < FIELD_POSITION.y - FIELD_SIZE.y / 2.0 {
                     // ブロックがそこに達した場合、ブロックを固定
-                    commands.trigger(FixEvent);
+                    commands.trigger(BlockFixed);
                     return;
                 }
             }
@@ -88,7 +88,7 @@ pub fn block_movement(
                 Direction::Bottom => {
                     if player_x == block_x && player_y - GRID_SIZE == block_y {
                         // ブロックが底に達した場合、ブロックを固定
-                        commands.trigger(FixEvent);
+                        commands.trigger(BlockFixed);
                         return;
                     }
                 }

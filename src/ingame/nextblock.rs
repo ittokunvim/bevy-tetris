@@ -8,7 +8,7 @@ use crate::{
 use super::{
     FIELD_SIZE,
     FIELD_POSITION,
-    SpawnEvent,
+    BlockSpawned,
 };
 use super::utils::prelude::*;
 
@@ -99,7 +99,7 @@ fn setup(
 /// ブロック生成時に次にくるブロックの更新を行う関数
 /// 次ブロックリストの値の更新し画面の更新も行う
 fn update(
-    _spawned: On<SpawnEvent>,
+    _spawned: On<BlockSpawned>,
     mut query: Query<(
         &mut Transform,
         &mut MeshMaterial2d<ColorMaterial>,
@@ -143,7 +143,6 @@ fn update(
 }
 
 /// 次にくるブロックを削除する関数
-/// ゲームオーバーを抜けた時に実行される
 fn despawn(
     mut commands: Commands,
     query: Query<Entity, With<NextBoard>>,

@@ -2,15 +2,15 @@ use bevy::prelude::*;
 
 use crate::GRID_SIZE;
 use crate::ingame::{
-    HardDropEvent,
-    FixEvent,
+    BlockHarddrop,
+    BlockFixed,
 };
 use crate::ingame::utils::prelude::*;
 
 /// ブロックを一番下に固定する関数
 /// 衝突判定が出るまで、ブロックを下に移動させて固定する
 pub fn block_harddrop(
-    _was_harddrop: On<HardDropEvent>,
+    _was_harddrop: On<BlockHarddrop>,
     mut commands: Commands,
     mut player_query: Query<&mut Transform, (With<PlayerBlock>, Without<Block>)>,
     block_query: Query<&Transform, With<Block>>,
@@ -58,5 +58,5 @@ pub fn block_harddrop(
     }
 
     // ブロックを固定
-    commands.trigger(FixEvent);
+    commands.trigger(BlockFixed);
 }

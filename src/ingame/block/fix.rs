@@ -6,8 +6,8 @@ use crate::{
     Score,
 };
 use crate::ingame::{
-    SpawnEvent,
-    FixEvent,
+    BlockSpawned,
+    BlockFixed,
 };
 use crate::ingame::utils::prelude::*;
 
@@ -15,7 +15,7 @@ use crate::ingame::utils::prelude::*;
 /// `FixEvent`を受け取り、プレイヤーブロックを固定ブロックに変換し、
 /// ブロックマップを更新して、ラインが揃った場合にブロックを削除します。
 pub fn clear_block(
-    _fixed: On<FixEvent>,
+    _fixed: On<BlockFixed>,
     mut commands: Commands,
     mut player_query: Query<(Entity, &mut Transform), (With<PlayerBlock>, Without<Block>)>,
     mut block_query: Query<(Entity, &mut Transform), (With<Block>, Without<PlayerBlock>)>,
@@ -69,12 +69,12 @@ pub fn clear_block(
     }
 
     // ブロックを生成するイベントを送信
-    commands.trigger(SpawnEvent(None));
+    commands.trigger(BlockSpawned(None));
 }
 
 /// ホールドができるかどうか管理する関数
 pub fn enable_hold(
-    _fixed: On<FixEvent>,
+    _fixed: On<BlockFixed>,
     mut holdblocks: ResMut<HoldBlocks>,
 ) {
     info_once!("enable_hold");
@@ -86,7 +86,7 @@ pub fn enable_hold(
 /// ゲームオーバーを管理する関数
 /// 固定されたブロックからゲームオーバーになるかどうかチェックします
 pub fn check_gameover(
-    _fixed: On<FixEvent>,
+    _fixed: On<BlockFixed>,
     mut next_state: ResMut<NextState<AppState>>,
     query: Query<&Transform, With<Block>>,
 ) {

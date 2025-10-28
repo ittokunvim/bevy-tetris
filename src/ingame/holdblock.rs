@@ -5,7 +5,7 @@ use crate::{
     PATH_FONT,
     AppState,
 };
-use super::HoldEvent;
+use super::BlockHolded;
 use super::utils::prelude::*;
 
 const BOARD_SIZE: Vec2 = Vec2::new(
@@ -35,6 +35,7 @@ const BLOCK_INIT_POSITION: Vec3 = Vec3::new(
     10.0,
 );
 
+/// ホールドしたブロックを画面上に描画するコンポーネント
 #[derive(Component)]
 struct HoldBoard;
 
@@ -92,7 +93,7 @@ fn setup(
 /// ホールドしたブロックを更新する関数
 /// ブロックの状態をゲーム進行に合わせて更新を行う
 fn update(
-    holded: On<HoldEvent>,
+    holded: On<BlockHolded>,
     mut holdblock_query: Query<(
         &mut Transform,
         &mut MeshMaterial2d<ColorMaterial>,
@@ -102,7 +103,6 @@ fn update(
 ) {
     info_once!("update");
 
-    // ホールドイベントが発生した時の処理
     let blocktype = holded.0;
 
     for (mut transform, mut color, mut holdblock) in &mut holdblock_query.iter_mut() {
@@ -130,7 +130,6 @@ fn update(
 }
 
 /// ホールドブロックを削除する関数
-/// ゲームオーバーから抜けた時に実行される
 fn despawn(
     mut commands: Commands,
     query: Query<Entity, With<HoldBoard>>,
