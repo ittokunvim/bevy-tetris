@@ -15,17 +15,17 @@ pub struct BlockPlugin;
 impl Plugin for BlockPlugin {
     fn build(&self, app: &mut App) {
         app
+            .add_observer(spawn::block_spawn)
+            .add_observer(rotation::block_rotation)
+            .add_observer(movement::block_movement)
+            .add_observer(harddrop::block_harddrop)
+            .add_observer(hold::block_hold)
+            .add_observer(fix::clear_block)
+            .add_observer(fix::enable_hold)
+            .add_observer(fix::check_gameover)
             .add_systems(Update, (
-                spawn::block_spawn,
                 movement::block_falling,
-                rotation::block_rotation,
-                movement::block_movement,
-                harddrop::block_harddrop,
-                hold::block_hold,
                 gizmos::draw_gizmos_block,
-                fix::clear_block,
-                fix::enable_hold,
-                fix::check_gameover,
             ).chain().run_if(in_state(AppState::InGame)))
         ;
     }

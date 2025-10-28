@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use rand::{
-    distributions::Standard,
+    distr::Alphanumeric,
     prelude::Distribution,
     Rng,
 };
@@ -102,9 +102,9 @@ impl BlockType {
 
 /// ブロックの種類をランダムにサンプリングできるようにする
 /// (rand::randomなどで利用可)
-impl Distribution<BlockType> for Standard {
+impl Distribution<BlockType> for Alphanumeric {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> BlockType {
-        let idx: usize = rng.gen_range(0..BlockType::ALL.len());
+        let idx: usize = rng.random_range(0..BlockType::ALL.len());
         BlockType::ALL[idx]
     }
 }

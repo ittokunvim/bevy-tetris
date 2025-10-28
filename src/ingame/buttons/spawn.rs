@@ -67,7 +67,7 @@ impl KeyButton {
                 align_items: AlignItems::Center,
                 ..Default::default()
             },
-            BorderColor(BUTTON_COLOR),
+            BorderColor::all(BUTTON_COLOR),
             BorderRadius::MAX,
             BackgroundColor(BUTTON_COLOR),
         )
@@ -96,7 +96,7 @@ impl KeyButton {
                 align_items: AlignItems::Center,
                 ..Default::default()
             },
-            BorderColor(BUTTON_COLOR),
+            BorderColor::all(BUTTON_COLOR),
             BorderRadius::MAX,
             BackgroundColor(BUTTON_COLOR),
         )

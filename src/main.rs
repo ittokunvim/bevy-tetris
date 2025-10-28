@@ -2,6 +2,7 @@ use bevy::{
     prelude::*,
     log::LogPlugin,
     asset::AssetMetaCheck,
+    window::WindowResolution,
 };
 
 mod mainmenu;
@@ -42,11 +43,13 @@ enum AppState {
 pub struct Score(pub usize);
 
 fn main() {
+    let window_size = WINDOW_SIZE.as_uvec2();
+
     App::new()
         .add_plugins(DefaultPlugins
             .set(WindowPlugin {
                 primary_window: Some(Window {
-                    resolution: WINDOW_SIZE.into(),
+                    resolution: WindowResolution::new(window_size.x, window_size.y),
                     title: GAMETITLE.to_string(),
                     ..Default::default()
                 }),

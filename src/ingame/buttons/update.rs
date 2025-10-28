@@ -2,10 +2,10 @@ use bevy::prelude::*;
 
 use crate::ingame::{
     Direction,
-    MoveEvent,
-    RotationEvent,
-    HardDropEvent,
-    HoldEvent,
+    BlockMoved,
+    BlockRotated,
+    BlockHarddrop,
+    BlockHolded,
 };
 
 use crate::ingame::utils::{
@@ -25,86 +25,86 @@ use super::{
 };
 
 pub fn button_block_moveleft(
+    mut commands: Commands,
     mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<MoveLeftButton>)>,
-    mut events: EventWriter<MoveEvent>,
 ) {
     info_once!("button_block_moveleft");
 
     for interaction in &mut interaction_query {
         if let Interaction::Pressed = *interaction {
-            events.send(MoveEvent(Direction::Left));
+            commands.trigger(BlockMoved(Direction::Left));
         }
     }
 }
 
 pub fn button_block_moveright(
+    mut commands: Commands,
     mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<MoveRightButton>)>,
-    mut events: EventWriter<MoveEvent>,
 ) {
     info_once!("button_block_moveright");
 
     for interaction in &mut interaction_query {
         if let Interaction::Pressed = *interaction {
-            events.send(MoveEvent(Direction::Right));
+            commands.trigger(BlockMoved(Direction::Right));
         }
     }
 }
 
 pub fn button_block_movebottom(
+    mut commands: Commands,
     mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<MoveBottomButton>)>,
-    mut events: EventWriter<MoveEvent>,
 ) {
     info_once!("button_block_movebottom");
 
     for interaction in &mut interaction_query {
         if let Interaction::Pressed = *interaction {
-            events.send(MoveEvent(Direction::Bottom));
+            commands.trigger(BlockMoved(Direction::Bottom));
         }
     }
 }
 
 pub fn button_block_rotationleft(
+    mut commands: Commands,
     mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<RotateLeftButton>)>,
-    mut events: EventWriter<RotationEvent>,
 ) {
     info_once!("button_block_rotationleft");
 
     for interaction in &mut interaction_query {
         if let Interaction::Pressed = *interaction {
-            events.send(RotationEvent(Direction::Left));
+            commands.trigger(BlockRotated(Direction::Left));
         }
     }
 }
 
 pub fn button_block_rotationright(
+    mut commands: Commands,
     mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<RotateRightButton>)>,
-    mut events: EventWriter<RotationEvent>,
 ) {
     info_once!("button_block_rotationright");
 
     for interaction in &mut interaction_query {
         if let Interaction::Pressed = *interaction {
-            events.send(RotationEvent(Direction::Right));
+            commands.trigger(BlockRotated(Direction::Right));
         }
     }
 }
 
 pub fn button_block_harddrop(
+    mut commands: Commands,
     mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<HarddropButton>)>,
-    mut events: EventWriter<HardDropEvent>,
 ) {
     info_once!("button_block_harddrop");
 
     for interaction in &mut interaction_query {
         if let Interaction::Pressed = *interaction {
-            events.send_default();
+            commands.trigger(BlockHarddrop);
         }
     }
 }
 
 pub fn button_block_hold(
+    mut commands: Commands,
     mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<HoldButton>)>,
-    mut events: EventWriter<HoldEvent>,
     mut holdblocks: ResMut<HoldBlocks>,
     currentblock: Res<CurrentBlocks>,
 ) {
@@ -114,7 +114,7 @@ pub fn button_block_hold(
         if let Interaction::Pressed = *interaction {
             if holdblocks.can_hold {
                 holdblocks.can_hold = false;
-                events.send(HoldEvent(currentblock.blocktype));
+                commands.trigger(BlockHolded(currentblock.blocktype));
             }
         }
     }
