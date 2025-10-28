@@ -30,7 +30,7 @@ impl BlockRandomizer {
 
         // 一番初めに生成されるブロックは候補からランダム
         let first_piece = *BlockType::FIRST_CANDIDATES
-            .choose(&mut thread_rng())
+            .choose(&mut rand::rng())
             .expect("FIRST_BLOCK_CANDINATES should not be empty");
 
         // 履歴を初期化（RGM3準拠：S, Z, S, 最初ブロック）
@@ -65,7 +65,7 @@ impl Iterator for BlockRandomizer {
         let find_count = 6;
         // 最大6回まで「historyにないブロック」を探す
         for roll in 0..find_count {
-            idx = thread_rng().gen_range(0..RANDOMIZER_POOL_COUNT);
+            idx = rand::rng().random_range(0..RANDOMIZER_POOL_COUNT);
             picked_piece = self.pool[idx];
             if !self.history.contains(&picked_piece) || roll == 5 {
                 break;
