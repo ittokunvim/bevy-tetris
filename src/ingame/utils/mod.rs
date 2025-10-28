@@ -7,7 +7,7 @@ use crate::{
     GRID_SIZE,
     AppState,
 };
-use super::SpawnEvent;
+use super::BlockSpawned;
 use super::utils::{
     blockdata::*,
     blockrandomizer::BlockRandomizer,
@@ -217,17 +217,17 @@ fn despawn(
 
 /// リソースをセットアップする関数
 fn setup(
+    mut commands: Commands,
     mut _currentblock: ResMut<CurrentBlocks>,
     mut _blockmap: ResMut<BlockMap>,
     mut blockrandomizer: ResMut<BlockRandomizer>,
     mut _holdblocks: ResMut<HoldBlocks>,
     mut nextblocks: ResMut<NextBlocks>,
-    mut events: EventWriter<SpawnEvent>
 ) {
     info_once!("setup");
 
     **nextblocks = std::array::from_fn(|_| blockrandomizer.next().unwrap());
-    events.send(SpawnEvent(Some(nextblocks[0])));
+    commands.trigger(BlockSpawned(Some(nextblocks[0])));
 }
 
 /// リソースをリセットする関数
