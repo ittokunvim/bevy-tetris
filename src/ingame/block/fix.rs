@@ -67,9 +67,6 @@ pub fn clear_block(
             **score += 1;
         }
     }
-
-    // ブロックを生成するイベントを送信
-    commands.trigger(BlockSpawned(None));
 }
 
 /// ホールドができるかどうか管理する関数
@@ -87,10 +84,13 @@ pub fn enable_hold(
 /// 固定されたブロックからゲームオーバーになるかどうかチェックします
 pub fn check_gameover(
     _fixed: On<BlockFixed>,
+    mut commands: Commands,
     mut next_state: ResMut<NextState<AppState>>,
     query: Query<&Transform, With<Block>>,
 ) {
     info_once!("check_gameover");
+
+    let mut is_gameover = false;
 
     // ゲームオーバーかどうか判定する
     for transform in &query {
@@ -98,9 +98,15 @@ pub fn check_gameover(
         if pos.y >= FIELD_LEFT_TOP.y {
             if pos.x == FIELD_LEFT_TOP.x + GRID_SIZE * 5.0
             || pos.x == FIELD_LEFT_TOP.x + GRID_SIZE * 6.0 {
-                next_state.set(AppState::Gameover);
-                return;
+                is_gameover = true;
             }
         }
+    }
+
+    if is_gameover {
+        next_state.set(AppState::Gameover);
+    } else {
+        // ブロックを生成するイベントを送信
+        commands.trigger(BlockSpawned(None));
     }
 }
