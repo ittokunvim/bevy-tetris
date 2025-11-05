@@ -237,7 +237,7 @@ fn setup(
                     )]),
                     (Gameover::from_button(), Retry, children![(
                         Gameover::from_icon(retry_image.clone()),
-                    )])
+                    )]),
                 ]),
             ],
         )],
@@ -313,7 +313,7 @@ fn despawn(
     info_once!("despawn");
 
     for entity in &query {
-        commands.entity(entity).despawn();
+        commands.entity(entity).try_despawn();
     }
 }
 
