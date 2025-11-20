@@ -45,6 +45,7 @@ fn main() {
                 primary_window: Some(Window {
                     resolution: WindowResolution::new(window_size.x, window_size.y),
                     title: GAMETITLE.to_string(),
+                    canvas: Some("#bevy".into()),
                     ..Default::default()
                 }),
                 ..Default::default()
